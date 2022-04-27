@@ -266,4 +266,4 @@ var __search = "xxup.github.io",
   }
   _0x3bccx17[__Ox1467e[38]](__Ox1467e[37], _0x3bccxd),
     _0x3bccx8[__Ox1467e[38]](__Ox1467e[39], _0x3bccxe);
-})();
+})()
