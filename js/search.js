@@ -1,20 +1,19 @@
 document.writeln("<!-- 搜索栏	 -->");
 document.writeln("	<div id=\'search\'class=\'s-search\'>");
-document.writeln(" <iframe width=\"100%\"  height=\"60\"   frameborder=\"0\" allowtransparency=\"true\" src=\"//i.tianqi.com/index.php?c=code&id=12&icon=1&num=5&site=12\"></iframe>");
-document.writeln("					<div id=\'search-list\'class=\'hide-type-list\'>");
-document.writeln("						<div class=\'s-type\'>");
-document.writeln("							<span></span>");
-document.writeln("							<div class=\'s-type-list\'>");
-document.writeln("							<label for=\'type-baidu\'><span class=\'tile-lg bg-blue\'><i class=\'fa fa-search fa-2x m-t-sm\'></i></span>默认</label><label for=\'type-xueshu\'><span class=\'tile-lg bg-teal\'><i class=\'fa fa-book fa-2x m-t-sm\'></i></span>学术</label><label for=\'type-yinshi\'><span class=\'tile-lg bg-pink\'><i class=\'fa fa-video-camera fa-2x m-t-sm\'></i></span>影视</label>");
-document.writeln("							<label for=\'type-yinle\'><span class=\'tile-lg bg-yl\'><i class=\'fa fa-music fa-2x m-t-sm\'></i></span>音乐</label> <label for=\'type-gongju\'><span class=\'tile-lg bg-gj\'><i class=\'fa fa-legal fa-2x m-t-sm\'></i></span>工具</label><label for=\'type-tupian\'><span class=\'tile-lg bg-tp\'><i class=\'fa fa-file-image-o fa-2x m-t-sm\'></i></span>图片</label>");
-document.writeln("							<label for=\'type-shequ\'><span class=\'tile-lg bg-sq\'><i class=\'fa fa-github fa-2x m-t-sm\'></i></span>社区</label><label for=\'type-sucai\'><span class=\'tile-lg bg-sc\'><i class=\'fa fa-tree fa-2x m-t-sm\'></i></span>素材</label><label for=\'type-shenghuo\'><span class=\'tile-lg bg-red\'><i class=\'fa fa-coffee fa-2x m-t-sm\'></i></span>生活</label>");
-document.writeln("							</div>");
-document.writeln("						</div>");
+document.writeln("<div id=\'search-list\'class=\'hide-type-list\'>");
+document.writeln("<div class=\'s-type\'>");
+document.writeln("<span></span>");
+document.writeln("<div class=\'s-type-list\'>");
+document.writeln("<label for=\'type-baidu\'><span class=\'tile-lg bg-blue\'><i class=\'fa fa-search fa-2x m-t-sm\'></i></span>默认</label><label for=\'type-xueshu\'><span class=\'tile-lg bg-teal\'><i class=\'fa fa-book fa-2x m-t-sm\'></i></span>学术</label><label for=\'type-yinshi\'><span class=\'tile-lg bg-pink\'><i class=\'fa fa-video-camera fa-2x m-t-sm\'></i></span>影视</label>");
+document.writeln("<label for=\'type-yinle\'><span class=\'tile-lg bg-yl\'><i class=\'fa fa-music fa-2x m-t-sm\'></i></span>音乐</label> <label for=\'type-gongju\'><span class=\'tile-lg bg-gj\'><i class=\'fa fa-legal fa-2x m-t-sm\'></i></span>工具</label><label for=\'type-tupian\'><span class=\'tile-lg bg-tp\'><i class=\'fa fa-file-image-o fa-2x m-t-sm\'></i></span>图片</label>");
+document.writeln("<label for=\'type-shequ\'><span class=\'tile-lg bg-sq\'><i class=\'fa fa-github fa-2x m-t-sm\'></i></span>社区</label><label for=\'type-sucai\'><span class=\'tile-lg bg-sc\'><i class=\'fa fa-tree fa-2x m-t-sm\'></i></span>素材</label><label for=\'type-shenghuo\'><span class=\'tile-lg bg-red\'><i class=\'fa fa-coffee fa-2x m-t-sm\'></i></span>生活</label>");
+document.writeln("</div>");
+document.writeln("</div>");
 
-document.writeln("                                                <div class=\'search-group group-c\'>");
+document.writeln("<div class=\'search-group group-c\'>");
 
-document.writeln("						<span class=\'type-text\'>默认</span>");
-document.writeln("							<ul class=\'search-type\'>");
+document.writeln("<span class=\'type-text\'>默认</span>");
+document.writeln("<ul class=\'search-type\'>");
 
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-baidu\'value=\'https://www.baidu.com/s?wd=\'data-placeholder=\'百度一下\'><label for=\'type-baidu\'><span style=\'color:#003daa\'>百度</span></label></li>");
 document.writeln("");
@@ -23,11 +22,7 @@ document.writeln("");
 
 document.writeln("");document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-mijisou\'value=\'https://mijisou.com/?q=\'data-placeholder=\'匿名搜索\'><label for=\'type-mijisou\'><span style=\'color:#003daa\'>秘迹</span></label></li>");
 document.writeln("");
-
-
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
-
-
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-panduoduo\'value=\'http://www.panduoduo.net/s/name/\'data-placeholder=\'文件搜索\'><label for=\'type-panduoduo\'><span style=\'color:#003daa\'>网盘</span></label></li>");
 document.writeln("");
 document.writeln("");
@@ -152,7 +147,7 @@ document.writeln("    <input id=\'set-search-blank\'>");
 document.writeln("  </div>");
 document.writeln("</div>	");
 document.writeln("<!-- END搜索栏	   -->");
-  var __search ='www.open356.com',__develop ='seogo.me', __Ox1467e = ["checked", "input[name=\"type\"][value=\"", "\"]", "querySelector", "length", "s-current",
+  var __search ='xxup.github.io',__develop ='randomWeb.me', __Ox1467e = ["checked", "input[name=\"type\"][value=\"", "\"]", "querySelector", "length", "s-current",
                         "remove", "classList", "add", "parentNode", "superSearch", "setItem", "localStorage", "getItem", "target", "value",
                         "type", "focus", "newWindow", "preventDefault", "", "action", "open", "href", "input[name=\"type\"]:checked",
                         "data-placeholder", "getAttribute", "placeholder", "setAttribute", "_blank", "removeAttribute",
