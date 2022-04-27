@@ -69,7 +69,7 @@ document.writeln( '<li><input hidden="" type="radio" name="type" id="type-iData"
 );
 
 document.writeln("");
-document.writeln("      </ul>");
+document.writeln("</ul>");
 document.writeln("</div>");
 document.writeln("<div class='search-group group-b'>");
 document.writeln("<span class='type-text'>影视</span>");
