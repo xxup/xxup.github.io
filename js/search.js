@@ -13,16 +13,9 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-c\'>");
 document.writeln("<span class=\'type-text\'>默认</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-baidu\'value=\'https://www.baidu.com/s?wd=\'data-placeholder=\'百度一下\'><label for=\'type-baidu\'><span style=\'color:#003daa\'>百度</span></label></li>");
+document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
 document.writeln("");
-<!--
-document.writeln("");document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-maji\'value=\'https://magi.com/search?q=\'data-placeholder=\'智能引擎\'><label for=\'type-maji\'><span style=\'color:#003daa\'>MAGI</span></label></li>");
-document.writeln("");
-document.writeln("");document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-mijisou\'value=\'https://mijisou.com/?q=\'data-placeholder=\'匿名搜索\'><label for=\'type-mijisou\'><span style=\'color:#003daa\'>秘迹</span></label></li>");
-document.writeln("");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-panduoduo\'value=\'http://www.panduoduo.net/s/name/\'data-placeholder=\'文件搜索\'><label for=\'type-panduoduo\'><span style=\'color:#003daa\'>网盘</span></label></li>");
--->
 document.writeln("");
 document.writeln("");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-ditu\'value=\'https://ditu.amap.com/search?query=\'data-placeholder=\'高德地图\'><label for=\'type-ditu\'><span style=\'color:#003daa\'>地图</span></label></li>");
