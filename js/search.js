@@ -8,6 +8,8 @@ document.writeln("<label for=\'type-baidu\'><span class=\'tile-lg bg-blue\'><i c
 document.writeln("<label for=\'type-yinle\'><span class=\'tile-lg bg-yl\'><i class=\'fa fa-music fa-2x m-t-sm\'></i></span>音乐</label> <label for=\'type-gongju\'><span class=\'tile-lg bg-gj\'><i class=\'fa fa-legal fa-2x m-t-sm\'></i></span>工具</label><label for=\'type-tupian\'><span class=\'tile-lg bg-tp\'><i class=\'fa fa-file-image-o fa-2x m-t-sm\'></i></span>图片</label>");
 document.writeln("<label for=\'type-shequ\'><span class=\'tile-lg bg-sq\'><i class=\'fa fa-github fa-2x m-t-sm\'></i></span>社区</label><label for=\'type-sucai\'><span class=\'tile-lg bg-sc\'><i class=\'fa fa-tree fa-2x m-t-sm\'></i></span>素材</label><label for=\'type-shenghuo\'><span class=\'tile-lg bg-red\'><i class=\'fa fa-coffee fa-2x m-t-sm\'></i></span>生活</label>");
 
+document.writeln("</div>");
+document.writeln("</div>");
 document.writeln("<div class=\'search-group group-c\'>");
 document.writeln("<span class=\'type-text\'>默认</span>");
 document.writeln("<ul class=\'search-type\'>");
@@ -15,7 +17,7 @@ document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-ditu\'value=\'https://ditu.amap.com/search?query=\'data-placeholder=\'高德地图\'><label for=\'type-ditu\'><span style=\'color:#003daa\'>地图</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>						");
-document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\"color:#003daa\">Github</span></label></li>						");
+document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\"color:#003daa\">Github</span></label></li>");
 
 document.writeln("</ul>");
 document.writeln("</div>");
