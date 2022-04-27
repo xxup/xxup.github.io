@@ -23,7 +23,6 @@ document.writeln("");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-zhihu\'value=\'https://www.zhihu.com/search?q=\'data-placeholder=\'有问题上知乎\'><label for=\'type-zhihu\'><span style=\'color:#003daa\'>知乎</span></label></li>");
 document.writeln("");
 document.writeln("");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-yinyue\'value=\'https://music.163.com/#/search/m/?s=\'data-placeholder=\'网易云音乐\'><label for=\'type-yinyue\'><span style=\'color:#003daa\'>云村</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>						");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\"color:#003daa\">Github</span></label></li>						");
 
