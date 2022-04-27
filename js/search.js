@@ -24,10 +24,10 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-a s-current\'>");
 document.writeln("<span class=\"type-text\">学术</span>");
 document.writeln("<ul class=\"search-type\">");
-document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xueshu\" value=\"http://xueshu.baidu.com/s?wd=\" data-placeholder=\"百度学术\"><label for=\"type-xueshu\"><span style=\"color:#003daa\">百度</span></label></li>		");
-document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-biyingxueshu\" value=\"http://cn.bing.com/academic/search?q=\" data-placeholder=\"必应学术\"><label for=\"type-biyingxueshu\"><span style=\"color:#003daa\">必应</span></label></li>		");
-document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>		");
-document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>		");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xueshu\" value=\"http://xueshu.baidu.com/s?wd=\" data-placeholder=\"百度学术\"><label for=\"type-xueshu\"><span style=\"color:#003daa\">百度</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-biyingxueshu\" value=\"http://cn.bing.com/academic/search?q=\" data-placeholder=\"必应学术\"><label for=\"type-biyingxueshu\"><span style=\"color:#003daa\">必应</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
