@@ -5,9 +5,15 @@ document.writeln("<div id=\'search-list\'class=\'hide-type-list\'>");
 document.writeln("<div class=\'s-type\'>");
 document.writeln("<span></span>");
 document.writeln("<div class=\'s-type-list\'>");
-document.writeln("<label for=\'type-baidu\'><span class=\'tile-lg bg-blue\'><i class=\'fa fa-search fa-2x m-t-sm\'></i></span>默认</label><label for=\'type-xueshu\'><span class=\'tile-lg bg-teal\'><i class=\'fa fa-book fa-2x m-t-sm\'></i></span>学术</label><label for=\'type-yinshi\'><span class=\'tile-lg bg-pink\'><i class=\'fa fa-video-camera fa-2x m-t-sm\'></i></span>影视</label>");
-document.writeln("<label for=\'type-yinle\'><span class=\'tile-lg bg-yl\'><i class=\'fa fa-music fa-2x m-t-sm\'></i></span>音乐</label> <label for=\'type-gongju\'><span class=\'tile-lg bg-gj\'><i class=\'fa fa-legal fa-2x m-t-sm\'></i></span>工具</label><label for=\'type-tupian\'><span class=\'tile-lg bg-tp\'><i class=\'fa fa-file-image-o fa-2x m-t-sm\'></i></span>图片</label>");
-document.writeln("<label for=\'type-shequ\'><span class=\'tile-lg bg-sq\'><i class=\'fa fa-github fa-2x m-t-sm\'></i></span>社区</label><label for=\'type-sucai\'><span class=\'tile-lg bg-sc\'><i class=\'fa fa-tree fa-2x m-t-sm\'></i></span>素材</label><label for=\'type-shenghuo\'><span class=\'tile-lg bg-red\'><i class=\'fa fa-coffee fa-2x m-t-sm\'></i></span>生活</label>");
+document.writeln("<label for=\'type-baidu\'><span class=\'tile-lg bg-blue\'><i class=\'fa fa-search fa-2x m-t-sm\'></i></span>默认</label>
+                 <label for=\'type-xueshu\'><span class=\'tile-lg bg-teal\'><i class=\'fa fa-book fa-2x m-t-sm\'></i></span>学术</label>
+                 <label for=\'type-yinshi\'><span class=\'tile-lg bg-pink\'><i class=\'fa fa-video-camera fa-2x m-t-sm\'></i></span>影视</label>");
+document.writeln("<label for=\'type-yinle\'><span class=\'tile-lg bg-yl\'><i class=\'fa fa-music fa-2x m-t-sm\'></i></span>音乐</label> 
+                 <label for=\'type-gongju\'><span class=\'tile-lg bg-gj\'><i class=\'fa fa-legal fa-2x m-t-sm\'></i></span>工具</label>
+                 <label for=\'type-tupian\'><span class=\'tile-lg bg-tp\'><i class=\'fa fa-file-image-o fa-2x m-t-sm\'></i></span>图片</label>");
+document.writeln("<label for=\'type-shequ\'><span class=\'tile-lg bg-sq\'><i class=\'fa fa-github fa-2x m-t-sm\'></i></span>社区</label>
+                 <label for=\'type-sucai\'><span class=\'tile-lg bg-sc\'><i class=\'fa fa-tree fa-2x m-t-sm\'></i></span>素材</label>
+                 <label for=\'type-shenghuo\'><span class=\'tile-lg bg-red\'><i class=\'fa fa-coffee fa-2x m-t-sm\'></i></span>生活</label>");
 document.writeln("</div>");
 document.writeln("</div>");
 
@@ -89,12 +95,11 @@ document.writeln("<div class=\'search-group group-h\'>");
 document.writeln("<span class=\'type-text\'>素材</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://freebiesbug.com/?s=\' data-placeholder=\'搜索freebiesbug上的 UI 素材\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>UI</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-nipic\' value=\'http://soso.nipic.com/?q=\' data-placeholder=\'呢图\'><label for=\'type-nipic\'><span style=\'color:#003daa\'>呢图</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-iconfinder\' value=\'https://www.iconfinder.com/search/?q=\' data-placeholder=\'IconFinder\'><label for=\'type-iconfinder\'><span style=\'color:#003daa\'>IconFinder</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-thenounproject\' value=\'https://thenounproject.com/search/?q=\' data-placeholder=\'Noun Project\'><label for=\'type-thenounproject\'><span style=\'color:#003daa\'>Noun Project</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-officeplus\' value=\'http://www.officeplus.cn/List.shtml?cat=\' data-placeholder=\'Office Plus\'><label for=\'type-officeplus\'><span style=\'color:#003daa\'>PPT</span></label></li>");
 document.writeln("</ul>");
-document.writeln("</div>	");
+document.writeln("</div>");
 
 document.writeln("<div class=\'search-group group-y\'>");
 document.writeln("<span class=\'type-text\'>生活</span>");
