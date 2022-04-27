@@ -1,4 +1,4 @@
-document.writeln("<!-- 搜索栏	 -->");
+document.writeln("<!-- 搜索栏 -->");
 document.writeln("<div id=\'search\'class=\'s-search\'>");
 document.writeln("<div id=\'search-list\'class=\'hide-type-list\'>");
 document.writeln("<div class=\'s-type\'>");
@@ -59,7 +59,7 @@ document.writeln("								");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-ckdiany\'value=\'https://www.ck180.net/search.html?q=\'data-placeholder=\'CK电影部落 \'><label for=\'type-ckdiany\'><span style=\'color:#003daa\'>CK电影</span></label></li>");
 document.writeln("");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-fenghk\'value=\'http://ifkdy.com/?q=\'data-placeholder=\'疯狂电影搜索\'><label for=\'type-fenghk\'><span style=\'color:#003daa\'>疯狂电影</span></label></li>	");
-document.writeln("							</ul>");
+document.writeln("</ul>");
 document.writeln("</div>	");
 document.writeln("");
 document.writeln("");
@@ -103,7 +103,7 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-doubann\' value=\'https://www.douban.com/search?q=\' data-placeholder=\'豆瓣\'><label for=\'type-doubann\'><span style=\'color:#003daa\'>豆瓣</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-whyy\' value=\'https://ask.seowhy.com/search/?q=\' data-placeholder=\'SEO问答社区\'><label for=\'type-whyy\'><span style=\'color:#003daa\'>搜外问答</span></label></li>");
 document.writeln("</ul>");
-document.writeln("</div>		");
+document.writeln("</div>");
 document.writeln("<div class=\'search-group group-h\'>");
 document.writeln("<span class=\'type-text\'>素材</span>");
 document.writeln("<ul class=\'search-type\'>");
@@ -115,7 +115,7 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-thenounproject\' value=\'https://thenounproject.com/search/?q=\' data-placeholder=\'Noun Project\'><label for=\'type-thenounproject\'><span style=\'color:#003daa\'>Noun Project</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-officeplus\' value=\'http://www.officeplus.cn/List.shtml?cat=\' data-placeholder=\'Office Plus\'><label for=\'type-officeplus\'><span style=\'color:#003daa\'>PPT</span></label></li>");
 document.writeln("</ul>");
-document.writeln("</div>	");
+document.writeln("</div>");
 document.writeln("<div class=\'search-group group-y\'>");
 document.writeln("<span class=\'type-text\'>生活</span>");
 document.writeln("<ul class=\'search-type\'>");
