@@ -69,7 +69,7 @@ document.writeln( '<li><input hidden="" type="radio" name="type" id="type-iData"
 );
 
 document.writeln("");
-document.writeln("</ul>");
+document.writeln("      </ul>");
 document.writeln("</div>");
 document.writeln("<div class='search-group group-b'>");
 document.writeln("<span class='type-text'>影视</span>");
@@ -211,9 +211,10 @@ document.writeln("<div class='set-check hidden-xs'>");
 document.writeln("<input id='set-search-blank'>");
 document.writeln("</div>");
 document.writeln("</div>");
+
 document.writeln("<!-- END搜索栏 -->");
 
-var __search = "xxup.github.io",
+var __search = "xxup.github.io.com",
   __develop = "randomWeb",
   __Ox1467e = [
     "checked",
