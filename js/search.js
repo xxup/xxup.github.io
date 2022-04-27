@@ -1,6 +1,5 @@
 document.writeln("<!-- 搜索栏	 -->");
 document.writeln("	<div id=\'search\'class=\'s-search\'>");
-document.writeln(" <iframe width=\"100%\"  height=\"60\"   frameborder=\"0\" allowtransparency=\"true\" src=\"//i.tianqi.com/index.php?c=code&id=12&icon=1&num=5&site=12\"></iframe>");
 document.writeln("					<div id=\'search-list\'class=\'hide-type-list\'>");
 document.writeln("						<div class=\'s-type\'>");
 document.writeln("							<span></span>");
