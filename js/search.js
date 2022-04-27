@@ -20,7 +20,7 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-c\'>");
 document.writeln("<span class=\'type-text\'>默认</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-baidu\'value=\'https://www.baidu.com/s?wd=\'data-placeholder=\'百度搜索\'><label for=\'type-baidu\'><span style=\'color:#003daa\'>百度</span></label></li>");
+document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-baidu\'value=\'https://www.baidu.com/s?wd=\'data-placeholder=\'百度一下\'><label for=\'type-baidu\'><span style=\'color:#003daa\'>百度</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-ditu\'value=\'https://ditu.amap.com/search?query=\'data-placeholder=\'高德地图\'><label for=\'type-ditu\'><span style=\'color:#003daa\'>地图</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
@@ -114,7 +114,7 @@ document.writeln("</div>");
 document.writeln("</div>");
 
 document.writeln("<form  height=\"50px\"  action=\'https://www.baidu.com/s?wd=\'method=\'get\'target=\'_blank\'id=\'super-search-fm\'>");
-document.writeln("<input type=\'text\'id=\'search-text\'placeholder=\'百度搜索\'style=\'outline:none\'autofocus/><button type=\'submit\'><i class=\'fa fa-search\'></i></button>");
+document.writeln("<input type=\'text\'id=\'search-text\'placeholder=\'百度一下\'style=\'outline:none\'autofocus/><button type=\'submit\'><i class=\'fa fa-search\'></i></button>");
 document.writeln("</form>");
 document.writeln("<div class=\'set-check hidden-xs\'>");
 document.writeln("<input id=\'set-search-blank\'>");
