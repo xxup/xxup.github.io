@@ -32,7 +32,6 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-wanfang\" value=\"http://s.wanfangdata.com.cn/Paper.aspx?q=\" data-placeholder=\"万方论文\"><label for=\"type-wanfang\"><span style=\"color:#003daa\">万方</span></label></li>		");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>		");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-iData\" value=\"https://search.ehn3.com/search?keyword=\" data-placeholder=\"知识检索\"><label for=\"type-iData\"><span style=\"color:#003daa\">iData</span></label></li>		");
-document.writeln("");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -40,13 +39,7 @@ document.writeln("<div class=\'search-group group-b\'>");
 document.writeln("<span class=\'type-text\'>影视</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'http://www.nicotv.club/video/search/\'data-placeholder=\'妮可动漫搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>妮可影视</span></label></li>");
-document.writeln(" ");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://neets.cc/search?key=\'data-placeholder=\'Neets搜索\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>Neets</span></label></li>");
-document.writeln("								");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-bashi\'value=\'http://www.74mz.com/search?wd=\'data-placeholder=\'巴士动漫电影网\'><label for=\'type-bashi\'><span style=\'color:#003daa\'>巴士动漫</span></label></li>");
-document.writeln("								");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-ckdiany\'value=\'https://www.ck180.net/search.html?q=\'data-placeholder=\'CK电影部落 \'><label for=\'type-ckdiany\'><span style=\'color:#003daa\'>CK电影</span></label></li>");
-document.writeln("");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-fenghk\'value=\'http://ifkdy.com/?q=\'data-placeholder=\'疯狂电影搜索\'><label for=\'type-fenghk\'><span style=\'color:#003daa\'>疯狂电影</span></label></li>	");
 document.writeln("</ul>");
 document.writeln("</div>	");
