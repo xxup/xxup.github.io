@@ -86,7 +86,7 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-h\'>");
 document.writeln("<span class=\'type-text\'>素材</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-sucai\' value=\'http://so.shejidaren.com/cse/search?s=1461928278188833482&amp;q=\' data-placeholder=\'设计达人\'><label for=\'type-sucai\'><span style=\'color:#003daa\'>设计达人</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-sucai\' value=\'https://www.freepik.com/search?query=\' data-placeholder=\'Freepik\'><label for=\'type-sucai\'><span style=\'color:#003daa\'>Freepik</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://freebiesbug.com/?s=\' data-placeholder=\'搜索freebiesbug上的 UI 素材\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>UI</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-iconfinder\' value=\'https://www.iconfinder.com/search/?q=\' data-placeholder=\'IconFinder\'><label for=\'type-iconfinder\'><span style=\'color:#003daa\'>IconFinder</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-thenounproject\' value=\'https://thenounproject.com/search/?q=\' data-placeholder=\'Noun Project\'><label for=\'type-thenounproject\'><span style=\'color:#003daa\'>Noun Project</span></label></li>");
