@@ -62,7 +62,7 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-icp\' value=\'https://icp.aizhan.com/\' data-placeholder=\'请输入网址(不带http://)\'><label for=\'type-icp\'><span style=\'color:#003daa\'>备案查询</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'http://ping.chinaz.com/\' data-placeholder=\'请输入网址(不带http://)\'><label for=\'type-ping\'><span style=\'color:#003daa\'>PING检测</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-404\' value=\'http://tool.chinaz.com/Links/?DAddress=\' data-placeholder=\'请输入网址(不带http://)\'><label for=\'type-404\'><span style=\'color:#003daa\'>死链检测</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'http://www.ciku5.com/s?wd=\' data-placeholder=\'请输入关键词\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>关键词挖掘</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://www.tianyancha.com/search?key=\'请输入企业或法人名称\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>天眼企业查询</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
