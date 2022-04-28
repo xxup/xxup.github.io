@@ -18,6 +18,7 @@ document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com.hk/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>谷歌</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-ditu\'value=\'https://ditu.amap.com/search?query=\'data-placeholder=\'高德地图\'><label for=\'type-ditu\'><span style=\'color:#003daa\'>地图</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\"color:#003daa\">Github</span></label></li>");
+document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-maji\'value=\'https://codepen.io/search/pens?q=\'data-placeholder=\'CodePen\'><label for=\'type-maji\'><span style=\'color:#003daa\'>CodePen</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
