@@ -72,7 +72,7 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-b\'>");
 document.writeln("<span class=\'type-text\'>影视</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'http://www.nicotv.club/video/search/\'data-placeholder=\'妮可动漫搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>妮可</span></label></li>");
+document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'https://www.manamana.net/Search?content=\'data-placeholder=\'MANA新媒体艺术搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>MANA</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-bashi\'value=\'https://www.douyin.com/search/\'data-placeholder=\'抖音搜索\'><label for=\'type-bashi\'><span style=\'color:#003daa\'>抖音</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-fenghk\'value=\'https://www.kuaishou.com/search/video?searchKey=\'data-placeholder=\'快手搜索\'><label for=\'type-fenghk\'><span style=\'color:#003daa\'>快手</span></label></li>");
