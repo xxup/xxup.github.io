@@ -67,6 +67,7 @@ document.writeln("<div class=\'search-group group-b\'>");
 document.writeln("<span class=\'type-text\'>影视</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'http://www.nicotv.club/video/search/\'data-placeholder=\'妮可动漫搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>妮可影视</span></label></li>");
+document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://www.douyin.com/search/" data-placeholder=\"抖音\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">抖音</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://neets.cc/search?key=\'data-placeholder=\'Neets搜索\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>Neets</span></label></li>");
 document.writeln("</ul>");
