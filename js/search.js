@@ -31,12 +31,13 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("</ul>");
 document.writeln("</div>");
 
-document.writeln("<div class=\'search-group group-b\'>");
-document.writeln("<span class=\'type-text\'>影视</span>");
+document.writeln("<div class=\'search-group group-f\'>");
+document.writeln("<span class=\'type-text\'>图片</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'http://www.nicotv.club/video/search/\'data-placeholder=\'妮可动漫搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>妮可影视</span></label></li>");
-document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://neets.cc/search?key=\'data-placeholder=\'Neets搜索\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>Neets</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-tupian\' value=\'http://image.baidu.com/search/index?tn=baiduimage&amp;ps=1&amp;ct=201326592&amp;lm=-1&amp;cl=2&amp;nc=1&amp;ie=utf-8&amp;word=\' data-placeholder=\'搜索百度图片\'><label for=\'type-tupian\'><span style=\'color:#003daa\'>百度</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-BING\' value=\'http://cn.bing.com/images/search?q=\' data-placeholder=\'BING搜索引擎\'><label for=\'type-BING\'><span style=\'color:#003daa\'>Bing</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-hellorf\' value=\'https://yandex.com/images/search?from=tabbar&text=\'雅虎\'><label for=\'type-hellorf\'><span style=\'color:#003daa\'>雅虎</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-500px\' value=\'https://500px.com/search?q=\' data-placeholder=\'500PX 品质摄影社区\'><label for=\'type-500px\'><span style=\'color:#003daa\'>500PX</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -62,13 +63,12 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("</ul>");
 document.writeln("</div>");
 
-document.writeln("<div class=\'search-group group-f\'>");
-document.writeln("<span class=\'type-text\'>图片</span>");
+document.writeln("<div class=\'search-group group-b\'>");
+document.writeln("<span class=\'type-text\'>影视</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-tupian\' value=\'http://image.baidu.com/search/index?tn=baiduimage&amp;ps=1&amp;ct=201326592&amp;lm=-1&amp;cl=2&amp;nc=1&amp;ie=utf-8&amp;word=\' data-placeholder=\'搜索百度图片\'><label for=\'type-tupian\'><span style=\'color:#003daa\'>百度</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-BING\' value=\'http://cn.bing.com/images/search?q=\' data-placeholder=\'BING搜索引擎\'><label for=\'type-BING\'><span style=\'color:#003daa\'>Bing</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-hellorf\' value=\'https://yandex.com/images/search?from=tabbar&text=\'雅虎\'><label for=\'type-hellorf\'><span style=\'color:#003daa\'>雅虎</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-500px\' value=\'https://500px.com/search?q=\' data-placeholder=\'500PX 品质摄影社区\'><label for=\'type-500px\'><span style=\'color:#003daa\'>500PX</span></label></li>");
+document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'http://www.nicotv.club/video/search/\'data-placeholder=\'妮可动漫搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>妮可影视</span></label></li>");
+document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
+document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://neets.cc/search?key=\'data-placeholder=\'Neets搜索\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>Neets</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
