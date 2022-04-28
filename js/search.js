@@ -51,9 +51,9 @@ document.writeln("<div class=\'search-group group-d\'>");
 document.writeln("<span class=\'type-text\'>音乐</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-yinle\' value=\'http://music.163.com/#/search/m/?s=\' data-placeholder=\'网易云音乐\'><label for=\'type-yinle\'><span style=\'color:#003daa\'>云音乐</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-qq-music\' value=\'https://y.qq.com/portal/search.html#searchid=1&amp;remoteplace=txt.yqq.top&amp;t=song&amp;w=\' data-placeholder=\'QQ音乐\'><label for=\'type-qq-music\'><span style=\'color:#003daa\'>QQ音乐</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-soundcloud\' value=\'https://www.kugou.com/yy/html/search.html#searchType=song&searchKeyWord=\' data-placeholder=\'酷狗音乐\'><label for=\'type-soundcloud\'><span style=\'color:#003daa\'>酷狗音乐</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-baidu-music\' value=\'http://music.baidu.com/search?key=\' data-placeholder=\'千千音乐\'><label for=\'type-baidu-music\'><span style=\'color:#003daa\'>千千音乐</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-qq-music\' value=\'https://y.qq.com/portal/search.html#searchid=1&amp;remoteplace=txt.yqq.top&amp;t=song&amp;w=\' data-placeholder=\'QQ音乐\'><label for=\'type-qq-music\'><span style=\'color:#003daa\'>QQ音乐</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
