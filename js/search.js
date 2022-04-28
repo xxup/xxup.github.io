@@ -73,6 +73,7 @@ document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-bashi\'value=\'https://www.douyin.com/search/\'data-placeholder=\'抖音搜索\'><label for=\'type-bashi\'><span style=\'color:#003daa\'>抖音</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-fenghk\'value=\'https://www.kuaishou.com/search/video?searchKey=\'data-placeholder=\'快手搜索\'><label for=\'type-fenghk\'><span style=\'color:#003daa\'>快手</span></label></li>");
+document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-ckdiany\'value=\'https://v.qq.com/x/search/?q=\'data-placeholder=\'腾讯视频 \'><label for=\'type-ckdiany\'><span style=\'color:#003daa\'>腾讯视频</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://neets.cc/search?key=\'data-placeholder=\'Neets搜索\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>Neets</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
