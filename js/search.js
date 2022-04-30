@@ -60,7 +60,7 @@ document.writeln("</div>");
 document.writeln("<div class=\'search-group group-e\'>");
 document.writeln("<span class=\'type-text\'>工具</span>");
 document.writeln("<ul class=\'search-type\'>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-gongju\' value=\'https://translate.google.cn/?sl=auto&tl=zh-CN&text=\'请输入文本（翻译结果为中文）\'><label for=\'type-gongju\'><span style=\'color:#003daa\'>Google翻译</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-gongju\' value=\'https://translate.google.cn/?sl=auto&tl=zh-CN&text=\' data-placeholder=\'请输入文本（翻译结果为中文）\'><label for=\'type-gongju\'><span style=\'color:#003daa\'>Google翻译</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-links\' value=\'https://dict.baidu.com/s?wd=\' data-placeholder=\'请输入词语，成语，诗词\'><label for=\'type-links\'><span style=\'color:#003daa\'>百度汉语</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-icp\' value=\'https://flightaware.com/live/airport/\' data-placeholder=\'请输入航班或机场代码\'><label for=\'type-icp\'><span style=\'color:#003daa\'>航班跟踪</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://haoma.baidu.com/phoneSearch?search=\' data-placeholder=\'请输入号码\'><label for=\'type-ping\'><span style=\'color:#003daa\'>号码查询</span></label></li>");
