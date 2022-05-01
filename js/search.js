@@ -41,10 +41,10 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-BING\' value=\'https://bing.com/images/search?q=\' data-placeholder=\'必应图片搜索\'><label for=\'type-BING\'><span style=\'color:#003daa\'>必应</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-hellorf\' value=\'https://yandex.com/images/search?text=\' data-placeholder=\'雅虎图片搜索\'><label for=\'type-hellorf\'><span style=\'color:#003daa\'>雅虎</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-whyy\' value=\'https://unsplash.dogedoge.com/s/photos/\' data-placeholder=\'Unsplash图片搜索\'><label for=\'type-whyy\'><span style=\'color:#003daa\'>Unsplash</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://dribbble.com/search/\' data-placeholder=\'搜索Dribbble的UI素材\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>Dribbble</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiami\' value=\'https://www.pexels.com/zh-cn/search/\' data-placeholder=\'Pexels图片搜索\'><label for=\'type-xiami\'><span style=\'color:#003daa\'>Pexels</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ape8\' value=\'https://pixabay.com/images/search/\' data-placeholder=\'Pixabay图片搜索\'><label for=\'type-ape8\'><span style=\'color:#003daa\'>Pixabay</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-500px\' value=\'https://500px.com/search?q=\' data-placeholder=\'500PX 品质摄影社区\'><label for=\'type-500px\'><span style=\'color:#003daa\'>500PX</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://dribbble.com/search/\' data-placeholder=\'搜索Dribbble的UI素材\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>Dribbble</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -74,11 +74,11 @@ document.writeln("<div class=\'search-group group-b\'>");
 document.writeln("<span class=\'type-text\'>影视</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-yinshi\'value=\'https://www.manamana.net/Search?content=\'data-placeholder=\'MANA新媒体艺术搜索\'><label for=\'type-yinshi\'><span style=\'color:#003daa\'>MANA</span></label></li>");
+document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://www.bbcearth.com/search?q=\'data-placeholder=\'搜索BBC地球\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>BBC</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-bilibili\" value=\"https://search.bilibili.com/all?keyword=\" data-placeholder=\"哔哩哔哩\"><label for=\"type-bilibili\"><span style=\"color:#003daa\">B站</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-bashi\'value=\'https://www.douyin.com/search/\'data-placeholder=\'抖音搜索\'><label for=\'type-bashi\'><span style=\'color:#003daa\'>抖音</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-fenghk\'value=\'https://www.kuaishou.com/search/video?searchKey=\'data-placeholder=\'快手搜索\'><label for=\'type-fenghk\'><span style=\'color:#003daa\'>快手</span></label></li>");
 document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-ckdiany\'value=\'https://v.qq.com/x/search/?q=\'data-placeholder=\'腾讯视频 \'><label for=\'type-ckdiany\'><span style=\'color:#003daa\'>腾讯</span></label></li>");
-document.writeln("<li><input hidden type=\'radio\'name=\'type\'id=\'type-Neets\'value=\'https://www.bbcearth.com/search?q=\'搜索BBC地球\'><label for=\'type-Neets\'><span style=\'color:#003daa\'>BBC</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
