@@ -89,7 +89,7 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-wechat\' value=\'http://weixin.sogou.com/weixin?type=2&amp;query=\' data-placeholder=\'微信\'><label for=\'type-wechat\'><span style=\'color:#003daa\'>微信</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-weiboo\' value=\'http://s.weibo.com/weibo/\' data-placeholder=\'微博\'><label for=\'type-weiboo\'><span style=\'color:#003daa\'>微博</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-doubann\' value=\'https://www.douban.com/search?q=\' data-placeholder=\'豆瓣\'><label for=\'type-doubann\'><span style=\'color:#003daa\'>豆瓣</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiangha\' value=\'https://baike.baidu.com/item/\' data-placeholder=\'百度百科\'><label for=\'type-xiangha\'><span style=\'color:#003daa\'>百度百科</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-iData\" value=\"https://baike.baidu.com/item/\" data-placeholder=\"百度百科\"><label for=\"type-iData\"><span style=\"color:#003daa\">百度百科</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiachufang\' value=\'https://www.mbalib.com/s?q=\' data-placeholder=\'MBA智库\'><label for=\'type-xiachufang\'><span style=\'color:#003daa\'>MBA智库</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
