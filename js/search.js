@@ -32,7 +32,7 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xiaomuchou\" value=\"https://ctext.org/pre-qin-and-han/zh?searchu=\" data-placeholder=\"中国哲学全文检索\"><label for=\"type-xiaomuchou\"><span style=\"color:#003daa\">中国哲学</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/searchbooks.pl?if=gb&author=\' data-placeholder=\'中国哲学作者名称检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>国学检索</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/searchbooks.pl?if=gb&searchu=\' data-placeholder=\'中国哲学书名检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>国学检索</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
