@@ -31,6 +31,7 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-biyingxueshu\" value=\"http://cn.bing.com/academic/search?q=\" data-placeholder=\"必应学术\"><label for=\"type-biyingxueshu\"><span style=\"color:#003daa\">必应</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xiaomuchou\" value=\"https://ctext.org/pre-qin-and-han/zh?searchu=\" data-placeholder=\"诸子百家全文检索\"><label for=\"type-xiaomuchou\"><span style=\"color:#003daa\">诸子百家</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -64,8 +65,8 @@ document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-gongju\' value=\'https://translate.google.cn/?sl=auto&tl=zh-CN&text=\' data-placeholder=\'请输入英文\'><label for=\'type-gongju\'><span style=\'color:#003daa\'>Google翻译</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-links\' value=\'https://dict.baidu.com/s?wd=\' data-placeholder=\'请输入词语，成语，诗词\'><label for=\'type-links\'><span style=\'color:#003daa\'>百度汉语</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-icp\' value=\'https://flightaware.com/live/airport/\' data-placeholder=\'请输入航班或机场代码\'><label for=\'type-icp\'><span style=\'color:#003daa\'>航班跟踪</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://haoma.baidu.com/phoneSearch?search=\' data-placeholder=\'请输入号码\'><label for=\'type-ping\'><span style=\'color:#003daa\'>号码查询</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://www.tianyancha.com/search?key=\' data-placeholder=\'请输入企业或法人名称\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>天眼企业查询</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://d.qianzhan.com/xdata/xsearch?q=\' data-placeholder=\'请输入数据关键词\'><label for=\'type-ping\'><span style=\'color:#003daa\'>前瞻数据库</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://www.tianyancha.com/search?key=\' data-placeholder=\'请输入企业或法人名称\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>天眼查询</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiangha\' value=\'https://translate.google.cn/?sl=auto&tl=en&text=\' data-placeholder=\'请输入中文\'><label for=\'type-xiangha\'><span style=\'color:#003daa\'>谷歌翻译</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
