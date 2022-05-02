@@ -127,9 +127,7 @@ document.writeln("</div>");
 document.writeln("</div>");
 document.writeln("<!-- END搜索栏 -->");
 
-var __search = "xxup.github.io",
-  __develop = "randomup.me",
-  __Ox1467e = [
+var __Ox1467e = [
     "checked",
     'input[name="type"][value="',
     '"]',
