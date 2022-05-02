@@ -67,7 +67,7 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-links\' value=\'https://dict.baidu.com/s?wd=\' data-placeholder=\'请输入词语，成语，诗词\'><label for=\'type-links\'><span style=\'color:#003daa\'>百度汉语</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-icp\' value=\'https://flightaware.com/live/airport/\' data-placeholder=\'请输入航班或机场代码\'><label for=\'type-icp\'><span style=\'color:#003daa\'>航班跟踪</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://d.qianzhan.com/xdata/xsearch?q=\' data-placeholder=\'请输入数据关键词\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>前瞻数据库</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiangha\' value=\'https://translate.google.cn/?sl=auto&tl=en&text=\' data-placeholder=\'请输入中文\'><label for=\'type-xiangha\'><span style=\'color:#003daa\'>谷歌翻译</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiangha\' value=\'https://www.tianyancha.com/search?key=\' data-placeholder=\'请输入企业或法人名称\'><label for=\'type-xiangha\'><span style=\'color:#003daa\'>天眼查询</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
