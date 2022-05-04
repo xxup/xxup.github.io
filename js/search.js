@@ -33,7 +33,7 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xiaomuchou\" value=\"https://ctext.org/pre-qin-and-han/zh?searchu=\" data-placeholder=\"先秦两汉传统书籍全文检索\"><label for=\"type-xiaomuchou\"><span style=\"color:#003daa\">国学检索</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/post-han/zh?searchu=\' data-placeholder=\'两汉之后传统书籍全文检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>传统文化</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/post-han/zh?searchu=\' data-placeholder=\'汉代之后传统书籍全文检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>传统文化</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -46,8 +46,8 @@ document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-whyy\' value=\'https://unsplash.dogedoge.com/s/photos/\' data-placeholder=\'Unsplash图片搜索\'><label for=\'type-whyy\'><span style=\'color:#003daa\'>Unsplash</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiami\' value=\'https://www.pexels.com/zh-cn/search/\' data-placeholder=\'Pexels图片搜索\'><label for=\'type-xiami\'><span style=\'color:#003daa\'>Pexels</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ape8\' value=\'https://pixabay.com/images/search/\' data-placeholder=\'Pixabay图片搜索\'><label for=\'type-ape8\'><span style=\'color:#003daa\'>Pixabay</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-500px\' value=\'https://500px.com/search?q=\' data-placeholder=\'500PX 品质摄影社区\'><label for=\'type-500px\'><span style=\'color:#003daa\'>500PX</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://dribbble.com/search/\' data-placeholder=\'搜索Dribbble的UI素材\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>Dribbble</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-500px\' value=\'https://500px.com/search?q=\' data-placeholder=\'500PX品质摄影社区\'><label for=\'type-500px\'><span style=\'color:#003daa\'>500PX</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-freebiesbug\' value=\'https://dribbble.com/search/\' data-placeholder=\'Dribbble的UI素材搜索\'><label for=\'type-freebiesbug\'><span style=\'color:#003daa\'>Dribbble</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
