@@ -15,12 +15,13 @@ document.writeln("<div class=\'search-group group-c\'>");
 document.writeln("<span class=\'type-text\'>默认</span>");
 document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-baidu\'value=\'https://www.baidu.com/s?wd=\'data-placeholder=\'百度搜索\'><label for=\'type-baidu\'><span style=\'color:#003daa\'>百度</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://cn.bing.com/search?q=\' data-placeholder=\'必应搜索\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>必应</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-ditu\'value=\'https://ditu.amap.com/search?query=\'data-placeholder=\'高德地图\'><label for=\'type-ditu\'><span style=\'color:#003daa\'>地图</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>Google</span></label></li>");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-mijisou\'value=\'https://duckduckgo.com/?q=\'data-placeholder=\'DuckDuckGo\'><label for=\'type-mijisou\'><span style=\'color:#003daa\'>DuckDuckGo</span></label></li>");
+document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-mijisou\'value=\'https://duckduckgo.com/?q=\'data-placeholder=\'DDG\'><label for=\'type-mijisou\'><span style=\'color:#003daa\'>DuckDuckGo</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\"color:#003daa\">Github</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-maji\'value=\'https://codepen.io/search/pens?q=\'data-placeholder=\'CodePen\'><label for=\'type-maji\'><span style=\'color:#003daa\'>CodePen</span></label></li>");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-panduoduo\'value=\'https://3dwarehouse.sketchup.com/search/?q=\'data-placeholder=\'3D模型库搜索\'><label for=\'type-panduoduo\'><span style=\'color:#003daa\'>3D Warehouse</span></label></li>");
+document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-panduoduo\'value=\'https://3dwarehouse.sketchup.com/search/?q=\'data-placeholder=\'3D模型库搜索\'><label for=\'type-panduoduo\'><span style=\'color:#003daa\'>3DWarehouse</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -31,8 +32,8 @@ document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-biyingxueshu\" value=\"http://cn.bing.com/academic/search?q=\" data-placeholder=\"必应学术\"><label for=\"type-biyingxueshu\"><span style=\"color:#003daa\">必应</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-zhiwang\" value=\"http://kns.cnki.net/kns/brief/Default_Result.aspx?code=SCDB&amp;kw=\" data-placeholder=\"知网文献\"><label for=\"type-zhiwang\"><span style=\"color:#003daa\">知网</span></label></li>");
 document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-yingxiangyinzhi\" value=\"http://www.letpub.com.cn/index.php?page=journalapp&amp;view=search&amp;searchname=\" data-placeholder=\"SCI查询\"><label for=\"type-yingxiangyinzhi\"><span style=\"color:#003daa\">影响因子</span></label></li>");
-document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xiaomuchou\" value=\"https://ctext.org/pre-qin-and-han/zh?searchu=\" data-placeholder=\"传统文化全文检索\"><label for=\"type-xiaomuchou\"><span style=\"color:#003daa\">传统文化</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/searchbooks.pl?if=gb&searchu=\' data-placeholder=\'中国哲学书名检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>国学检索</span></label></li>");
+document.writeln("<li><input hidden=\"\" type=\"radio\" name=\"type\" id=\"type-xiaomuchou\" value=\"https://ctext.org/pre-qin-and-han/zh?searchu=\" data-placeholder=\"先秦传统书籍全文检索\"><label for=\"type-xiaomuchou\"><span style=\"color:#003daa\">国学检索</span></label></li>");
+document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ping\' value=\'https://ctext.org/post-han/zh?searchu=\' data-placeholder=\'两汉后传统书籍全文检索\'><label for=\'type-ping\'><span style=\'color:#003daa\'>传统文化</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
 
@@ -66,7 +67,6 @@ document.writeln("<ul class=\'search-type\'>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-gongju\' value=\'https://translate.google.cn/?sl=auto&tl=zh-CN&text=\' data-placeholder=\'请输入英文\'><label for=\'type-gongju\'><span style=\'color:#003daa\'>Google翻译</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-links\' value=\'https://dict.baidu.com/s?wd=\' data-placeholder=\'请输入词语，成语，诗词\'><label for=\'type-links\'><span style=\'color:#003daa\'>百度汉语</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-icp\' value=\'https://flightaware.com/live/airport/\' data-placeholder=\'请输入航班或机场代码\'><label for=\'type-icp\'><span style=\'color:#003daa\'>航班跟踪</span></label></li>");
-document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-ciku\' value=\'https://d.qianzhan.com/xdata/xsearch?q=\' data-placeholder=\'请输入数据关键词\'><label for=\'type-ciku\'><span style=\'color:#003daa\'>前瞻数据库</span></label></li>");
 document.writeln("<li><input hidden=\'\' type=\'radio\' name=\'type\' id=\'type-xiangha\' value=\'https://www.tianyancha.com/search?key=\' data-placeholder=\'请输入企业或法人名称\'><label for=\'type-xiangha\'><span style=\'color:#003daa\'>天眼查询</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
