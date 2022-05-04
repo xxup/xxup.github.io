@@ -124,6 +124,7 @@
   border-radius: 3rem;
   display: block;
   margin: auto;
+  cursor: pointer;
 }
 .s-type-list label:hover {
   color: #000;
