@@ -109,13 +109,22 @@
   color: #0179a8;
   width: 3pc;
   height: 3pc;
+  font-size: 2.2rem;
+  line-height: 3rem;
+  border-radius: 3rem;
+  display: block;
+  margin: auto;
+}
+.s-type-list .tile-lg:hover {
+  color: #ea6759;
+  width: 3pc;
+  height: 3pc;
   font-size: 2.25rem;
   line-height: 3rem;
   border-radius: 3rem;
   display: block;
   margin: auto;
 }
-
 .s-type-list label:hover {
   color: #000;
 }
