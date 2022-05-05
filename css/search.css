@@ -117,13 +117,7 @@
 }
 .s-type-list .tile-lg:hover {
   color: #ea6759;
-  width: 3pc;
-  height: 3pc;
   font-size: 2.25rem;
-  line-height: 3rem;
-  border-radius: 3rem;
-  display: block;
-  margin: auto;
   cursor: pointer;
 }
 .s-type-list label:hover {
