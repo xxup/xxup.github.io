@@ -20,7 +20,6 @@ document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-google2\'value=\'https://www.google.com/search?query=\'data-placeholder=\'谷歌搜索\'><label for=\'type-google2\'><span style=\'color:#003daa\'>Google</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-mijisou\'value=\'https://duckduckgo.com/?q=\'data-placeholder=\'DuckDuckGo\'><label for=\'type-mijisou\'><span style=\'color:#003daa\'>DuckDuckGo</span></label></li>");
 document.writeln("<li><input hidden type=\"radio\" name=\"type\" id=\"type-github\" value=\"https://github.com/search?q=\" data-placeholder=\"Github\"><label for=\"type-github\"><span style=\'color:#003daa\'>Github</span></label></li>");
-document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-maji\'value=\'https://codepen.io/search/pens?q=\'data-placeholder=\'CodePen\'><label for=\'type-maji\'><span style=\'color:#003daa\'>CodePen</span></label></li>");
 document.writeln("<li><input checked hidden type=\'radio\'name=\'type\'id=\'type-panduoduo\'value=\'https://3dwarehouse.sketchup.com/search/?q=\'data-placeholder=\'3D模型库搜索\'><label for=\'type-panduoduo\'><span style=\'color:#003daa\'>3DWarehouse</span></label></li>");
 document.writeln("</ul>");
 document.writeln("</div>");
