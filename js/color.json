@@ -183,7 +183,7 @@
 {"CMYK": [40, 92, 78, 66], "RGB": [72, 30, 28], "hex": "#481e1c", "name": "豆沙", "pinyin": "dousha"},
 {"CMYK": [0, 9, 12, 0], "RGB": [251, 238, 226], "hex": "#fbeee2", "name": "淡米粉", "pinyin": "danmifen"},
 {"CMYK": [0, 19, 19, 0], "RGB": [246, 220, 206], "hex": "#f6dcce", "name": "初桃粉红", "pinyin": "chutaofenhong"},
-{"CMYK": [0, 27, 27, 0], "RGB": [247, 207, 186], "hex": "#f7cfba", "name": "介壳淡粉红",…},
+{"CMYK": [0, 27, 27, 0], "RGB": [247, 207, 186], "hex": "#f7cfba", "name": "介壳淡粉红","pinyin": "jieqiaodanfenhong"},
 {"CMYK": [0, 43, 43, 0], "RGB": [246, 173, 143], "hex": "#f6ad8f", "name": "淡藏花红", "pinyin": "dancanghuahong"},
 {"CMYK": [0, 58, 61, 0], "RGB": [246, 140, 96], "hex": "#f68c60", "name": "瓜瓤红", "pinyin": "guaranghong"},
 {"CMYK": [0, 67, 74, 0], "RGB": [249, 114, 61], "hex": "#f9723d", "name": "芙蓉红", "pinyin": "furonghong"},
