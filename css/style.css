@@ -1,48 +1,14 @@
-:root{
+:root {
+  position:fixed;
   width:100vw;
   height:100vh;
-  position:fixed;
-  background-image:conic-gradient(white,lightyellow,pink,white);
+  padding:0px;
+  margin:0px;
+  background-image:linear-gradient(red,yellow,green,cyan,blue,purple,red);
 }
 #test{
-  color:brown;
-  font-size:200%;
-  text-align:center;
-  padding-top:50px;
-}
-hr{
-  width:60%;
-  opacity:0.3;
-}
-nav {
-  display:flex;
-  gap:10px;
-
-}
-a{
-  flex:1;
-  border:1px solid brown;
-  background-color:rgba(255,235,200,0.5);
-  color:brown;
-  text-align:center;
-  border-radius:8px;
-  margin-top:10px;
-}
-a:hover{
-  background-color:white;
-}
-
-img{
-  width:100%;
-  margin-top:30px;
-  border-radius:10px;
-}
-footer{
-  width:100%;
-}
-footer p{
-  color:grey;
-  padding-top:18%; 
-  font-size:80%; 
-  text-align:center;
+  color:navy;
+  font-size:250%;
+  padding-top:65%;
+  padding-left:25%;
 }
