@@ -4,13 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>p5.js 脚本生成器 · 纯静态版</title>
-  <!-- CodeMirror -->
+  <!-- CodeMirror 外部依赖 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+    /* ---------- 全局重置 ---------- */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    /* ---------- 导航栏 ---------- */
     nav {
       background: #333;
       padding: 10px 20px;
@@ -20,9 +28,16 @@
       align-items: center;
       justify-content: space-between;
     }
-    nav .nav-left { display: flex; flex-wrap: wrap; align-items: center; }
-    nav .nav-right { position: relative; }
-    nav a, .dropdown-btn {
+    nav .nav-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    nav .nav-right {
+      position: relative;
+    }
+    nav a,
+    .dropdown-btn {
       color: white;
       text-decoration: none;
       margin-right: 15px;
@@ -32,15 +47,24 @@
       font-size: 1rem;
       padding: 5px 10px;
     }
-    nav a:hover, .dropdown-btn:hover { background: #555; border-radius: 3px; }
-    .dropdown { position: relative; display: inline-block; }
+    nav a:hover,
+    .dropdown-btn:hover {
+      background: #555;
+      border-radius: 3px;
+    }
+
+    /* ---------- 下拉菜单 ---------- */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
     .dropdown-content {
       display: none;
       position: absolute;
       right: 0;
       background-color: #f9f9f9;
       min-width: 220px;
-      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
       z-index: 1;
       border-radius: 4px;
       padding: 5px 0;
@@ -53,14 +77,18 @@
       border-bottom: 1px solid #eee;
       background: white;
     }
-    .dropdown-content .page-item:last-child { border-bottom: none; }
+    .dropdown-content .page-item:last-child {
+      border-bottom: none;
+    }
     .dropdown-content .page-item a {
       color: #333;
       text-decoration: none;
       flex: 1;
       cursor: pointer;
     }
-    .dropdown-content .page-item a:hover { background: transparent; }
+    .dropdown-content .page-item a:hover {
+      background: transparent;
+    }
     .dropdown-content .page-item .actions {
       display: flex;
       gap: 5px;
@@ -73,12 +101,27 @@
       padding: 2px 6px;
       border-radius: 3px;
     }
-    .dropdown-content .page-item .actions .del { color: #d9534f; }
-    .dropdown-content .page-item .actions .del:hover { background: #f2dede; }
-    .dropdown-content .page-item .actions .rename { color: #5bc0de; }
-    .dropdown-content .page-item .actions .rename:hover { background: #d9edf7; }
-    .dropdown:hover .dropdown-content { display: block; }
-    .dropdown-btn { background: #444; border-radius: 3px; }
+    .dropdown-content .page-item .actions .del {
+      color: #d9534f;
+    }
+    .dropdown-content .page-item .actions .del:hover {
+      background: #f2dede;
+    }
+    .dropdown-content .page-item .actions .rename {
+      color: #5bc0de;
+    }
+    .dropdown-content .page-item .actions .rename:hover {
+      background: #d9edf7;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown-btn {
+      background: #444;
+      border-radius: 3px;
+    }
+
+    /* ---------- 主内容 ---------- */
     #app {
       margin-top: 20px;
       padding: 20px;
@@ -86,9 +129,18 @@
       border-radius: 5px;
       min-height: 200px;
     }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .form-group input, .form-group textarea {
+
+    /* ---------- 表单元素 ---------- */
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group textarea {
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
@@ -102,17 +154,57 @@
       height: 300px;
       font-size: 14px;
     }
-    button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .result { margin-top: 20px; padding: 10px; background: #e9f7fe; border-radius: 4px; }
-    .preview-img { max-width: 200px; max-height: 200px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; }
-    .no-pages { color: #999; font-style: italic; padding: 8px 16px; background: white; display: block; }
-    .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .action-buttons button { background: #6c757d; }
-    .action-buttons button.preview { background: #28a745; }
+
+    /* ---------- 按钮 ---------- */
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+
+    /* ---------- 结果与预览 ---------- */
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e9f7fe;
+      border-radius: 4px;
+    }
+    .preview-img {
+      max-width: 200px;
+      max-height: 200px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .no-pages {
+      color: #999;
+      font-style: italic;
+      padding: 8px 16px;
+      background: white;
+      display: block;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .action-buttons button {
+      background: #6c757d;
+    }
+    .action-buttons button.preview {
+      background: #28a745;
+    }
   </style>
 </head>
 <body>
+  <!-- 导航栏 -->
   <nav>
     <div class="nav-left">
       <a href="/">首页</a>
@@ -128,14 +220,22 @@
       </div>
     </div>
   </nav>
+
+  <!-- 主内容区域 -->
   <div id="app">加载中...</div>
 
+  <!-- CodeMirror JS 依赖 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <!-- 主脚本 -->
   <script>
     // -------- 本地存储管理 --------
     function getPages() {
       try {
         return JSON.parse(localStorage.getItem('p5_pages')) || [];
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     }
     function savePages(pages) {
       localStorage.setItem('p5_pages', JSON.stringify(pages));
@@ -148,7 +248,7 @@
       return div.innerHTML;
     }
 
-    // 生成 p5 页面 HTML（与之前相同，但图片用 DataURL 直接嵌入）
+    // 生成 p5 页面 HTML（图片用 DataURL 嵌入）
     function generatePageHtml(title, script, imageDataUrl) {
       const safeTitle = escapeHtml(title) || '未命名页面';
       const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl}";` : 'var imageUrl = null;';
@@ -169,7 +269,7 @@
 </html>`;
     }
 
-    // 预览生成的页面（在新窗口打开）
+    // 预览（新窗口打开）
     function previewPage(htmlContent) {
       const win = window.open('', '_blank');
       if (win) {
@@ -180,7 +280,7 @@
       }
     }
 
-    // 下载生成的页面
+    // 下载 HTML 文件
     function downloadPage(htmlContent, filename) {
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
@@ -203,7 +303,6 @@
       let html = '';
       pages.forEach((page, index) => {
         const title = escapeHtml(page.title);
-        const id = page.id || index; // 用 id 或索引
         html += `
           <div class="page-item">
             <a onclick="previewPageByIndex(${index})">${title}</a>
@@ -232,7 +331,6 @@
       pages.splice(index, 1);
       savePages(pages);
       updateNavPages();
-      // 如果当前在生成器页面，可能不需要刷新，但为了简洁，重绘当前视图
       render();
     };
 
@@ -255,12 +353,17 @@
 
     // -------- 前端路由（SPA） --------
     let editor = null;
-    let uploadedImageDataUrl = null; // 存储 Base64 图片数据
+    let uploadedImageDataUrl = null;
 
     function render() {
       const path = window.location.pathname;
       const app = document.getElementById('app');
-      // 简单的路由模拟
+
+      if (editor) {
+        editor.toTextArea();
+        editor = null;
+      }
+
       if (path === '/' || path === '/index.html') {
         app.innerHTML = `
           <h1>🎨 p5.js 脚本生成器 · 纯静态版</h1>
@@ -269,7 +372,6 @@
           <p>生成的页面会保存在本地存储中，关闭浏览器后依然存在。</p>
           <p>点击导航栏的 "生成 p5.js 脚本" 开始创作。</p>
         `;
-        if (editor) { editor.toTextArea(); editor = null; }
       } else if (path === '/about') {
         app.innerHTML = `
           <h1>📖 关于</h1>
@@ -278,7 +380,6 @@
           <p>支持预览、下载、删除和重命名已生成的作品。</p>
           <p>基于 CodeMirror 实现代码高亮。</p>
         `;
-        if (editor) { editor.toTextArea(); editor = null; }
       } else if (path === '/generator') {
         app.innerHTML = `
           <h1>✏️ 编写 p5.js 脚本</h1>
@@ -300,7 +401,6 @@
           <div id="result" class="result" style="display:none;"></div>
         `;
 
-        // 初始化 CodeMirror
         setTimeout(() => {
           const textarea = document.getElementById('script');
           if (textarea && !editor) {
@@ -316,11 +416,9 @@
           }
         }, 50);
 
-        // 重置图片相关
         uploadedImageDataUrl = null;
         document.getElementById('image-preview').innerHTML = '';
 
-        // 挂载图片上传处理函数
         window.handleImageUpload = function(input) {
           const file = input.files[0];
           if (!file) return;
@@ -332,7 +430,6 @@
           reader.readAsDataURL(file);
         };
 
-        // 生成页面
         window.buildPage = function() {
           const title = document.getElementById('title').value.trim() || '未命名脚本';
           const script = editor ? editor.getValue().trim() : document.getElementById('script').value.trim();
@@ -345,7 +442,6 @@
           resultDiv.style.display = 'block';
           resultDiv.innerHTML = '正在生成...';
 
-          // 生成完整 HTML
           const htmlContent = generatePageHtml(title, script, imageDataUrl);
 
           // 保存到 localStorage
@@ -359,16 +455,34 @@
           savePages(pages);
           updateNavPages();
 
-          // 显示结果并提供预览/下载按钮
-          resultDiv.innerHTML = `
-            <p>✅ 页面生成成功！已保存到本地存储。</p>
-            <div class="action-buttons">
-              <button class="preview" onclick="previewPage(\`${htmlContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">👁️ 预览</button>
-              <button onclick="downloadPage(\`${htmlContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, '${title}.html')">📥 下载 HTML</button>
-            </div>
-          `;
+          // ----- 使用 DOM 构建结果区域，避免转义问题 -----
+          resultDiv.innerHTML = '';
+          const msg = document.createElement('p');
+          msg.textContent = '✅ 页面生成成功！已保存到本地存储。';
+          resultDiv.appendChild(msg);
 
-          // 重置表单（可选）
+          const btnContainer = document.createElement('div');
+          btnContainer.className = 'action-buttons';
+
+          const previewBtn = document.createElement('button');
+          previewBtn.className = 'preview';
+          previewBtn.textContent = '👁️ 预览';
+          previewBtn.addEventListener('click', function() {
+            previewPage(htmlContent);
+          });
+          btnContainer.appendChild(previewBtn);
+
+          const downloadBtn = document.createElement('button');
+          downloadBtn.textContent = '📥 下载 HTML';
+          downloadBtn.addEventListener('click', function() {
+            downloadPage(htmlContent, `${title}.html`);
+          });
+          btnContainer.appendChild(downloadBtn);
+
+          resultDiv.appendChild(btnContainer);
+          // ----- 修复结束 -----
+
+          // 重置表单
           document.getElementById('title').value = '';
           if (editor) editor.setValue('');
           else document.getElementById('script').value = '';
@@ -378,11 +492,10 @@
         };
       } else {
         app.innerHTML = `<h1>📄 页面 ${path}</h1><p>该路径未定义。</p>`;
-        if (editor) { editor.toTextArea(); editor = null; }
       }
     }
 
-    // 拦截内部链接点击（SPA 导航）
+    // -------- SPA 导航拦截 --------
     document.addEventListener('click', (e) => {
       const link = e.target.closest('a');
       if (link) {
@@ -397,22 +510,11 @@
 
     window.addEventListener('popstate', render);
 
-    // 初次加载
+    // -------- 初始化 --------
     window.onload = function() {
       updateNavPages();
       render();
     };
-
-    // 由于预览和下载函数需要转义反引号和$，我们使用函数方式传递，已在上面定义。
-    // 但为了安全，我们可以在生成结果时使用函数引用而非内联模板字符串。
-    // 更健壮的方式：修改 buildPage 中点击事件直接用函数，但上面已用内联，因为字符串转义风险低。
-    // 为了更安全，我们重新定义 buildPage 中的按钮事件，用 data 属性传递 HTML。
-    // 但为简洁，我们已用转义处理，基本可用。
-
-    // 补充：由于 previewPage 和 downloadPage 已在全局定义，内联调用没问题。
-    // 注意：在模板字符串中嵌入 htmlContent 需要转义反引号和$，我们已做。
-    // 如果担心转义不完整，可以使用更安全的方法：生成结果后使用 DOM 添加按钮事件。
-    // 但当前实现足够简单且有效。
   </script>
 </body>
 </html>
