@@ -6,14 +6,11 @@
   <title>p5.js 脚本生成器</title>
   <!-- CodeMirror 基础 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-  <!-- 亮色主题（默认） -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css" id="cm-theme">
-  <!-- 可选暗色主题（预加载，通过 id 切换） -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" id="cm-theme-dark" disabled>
   <!-- JSZip -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    /* ---------- 全局重置 ---------- */
     * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
@@ -27,7 +24,7 @@
       color: #ddd;
     }
 
-    /* ---------- 顶部导航栏 ---------- */
+    /* 顶部导航 */
     .top-nav {
       background: #333;
       color: white;
@@ -57,25 +54,8 @@
       font-size: 1.2rem;
       font-weight: bold;
     }
-    .top-nav .right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .top-nav .right button {
-      background: #555;
-      border: none;
-      color: white;
-      padding: 5px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    .top-nav .right button:hover {
-      background: #777;
-    }
 
-    /* ---------- 侧边栏 ---------- */
+    /* 侧边栏 */
     .sidebar {
       position: fixed;
       top: 0;
@@ -89,18 +69,16 @@
       padding-top: 60px;
       overflow-y: auto;
       box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
     }
-    .sidebar.open {
-      left: 0;
-    }
+    .sidebar.open { left: 0; }
     .sidebar .nav-item {
       padding: 12px 20px;
       border-bottom: 1px solid #444;
       cursor: pointer;
     }
-    .sidebar .nav-item:hover {
-      background: #3a3a3a;
-    }
+    .sidebar .nav-item:hover { background: #3a3a3a; }
     .sidebar .nav-item a {
       color: #eee;
       text-decoration: none;
@@ -124,9 +102,7 @@
       border-bottom: 1px solid #3a3a3a;
       cursor: pointer;
     }
-    .sidebar .page-item:hover {
-      background: #3a3a3a;
-    }
+    .sidebar .page-item:hover { background: #3a3a3a; }
     .sidebar .page-item .page-title {
       flex: 1;
       color: #eee;
@@ -140,9 +116,7 @@
       font-size: 0.8rem;
       padding: 2px 5px;
     }
-    .sidebar .page-item .actions button:hover {
-      color: white;
-    }
+    .sidebar .page-item .actions button:hover { color: white; }
     .sidebar .page-item .actions .del:hover { color: #d9534f; }
     .sidebar .page-item .actions .rename:hover { color: #5bc0de; }
     .sidebar .no-pages {
@@ -150,8 +124,20 @@
       color: #888;
       font-style: italic;
     }
+    /* 底部菜单 */
+    .sidebar-footer {
+      margin-top: auto;
+      border-top: 2px solid #666;
+      padding: 10px 0;
+    }
+    .sidebar-footer .nav-item {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: none;
+    }
+    .sidebar-footer .nav-item:hover { background: #3a3a3a; }
 
-    /* 遮罩层 */
+    /* 遮罩 */
     .overlay {
       display: none;
       position: fixed;
@@ -159,11 +145,9 @@
       background: rgba(0,0,0,0.4);
       z-index: 150;
     }
-    .overlay.show {
-      display: block;
-    }
+    .overlay.show { display: block; }
 
-    /* ---------- 主内容 ---------- */
+    /* 主内容 */
     #app {
       padding: 20px;
       max-width: 900px;
@@ -177,7 +161,7 @@
       color: #ddd;
     }
 
-    /* ---------- 表单 ---------- */
+    /* 表单 */
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
     .form-group input, .form-group textarea {
@@ -200,9 +184,7 @@
       height: 300px;
       font-size: 14px;
     }
-    body.dark-mode .form-group .CodeMirror {
-      border-color: #555;
-    }
+    body.dark-mode .form-group .CodeMirror { border-color: #555; }
 
     button {
       background: #007bff;
@@ -219,9 +201,7 @@
       background: #e9f7fe;
       border-radius: 4px;
     }
-    body.dark-mode .result {
-      background: #2a4a5a;
-    }
+    body.dark-mode .result { background: #2a4a5a; }
     .preview-img {
       max-width: 200px;
       max-height: 200px;
@@ -235,9 +215,7 @@
       flex-wrap: wrap;
       margin-top: 10px;
     }
-    .action-buttons button {
-      background: #6c757d;
-    }
+    .action-buttons button { background: #6c757d; }
     .action-buttons button.preview { background: #28a745; }
     .action-buttons button.zip { background: #17a2b8; }
   </style>
@@ -249,10 +227,6 @@
     <div class="left">
       <button class="hamburger" id="hamburgerBtn">☰</button>
       <span class="title">🎨 p5.js 生成器</span>
-    </div>
-    <div class="right">
-      <button id="themeToggle">🌓 主题</button>
-      <button id="exportZipBtn">📦 导出 ZIP</button>
     </div>
   </nav>
 
@@ -266,6 +240,11 @@
     <div id="sidebar-pages">
       <div class="no-pages">暂无生成的脚本</div>
     </div>
+    <!-- 底部菜单 -->
+    <div class="sidebar-footer">
+      <div class="nav-item" id="themeToggleSidebar">🌓 切换主题</div>
+      <div class="nav-item" id="exportZipSidebar">📦 导出所有作品</div>
+    </div>
   </div>
   <div class="overlay" id="overlay"></div>
 
@@ -277,7 +256,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 
   <script>
-    // -------- 本地存储管理 --------
+    // -------- 本地存储 --------
     function getPages() {
       try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { return []; }
     }
@@ -312,7 +291,7 @@
 </html>`;
     }
 
-    // -------- 预览 & 下载 --------
+    // -------- 预览 --------
     function previewPage(htmlContent) {
       const win = window.open('', '_blank');
       if (win) {
@@ -323,18 +302,7 @@
       }
     }
 
-    function downloadPage(htmlContent, filename) {
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename || 'p5_sketch.html';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-    }
-
-    // -------- 导出 ZIP --------
+    // -------- 导出所有作品为 ZIP --------
     function exportZip() {
       const pages = getPages();
       if (!pages.length) {
@@ -361,7 +329,7 @@
     let currentPath = '/';
     let editor = null;
     let uploadedImageDataUrl = null;
-    let theme = 'light'; // 'light' or 'dark'
+    let theme = 'light';
 
     // 更新侧边栏作品列表
     function updateSidebarPages() {
@@ -387,18 +355,11 @@
       container.innerHTML = html;
     }
 
-    // 导航到指定页面（当前窗口）
+    // 导航到指定页面（当前窗口，使用 iframe）
     function navigateToPage(index) {
       const pages = getPages();
       if (!pages[index]) return;
       const content = pages[index].html;
-      // 在当前窗口显示该 HTML（利用 iframe 或直接替换内容）
-      // 我们采用一个简单方式：将 app 内容替换为 iframe 显示该 HTML，或者直接渲染？
-      // 但为了保持 SPA 风格，我们可以将 HTML 放入一个 div 中直接展示，但会丢失样式。
-      // 更合理：在新窗口预览，但要求在当前窗口打开，我们可以用 iframe。
-      // 或者我们使用一个“预览”视图，但这样会破坏路由。
-      // 简单实现：直接跳转到该页面（使用 data URI），但会丢失应用状态。
-      // 鉴于要求“在当前窗口切换”，我们使用 iframe 嵌入。
       const app = document.getElementById('app');
       app.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -407,10 +368,8 @@
         </div>
         <iframe srcdoc="${escapeHtml(content).replace(/"/g, '&quot;')}" style="width:100%; height:80vh; border:1px solid #ccc; border-radius:4px;"></iframe>
       `;
-      // 关闭侧边栏
       closeSidebar();
     }
-    // 暴露给 onclick
     window.navigateToPage = navigateToPage;
 
     // 删除页面
@@ -420,7 +379,6 @@
       pages.splice(index, 1);
       savePages(pages);
       updateSidebarPages();
-      // 如果当前正在预览该页，返回主页
       render();
     }
     window.deletePage = deletePage;
@@ -435,7 +393,6 @@
       page.title = newTitle.trim();
       savePages(pages);
       updateSidebarPages();
-      // 如果当前正在预览该页，刷新标题显示（但复杂，简单处理：重新渲染）
       render();
     }
     window.renamePage = renamePage;
@@ -452,7 +409,7 @@
     document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
     document.getElementById('overlay').addEventListener('click', closeSidebar);
 
-    // 侧边栏导航项点击
+    // 侧边栏导航点击
     document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
       el.addEventListener('click', function() {
         const path = this.getAttribute('data-path');
@@ -462,7 +419,7 @@
       });
     });
 
-    // 主题切换
+    // 主题切换（侧边栏底部）
     function toggleTheme() {
       const body = document.body;
       const lightTheme = document.getElementById('cm-theme');
@@ -472,31 +429,25 @@
         lightTheme.disabled = true;
         darkTheme.disabled = false;
         theme = 'dark';
-        // 刷新编辑器主题
-        if (editor) {
-          editor.setOption('theme', 'dracula');
-        }
+        if (editor) editor.setOption('theme', 'dracula');
       } else {
         body.classList.remove('dark-mode');
         lightTheme.disabled = false;
         darkTheme.disabled = true;
         theme = 'light';
-        if (editor) {
-          editor.setOption('theme', 'default');
-        }
+        if (editor) editor.setOption('theme', 'default');
       }
     }
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('themeToggleSidebar').addEventListener('click', toggleTheme);
 
-    // 导出 ZIP
-    document.getElementById('exportZipBtn').addEventListener('click', exportZip);
+    // 导出 ZIP（侧边栏底部）
+    document.getElementById('exportZipSidebar').addEventListener('click', exportZip);
 
     // -------- 路由渲染 --------
     function render() {
       const path = window.location.pathname;
       const app = document.getElementById('app');
 
-      // 清理编辑器实例
       if (editor) {
         editor.toTextArea();
         editor = null;
@@ -507,7 +458,7 @@
           <h1>🎨 p5.js 脚本生成器</h1>
           <p>所有数据保存在本地浏览器中，无需服务器。</p>
           <p>编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。</p>
-          <p>支持预览、下载、导出 ZIP、删除和重命名作品。</p>
+          <p>支持预览、导出 ZIP、删除和重命名作品。</p>
           <p>点击左上角菜单查看所有作品。</p>
         `;
       } else if (path === '/about') {
@@ -538,7 +489,6 @@
           <div id="result" class="result" style="display:none;"></div>
         `;
 
-        // 初始化 CodeMirror
         setTimeout(() => {
           const textarea = document.getElementById('script');
           if (textarea && !editor) {
@@ -555,7 +505,6 @@
           }
         }, 50);
 
-        // 重置图片
         uploadedImageDataUrl = null;
         document.getElementById('image-preview').innerHTML = '';
 
@@ -602,6 +551,7 @@
           const btnContainer = document.createElement('div');
           btnContainer.className = 'action-buttons';
 
+          // 预览按钮
           const previewBtn = document.createElement('button');
           previewBtn.className = 'preview';
           previewBtn.textContent = '👁️ 预览';
@@ -610,12 +560,12 @@
           });
           btnContainer.appendChild(previewBtn);
 
-          const downloadBtn = document.createElement('button');
-          downloadBtn.textContent = '📥 下载 HTML';
-          downloadBtn.addEventListener('click', function() {
-            downloadPage(htmlContent, `${title}.html`);
-          });
-          btnContainer.appendChild(downloadBtn);
+          // 导出所有 ZIP 按钮（替换原来的下载 HTML）
+          const zipBtn = document.createElement('button');
+          zipBtn.className = 'zip';
+          zipBtn.textContent = '📦 导出所有作品 (ZIP)';
+          zipBtn.addEventListener('click', exportZip);
+          btnContainer.appendChild(zipBtn);
 
           resultDiv.appendChild(btnContainer);
 
@@ -632,10 +582,8 @@
       }
     }
 
-    // 监听 popstate
     window.addEventListener('popstate', render);
 
-    // 初始化
     window.onload = function() {
       updateSidebarPages();
       render();
