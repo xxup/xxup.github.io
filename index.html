@@ -3,144 +3,184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>p5.js 脚本生成器 · 纯静态版</title>
-  <!-- CodeMirror 外部依赖 -->
+  <title>p5.js 脚本生成器</title>
+  <!-- CodeMirror 基础 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <!-- 亮色主题（默认） -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css" id="cm-theme">
+  <!-- 可选暗色主题（预加载，通过 id 切换） -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" id="cm-theme-dark" disabled>
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     /* ---------- 全局重置 ---------- */
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background: #f5f5f5;
+      transition: background 0.3s;
+    }
+    body.dark-mode {
+      background: #1e1e1e;
+      color: #ddd;
     }
 
-    /* ---------- 导航栏 ---------- */
-    nav {
+    /* ---------- 顶部导航栏 ---------- */
+    .top-nav {
       background: #333;
+      color: white;
       padding: 10px 20px;
-      border-radius: 5px;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 56px;
     }
-    nav .nav-left {
+    .top-nav .left {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
+      gap: 15px;
     }
-    nav .nav-right {
-      position: relative;
-    }
-    nav a,
-    .dropdown-btn {
-      color: white;
-      text-decoration: none;
-      margin-right: 15px;
-      cursor: pointer;
+    .top-nav .hamburger {
+      font-size: 24px;
       background: none;
       border: none;
-      font-size: 1rem;
-      padding: 5px 10px;
+      color: white;
+      cursor: pointer;
+      padding: 0 5px;
     }
-    nav a:hover,
-    .dropdown-btn:hover {
+    .top-nav .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .top-nav .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-nav .right button {
       background: #555;
-      border-radius: 3px;
+      border: none;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .top-nav .right button:hover {
+      background: #777;
     }
 
-    /* ---------- 下拉菜单 ---------- */
-    .dropdown {
-      position: relative;
-      display: inline-block;
+    /* ---------- 侧边栏 ---------- */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 280px;
+      height: 100%;
+      background: #2c2c2c;
+      color: #eee;
+      transition: left 0.3s ease;
+      z-index: 200;
+      padding-top: 60px;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
     }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: #f9f9f9;
-      min-width: 220px;
-      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-      z-index: 1;
-      border-radius: 4px;
-      padding: 5px 0;
+    .sidebar.open {
+      left: 0;
     }
-    .dropdown-content .page-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 12px;
-      border-bottom: 1px solid #eee;
-      background: white;
+    .sidebar .nav-item {
+      padding: 12px 20px;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
     }
-    .dropdown-content .page-item:last-child {
-      border-bottom: none;
+    .sidebar .nav-item:hover {
+      background: #3a3a3a;
     }
-    .dropdown-content .page-item a {
-      color: #333;
+    .sidebar .nav-item a {
+      color: #eee;
       text-decoration: none;
-      flex: 1;
-      cursor: pointer;
-    }
-    .dropdown-content .page-item a:hover {
-      background: transparent;
-    }
-    .dropdown-content .page-item .actions {
-      display: flex;
-      gap: 5px;
-    }
-    .dropdown-content .page-item .actions button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 0.8rem;
-      padding: 2px 6px;
-      border-radius: 3px;
-    }
-    .dropdown-content .page-item .actions .del {
-      color: #d9534f;
-    }
-    .dropdown-content .page-item .actions .del:hover {
-      background: #f2dede;
-    }
-    .dropdown-content .page-item .actions .rename {
-      color: #5bc0de;
-    }
-    .dropdown-content .page-item .actions .rename:hover {
-      background: #d9edf7;
-    }
-    .dropdown:hover .dropdown-content {
       display: block;
     }
-    .dropdown-btn {
-      background: #444;
-      border-radius: 3px;
+    .sidebar .divider {
+      border-top: 2px solid #666;
+      margin: 10px 0;
+    }
+    .sidebar .section-title {
+      padding: 8px 20px;
+      font-size: 0.9rem;
+      color: #aaa;
+      font-weight: bold;
+    }
+    .sidebar .page-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 20px 8px 30px;
+      border-bottom: 1px solid #3a3a3a;
+      cursor: pointer;
+    }
+    .sidebar .page-item:hover {
+      background: #3a3a3a;
+    }
+    .sidebar .page-item .page-title {
+      flex: 1;
+      color: #eee;
+      text-decoration: none;
+    }
+    .sidebar .page-item .actions button {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 5px;
+    }
+    .sidebar .page-item .actions button:hover {
+      color: white;
+    }
+    .sidebar .page-item .actions .del:hover { color: #d9534f; }
+    .sidebar .page-item .actions .rename:hover { color: #5bc0de; }
+    .sidebar .no-pages {
+      padding: 12px 20px;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* 遮罩层 */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 150;
+    }
+    .overlay.show {
+      display: block;
     }
 
     /* ---------- 主内容 ---------- */
     #app {
-      margin-top: 20px;
       padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
       background: white;
-      border-radius: 5px;
-      min-height: 200px;
+      min-height: calc(100vh - 56px);
+      transition: background 0.3s;
+    }
+    body.dark-mode #app {
+      background: #2d2d2d;
+      color: #ddd;
     }
 
-    /* ---------- 表单元素 ---------- */
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .form-group input,
-    .form-group textarea {
+    /* ---------- 表单 ---------- */
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .form-group input, .form-group textarea {
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
@@ -148,14 +188,22 @@
       border-radius: 4px;
       font-family: monospace;
     }
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group textarea {
+      background: #3a3a3a;
+      color: #ddd;
+      border-color: #555;
+    }
     .form-group .CodeMirror {
       border: 1px solid #ccc;
       border-radius: 4px;
       height: 300px;
       font-size: 14px;
     }
+    body.dark-mode .form-group .CodeMirror {
+      border-color: #555;
+    }
 
-    /* ---------- 按钮 ---------- */
     button {
       background: #007bff;
       color: white;
@@ -164,16 +212,15 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    button:hover {
-      background: #0056b3;
-    }
-
-    /* ---------- 结果与预览 ---------- */
+    button:hover { background: #0056b3; }
     .result {
       margin-top: 20px;
       padding: 10px;
       background: #e9f7fe;
       border-radius: 4px;
+    }
+    body.dark-mode .result {
+      background: #2a4a5a;
     }
     .preview-img {
       max-width: 200px;
@@ -181,13 +228,6 @@
       margin-top: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
-    }
-    .no-pages {
-      color: #999;
-      font-style: italic;
-      padding: 8px 16px;
-      background: white;
-      display: block;
     }
     .action-buttons {
       display: flex;
@@ -198,44 +238,48 @@
     .action-buttons button {
       background: #6c757d;
     }
-    .action-buttons button.preview {
-      background: #28a745;
-    }
+    .action-buttons button.preview { background: #28a745; }
+    .action-buttons button.zip { background: #17a2b8; }
   </style>
 </head>
 <body>
-  <!-- 导航栏 -->
-  <nav>
-    <div class="nav-left">
-      <a href="/">首页</a>
-      <a href="/about">关于</a>
-      <a href="/generator">生成 p5.js 脚本</a>
+
+  <!-- 顶部导航 -->
+  <nav class="top-nav">
+    <div class="left">
+      <button class="hamburger" id="hamburgerBtn">☰</button>
+      <span class="title">🎨 p5.js 生成器</span>
     </div>
-    <div class="nav-right">
-      <div class="dropdown">
-        <button class="dropdown-btn">📄 我的脚本 ▾</button>
-        <div class="dropdown-content" id="page-dropdown">
-          <span class="no-pages">暂无生成的脚本</span>
-        </div>
-      </div>
+    <div class="right">
+      <button id="themeToggle">🌓 主题</button>
+      <button id="exportZipBtn">📦 导出 ZIP</button>
     </div>
   </nav>
 
-  <!-- 主内容区域 -->
+  <!-- 侧边栏 -->
+  <div class="sidebar" id="sidebar">
+    <div class="nav-item" data-path="/">🏠 首页</div>
+    <div class="nav-item" data-path="/about">📖 关于</div>
+    <div class="nav-item" data-path="/generator">✏️ 生成脚本</div>
+    <div class="divider"></div>
+    <div class="section-title">📄 我的脚本</div>
+    <div id="sidebar-pages">
+      <div class="no-pages">暂无生成的脚本</div>
+    </div>
+  </div>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- 主内容 -->
   <div id="app">加载中...</div>
 
-  <!-- CodeMirror JS 依赖 -->
+  <!-- CodeMirror -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-  <!-- 主脚本 -->
+
   <script>
     // -------- 本地存储管理 --------
     function getPages() {
-      try {
-        return JSON.parse(localStorage.getItem('p5_pages')) || [];
-      } catch {
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { return []; }
     }
     function savePages(pages) {
       localStorage.setItem('p5_pages', JSON.stringify(pages));
@@ -248,7 +292,6 @@
       return div.innerHTML;
     }
 
-    // 生成 p5 页面 HTML（图片用 DataURL 嵌入）
     function generatePageHtml(title, script, imageDataUrl) {
       const safeTitle = escapeHtml(title) || '未命名页面';
       const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl}";` : 'var imageUrl = null;';
@@ -269,18 +312,17 @@
 </html>`;
     }
 
-    // 预览（新窗口打开）
+    // -------- 预览 & 下载 --------
     function previewPage(htmlContent) {
       const win = window.open('', '_blank');
       if (win) {
         win.document.write(htmlContent);
         win.document.close();
       } else {
-        alert('请允许弹出窗口，以便预览生成的页面。');
+        alert('请允许弹出窗口。');
       }
     }
 
-    // 下载 HTML 文件
     function downloadPage(htmlContent, filename) {
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
@@ -292,12 +334,41 @@
       URL.revokeObjectURL(link.href);
     }
 
-    // -------- 更新导航下拉菜单 --------
-    function updateNavPages() {
+    // -------- 导出 ZIP --------
+    function exportZip() {
       const pages = getPages();
-      const container = document.getElementById('page-dropdown');
       if (!pages.length) {
-        container.innerHTML = '<span class="no-pages">暂无生成的脚本</span>';
+        alert('没有可导出的作品。');
+        return;
+      }
+      const zip = new JSZip();
+      pages.forEach((page, idx) => {
+        const filename = `p5_${page.title || 'untitled'}_${idx+1}.html`.replace(/[^a-zA-Z0-9._-]/g, '_');
+        zip.file(filename, page.html);
+      });
+      zip.generateAsync({ type: 'blob' }).then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'p5_works.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      });
+    }
+
+    // -------- 侧边栏与路由 --------
+    let currentPath = '/';
+    let editor = null;
+    let uploadedImageDataUrl = null;
+    let theme = 'light'; // 'light' or 'dark'
+
+    // 更新侧边栏作品列表
+    function updateSidebarPages() {
+      const container = document.getElementById('sidebar-pages');
+      const pages = getPages();
+      if (!pages.length) {
+        container.innerHTML = '<div class="no-pages">暂无生成的脚本</div>';
         return;
       }
       let html = '';
@@ -305,10 +376,10 @@
         const title = escapeHtml(page.title);
         html += `
           <div class="page-item">
-            <a onclick="previewPageByIndex(${index})">${title}</a>
+            <span class="page-title" onclick="navigateToPage(${index})">${title}</span>
             <div class="actions">
-              <button class="rename" onclick="renamePage(${index})" title="重命名">✏️</button>
-              <button class="del" onclick="deletePage(${index})" title="删除">🗑️</button>
+              <button class="rename" onclick="event.stopPropagation(); renamePage(${index})" title="重命名">✏️</button>
+              <button class="del" onclick="event.stopPropagation(); deletePage(${index})" title="删除">🗑️</button>
             </div>
           </div>
         `;
@@ -316,49 +387,116 @@
       container.innerHTML = html;
     }
 
-    // 预览（通过索引）
-    window.previewPageByIndex = function(index) {
+    // 导航到指定页面（当前窗口）
+    function navigateToPage(index) {
       const pages = getPages();
-      if (pages[index]) {
-        previewPage(pages[index].html);
-      }
-    };
+      if (!pages[index]) return;
+      const content = pages[index].html;
+      // 在当前窗口显示该 HTML（利用 iframe 或直接替换内容）
+      // 我们采用一个简单方式：将 app 内容替换为 iframe 显示该 HTML，或者直接渲染？
+      // 但为了保持 SPA 风格，我们可以将 HTML 放入一个 div 中直接展示，但会丢失样式。
+      // 更合理：在新窗口预览，但要求在当前窗口打开，我们可以用 iframe。
+      // 或者我们使用一个“预览”视图，但这样会破坏路由。
+      // 简单实现：直接跳转到该页面（使用 data URI），但会丢失应用状态。
+      // 鉴于要求“在当前窗口切换”，我们使用 iframe 嵌入。
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2>预览: ${escapeHtml(pages[index].title)}</h2>
+          <button onclick="render()">← 返回</button>
+        </div>
+        <iframe srcdoc="${escapeHtml(content).replace(/"/g, '&quot;')}" style="width:100%; height:80vh; border:1px solid #ccc; border-radius:4px;"></iframe>
+      `;
+      // 关闭侧边栏
+      closeSidebar();
+    }
+    // 暴露给 onclick
+    window.navigateToPage = navigateToPage;
 
     // 删除页面
-    window.deletePage = function(index) {
-      if (!confirm('确定要删除该页面吗？此操作不可恢复！')) return;
+    function deletePage(index) {
+      if (!confirm('确定删除该作品吗？')) return;
       const pages = getPages();
       pages.splice(index, 1);
       savePages(pages);
-      updateNavPages();
+      updateSidebarPages();
+      // 如果当前正在预览该页，返回主页
       render();
-    };
+    }
+    window.deletePage = deletePage;
 
     // 重命名页面
-    window.renamePage = function(index) {
+    function renamePage(index) {
       const pages = getPages();
       const page = pages[index];
       if (!page) return;
       const newTitle = prompt('请输入新标题：', page.title);
-      if (newTitle === null) return;
-      if (newTitle.trim() === '') {
-        alert('标题不能为空');
-        return;
-      }
+      if (newTitle === null || newTitle.trim() === '') return;
       page.title = newTitle.trim();
       savePages(pages);
-      updateNavPages();
+      updateSidebarPages();
+      // 如果当前正在预览该页，刷新标题显示（但复杂，简单处理：重新渲染）
       render();
-    };
+    }
+    window.renamePage = renamePage;
 
-    // -------- 前端路由（SPA） --------
-    let editor = null;
-    let uploadedImageDataUrl = null;
+    // 侧边栏开关
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('overlay').classList.add('show');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+    document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
+    document.getElementById('overlay').addEventListener('click', closeSidebar);
 
+    // 侧边栏导航项点击
+    document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
+      el.addEventListener('click', function() {
+        const path = this.getAttribute('data-path');
+        history.pushState(null, '', path);
+        render();
+        closeSidebar();
+      });
+    });
+
+    // 主题切换
+    function toggleTheme() {
+      const body = document.body;
+      const lightTheme = document.getElementById('cm-theme');
+      const darkTheme = document.getElementById('cm-theme-dark');
+      if (theme === 'light') {
+        body.classList.add('dark-mode');
+        lightTheme.disabled = true;
+        darkTheme.disabled = false;
+        theme = 'dark';
+        // 刷新编辑器主题
+        if (editor) {
+          editor.setOption('theme', 'dracula');
+        }
+      } else {
+        body.classList.remove('dark-mode');
+        lightTheme.disabled = false;
+        darkTheme.disabled = true;
+        theme = 'light';
+        if (editor) {
+          editor.setOption('theme', 'default');
+        }
+      }
+    }
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    // 导出 ZIP
+    document.getElementById('exportZipBtn').addEventListener('click', exportZip);
+
+    // -------- 路由渲染 --------
     function render() {
       const path = window.location.pathname;
       const app = document.getElementById('app');
 
+      // 清理编辑器实例
       if (editor) {
         editor.toTextArea();
         editor = null;
@@ -366,19 +504,18 @@
 
       if (path === '/' || path === '/index.html') {
         app.innerHTML = `
-          <h1>🎨 p5.js 脚本生成器 · 纯静态版</h1>
+          <h1>🎨 p5.js 脚本生成器</h1>
           <p>所有数据保存在本地浏览器中，无需服务器。</p>
-          <p>编写你的 p5.js 脚本，上传图片（可选），即可生成独立的 HTML 页面，并支持预览和下载。</p>
-          <p>生成的页面会保存在本地存储中，关闭浏览器后依然存在。</p>
-          <p>点击导航栏的 "生成 p5.js 脚本" 开始创作。</p>
+          <p>编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。</p>
+          <p>支持预览、下载、导出 ZIP、删除和重命名作品。</p>
+          <p>点击左上角菜单查看所有作品。</p>
         `;
       } else if (path === '/about') {
         app.innerHTML = `
           <h1>📖 关于</h1>
-          <p>此工具是纯前端应用，使用 localStorage 存储数据，无需后端。</p>
-          <p>你可以编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。</p>
-          <p>支持预览、下载、删除和重命名已生成的作品。</p>
-          <p>基于 CodeMirror 实现代码高亮。</p>
+          <p>纯前端工具，基于 localStorage 存储，无需后端。</p>
+          <p>使用 CodeMirror 实现代码高亮，支持亮色/暗色主题。</p>
+          <p>所有作品均可导出为 ZIP 包。</p>
         `;
       } else if (path === '/generator') {
         app.innerHTML = `
@@ -401,13 +538,15 @@
           <div id="result" class="result" style="display:none;"></div>
         `;
 
+        // 初始化 CodeMirror
         setTimeout(() => {
           const textarea = document.getElementById('script');
           if (textarea && !editor) {
+            const themeName = theme === 'dark' ? 'dracula' : 'default';
             editor = CodeMirror.fromTextArea(textarea, {
               mode: 'javascript',
               lineNumbers: true,
-              theme: 'default',
+              theme: themeName,
               tabSize: 2,
               indentUnit: 2,
               autofocus: true
@@ -416,6 +555,7 @@
           }
         }, 50);
 
+        // 重置图片
         uploadedImageDataUrl = null;
         document.getElementById('image-preview').innerHTML = '';
 
@@ -444,7 +584,6 @@
 
           const htmlContent = generatePageHtml(title, script, imageDataUrl);
 
-          // 保存到 localStorage
           const pages = getPages();
           pages.push({
             id: Date.now(),
@@ -453,9 +592,8 @@
             timestamp: new Date().toISOString()
           });
           savePages(pages);
-          updateNavPages();
+          updateSidebarPages();
 
-          // ----- 使用 DOM 构建结果区域，避免转义问题 -----
           resultDiv.innerHTML = '';
           const msg = document.createElement('p');
           msg.textContent = '✅ 页面生成成功！已保存到本地存储。';
@@ -480,7 +618,6 @@
           btnContainer.appendChild(downloadBtn);
 
           resultDiv.appendChild(btnContainer);
-          // ----- 修复结束 -----
 
           // 重置表单
           document.getElementById('title').value = '';
@@ -491,28 +628,16 @@
           document.getElementById('image').value = '';
         };
       } else {
-        app.innerHTML = `<h1>📄 页面 ${path}</h1><p>该路径未定义。</p>`;
+        app.innerHTML = `<h1>📄 页面 ${path}</h1><p>内容未定义。</p>`;
       }
     }
 
-    // -------- SPA 导航拦截 --------
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a');
-      if (link) {
-        const href = link.getAttribute('href');
-        if (href && href.startsWith('/') && !href.startsWith('//') && !href.startsWith('/generated/')) {
-          e.preventDefault();
-          history.pushState(null, '', href);
-          render();
-        }
-      }
-    });
-
+    // 监听 popstate
     window.addEventListener('popstate', render);
 
-    // -------- 初始化 --------
+    // 初始化
     window.onload = function() {
-      updateNavPages();
+      updateSidebarPages();
       render();
     };
   </script>
