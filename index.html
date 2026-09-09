@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>p5.js 脚本生成器</title>
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
@@ -11,11 +11,16 @@
   <!-- JSZip -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: Arial, sans-serif;
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
       background: #f5f5f5;
       transition: background 0.3s;
     }
@@ -24,30 +29,26 @@
       color: #ddd;
     }
 
-    /* 顶部导航 */
-    .top-nav {
-      background: #333;
+    /* 浮动汉堡按钮 */
+    .hamburger-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 300;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
       color: white;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: 56px;
-    }
-    .top-nav .hamburger {
-      font-size: 24px;
-      background: none;
       border: none;
-      color: white;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 26px;
       cursor: pointer;
-      padding: 0 5px;
-      margin-right: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      transition: background 0.2s;
+      line-height: 1;
     }
-    .top-nav .title {
-      font-size: 1.2rem;
-      font-weight: bold;
+    .hamburger-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
     }
 
     /* 侧边栏 */
@@ -61,19 +62,23 @@
       color: #eee;
       transition: left 0.3s ease;
       z-index: 200;
-      padding-top: 60px;
+      padding: 20px 0 20px 0;
       overflow-y: auto;
       box-shadow: 2px 0 10px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
     }
-    .sidebar.open { left: 0; }
+    .sidebar.open {
+      left: 0;
+    }
     .sidebar .nav-item {
       padding: 12px 20px;
       border-bottom: 1px solid #444;
       cursor: pointer;
     }
-    .sidebar .nav-item:hover { background: #3a3a3a; }
+    .sidebar .nav-item:hover {
+      background: #3a3a3a;
+    }
     .sidebar .divider {
       border-top: 2px solid #666;
       margin: 10px 0;
@@ -92,7 +97,9 @@
       border-bottom: 1px solid #3a3a3a;
       cursor: pointer;
     }
-    .sidebar .page-item:hover { background: #3a3a3a; }
+    .sidebar .page-item:hover {
+      background: #3a3a3a;
+    }
     .sidebar .page-item .page-title {
       flex: 1;
       color: #eee;
@@ -106,15 +113,21 @@
       font-size: 0.8rem;
       padding: 2px 5px;
     }
-    .sidebar .page-item .actions button:hover { color: white; }
-    .sidebar .page-item .actions .del:hover { color: #d9534f; }
-    .sidebar .page-item .actions .rename:hover { color: #5bc0de; }
+    .sidebar .page-item .actions button:hover {
+      color: white;
+    }
+    .sidebar .page-item .actions .del:hover {
+      color: #d9534f;
+    }
+    .sidebar .page-item .actions .rename:hover {
+      color: #5bc0de;
+    }
     .sidebar .no-pages {
       padding: 12px 20px;
       color: #888;
       font-style: italic;
     }
-    /* 底部仅保留主题切换 */
+    /* 底部仅主题切换 */
     .sidebar-footer {
       margin-top: auto;
       border-top: 2px solid #666;
@@ -125,47 +138,62 @@
       cursor: pointer;
       border-bottom: none;
     }
-    .sidebar-footer .nav-item:hover { background: #3a3a3a; }
+    .sidebar-footer .nav-item:hover {
+      background: #3a3a3a;
+    }
 
-    /* 遮罩 */
+    /* 遮罩层 */
     .overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
       z-index: 150;
     }
-    .overlay.show { display: block; }
+    .overlay.show {
+      display: block;
+    }
 
     /* 主内容 */
     #app {
+      width: 100%;
+      height: 100vh;
       padding: 20px;
-      max-width: 900px;
-      margin: 0 auto;
+      overflow-y: auto;
       background: white;
-      min-height: calc(100vh - 56px);
       transition: background 0.3s;
-    }
-    /* 预览模式：全屏显示，无内边距 */
-    #app.preview-mode {
-      padding: 0;
-      max-width: 100%;
-      margin: 0;
-      height: calc(100vh - 56px);
-      background: #000;
+      box-sizing: border-box;
     }
     body.dark-mode #app {
       background: #2d2d2d;
       color: #ddd;
     }
-    body.dark-mode #app.preview-mode {
+    /* 预览模式：完全全屏，无内边距 */
+    #app.preview-mode {
+      padding: 0;
       background: #000;
     }
+    #app.preview-mode iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
 
-    /* 表单 */
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .form-group input, .form-group textarea {
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group textarea {
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
@@ -185,7 +213,9 @@
       height: 300px;
       font-size: 14px;
     }
-    body.dark-mode .form-group .CodeMirror { border-color: #555; }
+    body.dark-mode .form-group .CodeMirror {
+      border-color: #555;
+    }
 
     button {
       background: #007bff;
@@ -195,14 +225,18 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    button:hover { background: #0056b3; }
+    button:hover {
+      background: #0056b3;
+    }
     .result {
       margin-top: 20px;
       padding: 10px;
       background: #e9f7fe;
       border-radius: 4px;
     }
-    body.dark-mode .result { background: #2a4a5a; }
+    body.dark-mode .result {
+      background: #2a4a5a;
+    }
     .preview-img {
       max-width: 200px;
       max-height: 200px;
@@ -216,25 +250,38 @@
       flex-wrap: wrap;
       margin-top: 10px;
     }
-    .action-buttons button { background: #6c757d; }
-    .action-buttons button.preview { background: #28a745; }
-    .action-buttons button.zip { background: #17a2b8; }
-    /* iframe 全屏 */
-    #app iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    .action-buttons button {
+      background: #6c757d;
+    }
+    .action-buttons button.preview {
+      background: #28a745;
+    }
+    .action-buttons button.zip {
+      background: #17a2b8;
+    }
+
+    /* 响应式 */
+    @media (max-width: 600px) {
+      .sidebar {
+        width: 240px;
+        left: -240px;
+      }
+      .hamburger-btn {
+        top: 12px;
+        left: 12px;
+        padding: 6px 12px;
+        font-size: 22px;
+      }
+      #app {
+        padding: 12px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- 顶部导航 -->
-  <nav class="top-nav">
-    <button class="hamburger" id="hamburgerBtn">☰</button>
-    <span class="title">🎨 p5.js 生成器</span>
-  </nav>
+  <!-- 浮动汉堡菜单 -->
+  <button class="hamburger-btn" id="hamburgerBtn">☰</button>
 
   <!-- 侧边栏 -->
   <div class="sidebar" id="sidebar">
@@ -246,7 +293,7 @@
     <div id="sidebar-pages">
       <div class="no-pages">暂无生成的脚本</div>
     </div>
-    <!-- 底部仅保留主题切换 -->
+    <!-- 底部仅主题切换 -->
     <div class="sidebar-footer">
       <div class="nav-item" id="themeToggleSidebar">🌓 切换主题</div>
     </div>
@@ -296,7 +343,7 @@
 </html>`;
     }
 
-    // -------- 预览（弹出窗口）--------
+    // -------- 预览（新窗口）--------
     function previewPage(htmlContent) {
       const win = window.open('', '_blank');
       if (win) {
@@ -335,7 +382,6 @@
     let uploadedImageDataUrl = null;
     let theme = 'light';
 
-    // 更新侧边栏作品列表
     function updateSidebarPages() {
       const container = document.getElementById('sidebar-pages');
       const pages = getPages();
@@ -359,27 +405,23 @@
       container.innerHTML = html;
     }
 
-    // 导航到指定页面（全屏显示，无标题和返回按钮）
     function navigateToPage(index) {
       const pages = getPages();
       if (!pages[index]) return;
       const content = pages[index].html;
       const app = document.getElementById('app');
-      // 清空app，添加iframe，并添加预览模式类
       app.innerHTML = `<iframe srcdoc="${escapeHtml(content).replace(/"/g, '&quot;')}"></iframe>`;
       app.classList.add('preview-mode');
       closeSidebar();
     }
     window.navigateToPage = navigateToPage;
 
-    // 删除页面
     function deletePage(index) {
       if (!confirm('确定删除该作品吗？')) return;
       const pages = getPages();
       pages.splice(index, 1);
       savePages(pages);
       updateSidebarPages();
-      // 如果当前是预览模式，退出到首页
       const app = document.getElementById('app');
       if (app.classList.contains('preview-mode')) {
         app.classList.remove('preview-mode');
@@ -391,7 +433,6 @@
     }
     window.deletePage = deletePage;
 
-    // 重命名页面
     function renamePage(index) {
       const pages = getPages();
       const page = pages[index];
@@ -401,12 +442,11 @@
       page.title = newTitle.trim();
       savePages(pages);
       updateSidebarPages();
-      // 如果当前预览的是该页，更新标题？但预览中不显示标题，所以无需处理。
       render();
     }
     window.renamePage = renamePage;
 
-    // 侧边栏开关
+    // 侧边栏控制
     function openSidebar() {
       document.getElementById('sidebar').classList.add('open');
       document.getElementById('overlay').classList.add('show');
@@ -418,12 +458,11 @@
     document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
     document.getElementById('overlay').addEventListener('click', closeSidebar);
 
-    // 侧边栏导航点击（非作品项）
+    // 侧边栏导航项点击
     document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
       el.addEventListener('click', function() {
         const path = this.getAttribute('data-path');
         history.pushState(null, '', path);
-        // 退出预览模式
         const app = document.getElementById('app');
         if (app.classList.contains('preview-mode')) {
           app.classList.remove('preview-mode');
@@ -459,7 +498,6 @@
       const path = window.location.pathname;
       const app = document.getElementById('app');
 
-      // 如果当前是预览模式，但路径变了，清除预览模式
       if (app.classList.contains('preview-mode') && path !== '/') {
         app.classList.remove('preview-mode');
       }
@@ -475,7 +513,7 @@
           <p>所有数据保存在本地浏览器中，无需服务器。</p>
           <p>编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。</p>
           <p>支持预览、导出 ZIP、删除和重命名作品。</p>
-          <p>点击左上角菜单查看所有作品。</p>
+          <p>点击左上角 ☰ 菜单查看所有作品。</p>
         `;
       } else if (path === '/about') {
         app.innerHTML = `
@@ -567,7 +605,6 @@
           const btnContainer = document.createElement('div');
           btnContainer.className = 'action-buttons';
 
-          // 预览按钮
           const previewBtn = document.createElement('button');
           previewBtn.className = 'preview';
           previewBtn.textContent = '👁️ 预览';
@@ -576,7 +613,6 @@
           });
           btnContainer.appendChild(previewBtn);
 
-          // 导出所有作品 ZIP
           const zipBtn = document.createElement('button');
           zipBtn.className = 'zip';
           zipBtn.textContent = '📦 导出所有作品 (ZIP)';
@@ -598,7 +634,6 @@
       }
     }
 
-    // 监听popstate，当返回时清除预览模式
     window.addEventListener('popstate', function() {
       const app = document.getElementById('app');
       if (app.classList.contains('preview-mode')) {
