@@ -18,8 +18,7 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      height: 100%;
-      overflow: hidden;
+      min-height: 100%;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
       transition: background 0.3s;
@@ -157,12 +156,12 @@
       display: block;
     }
 
-    /* 主内容 */
+    /* 主内容 — 改用 min-height 允许滚动 */
     #app {
       width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       padding: 20px;
-      overflow-y: auto;
+      padding-bottom: 40px; /* 额外底部空间 */
       background: white;
       transition: background 0.3s;
       box-sizing: border-box;
@@ -175,10 +174,11 @@
     #app.preview-mode {
       padding: 0;
       background: #000;
+      min-height: 100vh;
     }
     #app.preview-mode iframe {
       width: 100%;
-      height: 100%;
+      height: 100vh;
       border: none;
       display: block;
     }
@@ -210,7 +210,7 @@
     .form-group .CodeMirror {
       border: 1px solid #ccc;
       border-radius: 4px;
-      height: 300px;
+      height: 200px; /* 缩小高度 */
       font-size: 14px;
     }
     body.dark-mode .form-group .CodeMirror {
@@ -274,6 +274,7 @@
       }
       #app {
         padding: 12px;
+        padding-bottom: 30px;
       }
     }
   </style>
@@ -555,7 +556,7 @@
               indentUnit: 2,
               autofocus: true
             });
-            editor.setSize(null, 300);
+            editor.setSize(null, 200); // 高度与CSS一致
           }
         }, 50);
 
