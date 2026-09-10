@@ -1,10 +1,9 @@
-
 // 首页随机脚本
 
 const HOME_SCRIPTS = [
-  "p5/dots.js",
-  "p5/orbit.js",
-  "p5/rotating-square.js",
+  "p5sketches/dots.js",
+  "p5sketches/orbit.js",
+  "p5sketches/rotating-square.js",
 ];
 
 function pickRandomScriptPath() {
@@ -37,6 +36,48 @@ let homeScriptHtml = null;
 function pickRandomHomeScript() {
   homeScriptPath = pickRandomScriptPath();
   homeScriptHtml = homeScriptPath ? buildHomeFrameHtml(homeScriptPath) : null;
+}
+
+// AI 助手
+
+const AI_MODELS = {
+  chatgpt: {
+    name: "ChatGPT",
+    key: "ai_key_chatgpt",
+    storage: "ai_msgs_chatgpt",
+  },
+  gemini: { name: "Gemini", key: "ai_key_gemini", storage: "ai_msgs_gemini" },
+  deepseek: {
+    name: "DeepSeek",
+    key: "ai_key_deepseek",
+    storage: "ai_msgs_deepseek",
+  },
+};
+
+let aiCurrentModel = null;
+let aiMessages = [];
+let aiSending = false;
+
+function aiGetKey(model) {
+  return localStorage.getItem(AI_MODELS[model].key) || "";
+}
+function aiSetKey(model, key) {
+  localStorage.setItem(AI_MODELS[model].key, key);
+}
+function aiLoadMessages(model) {
+  try {
+    return JSON.parse(localStorage.getItem(AI_MODELS[model].storage)) || [];
+  } catch {
+    return [];
+  }
+}
+function aiSaveMessages() {
+  if (aiCurrentModel) {
+    localStorage.setItem(
+      AI_MODELS[aiCurrentModel].storage,
+      JSON.stringify(aiMessages),
+    );
+  }
 }
 
 // 加载文本内容
@@ -157,7 +198,7 @@ let uploadedImageDataUrl = null;
 let theme = "light";
 let searchTerm = "";
 
-// 侧边栏作品列表
+// 侧边栏列表
 
 function updateSidebarPages() {
   const container = document.getElementById("sidebar-pages");
@@ -284,6 +325,258 @@ document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
 
+// AI 助手 - 渲染与逻辑
+
+function renderAIChat(app) {
+  app.classList.add("ai-mode");
+  app.classList.remove("preview-mode");
+
+  if (!aiCurrentModel) {
+    const saved = localStorage.getItem("ai_last_model");
+    if (saved && AI_MODELS[saved]) {
+      aiCurrentModel = saved;
+      aiMessages = aiLoadMessages(saved);
+    }
+  }
+
+  app.innerHTML = `
+    <div class="ai-chat-wrap">
+      <div class="ai-messages" id="aiMessages"></div>
+      <div class="ai-input-bar">
+        <button class="ai-plus-btn" id="aiPlusBtn" title="选择模型">+</button>
+        <span class="ai-model-badge" id="aiModelBadge" style="display:${aiCurrentModel ? "inline-block" : "none"}">
+          ${aiCurrentModel ? AI_MODELS[aiCurrentModel].name : ""}
+        </span>
+        <input type="text" class="ai-input" id="aiInput" placeholder="${escapeHtml(get("pages.ai.placeholder", "输入你的问题..."))}">
+        <button class="ai-send-btn" id="aiSendBtn">${escapeHtml(get("pages.ai.sendBtn", "发送"))}</button>
+      </div>
+    </div>
+  `;
+
+  renderAIMessages();
+
+  document.getElementById("aiPlusBtn").addEventListener("click", showModelMenu);
+  document.getElementById("aiSendBtn").addEventListener("click", aiSendMessage);
+  document.getElementById("aiInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      aiSendMessage();
+    }
+  });
+}
+
+function renderAIMessages() {
+  const box = document.getElementById("aiMessages");
+  if (!box) return;
+  box.innerHTML = "";
+  if (!aiMessages.length) {
+    const tip = document.createElement("p");
+    tip.style.color = "#999";
+    tip.style.textAlign = "center";
+    tip.style.marginTop = "40px";
+    tip.textContent = aiCurrentModel
+      ? `当前模型：${AI_MODELS[aiCurrentModel].name}`
+      : "点击左下角 + 选择模型开始对话";
+    box.appendChild(tip);
+    return;
+  }
+  aiMessages.forEach((msg) => {
+    const div = document.createElement("div");
+    div.className = "ai-msg " + (msg.role === "user" ? "user" : "assistant");
+    div.textContent = msg.content;
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function showModelMenu() {
+  const old = document.querySelector(".ai-model-menu");
+  if (old) {
+    old.remove();
+    return;
+  }
+
+  const menu = document.createElement("div");
+  menu.className = "ai-model-menu";
+  ["chatgpt", "gemini", "deepseek"].forEach((key) => {
+    const item = document.createElement("div");
+    item.className = "item";
+    item.textContent = AI_MODELS[key].name;
+    item.addEventListener("click", () => {
+      menu.remove();
+      selectModel(key);
+    });
+    menu.appendChild(item);
+  });
+  document.body.appendChild(menu);
+
+  setTimeout(() => {
+    document.addEventListener("click", function closeMenu(e) {
+      if (!menu.contains(e.target) && e.target.id !== "aiPlusBtn") {
+        menu.remove();
+        document.removeEventListener("click", closeMenu);
+      }
+    });
+  }, 0);
+}
+
+function selectModel(model) {
+  aiCurrentModel = model;
+  localStorage.setItem("ai_last_model", model);
+  const badge = document.getElementById("aiModelBadge");
+  if (badge) {
+    badge.textContent = AI_MODELS[model].name;
+    badge.style.display = "inline-block";
+  }
+
+  aiMessages = aiLoadMessages(model);
+  renderAIMessages();
+
+  if (!aiGetKey(model)) {
+    showApiKeyModal(model);
+  }
+}
+
+function showApiKeyModal(model) {
+  const overlay = document.createElement("div");
+  overlay.className = "ai-modal-overlay";
+  overlay.innerHTML = `
+    <div class="ai-modal">
+      <h3>${escapeHtml(get("pages.ai.apiKeyTitle", "请输入 API Key"))} - ${AI_MODELS[model].name}</h3>
+      <input type="password" id="aiKeyInput" placeholder="sk-...">
+      <p class="hint">${escapeHtml(get("pages.ai.apiKeyHint", "Key 只保存在你的浏览器本地，不会上传到任何服务器。"))}</p>
+      <div class="buttons">
+        <button class="cancel" id="aiKeyCancel">取消</button>
+        <button class="save" id="aiKeySave">保存</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const input = document.getElementById("aiKeyInput");
+  input.focus();
+
+  document
+    .getElementById("aiKeyCancel")
+    .addEventListener("click", () => overlay.remove());
+  document.getElementById("aiKeySave").addEventListener("click", () => {
+    const key = input.value.trim();
+    if (key) {
+      aiSetKey(model, key);
+      overlay.remove();
+    } else {
+      alert(get("pages.ai.noKey", "请先输入 API Key"));
+    }
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("aiKeySave").click();
+  });
+}
+
+async function aiSendMessage() {
+  if (aiSending) return;
+  if (!aiCurrentModel) {
+    alert(get("pages.ai.noModel", "请先选择模型"));
+    return;
+  }
+  const key = aiGetKey(aiCurrentModel);
+  if (!key) {
+    showApiKeyModal(aiCurrentModel);
+    return;
+  }
+  const input = document.getElementById("aiInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  aiMessages.push({ role: "user", content: text });
+  aiSaveMessages();
+  input.value = "";
+  renderAIMessages();
+
+  aiSending = true;
+  const sendBtn = document.getElementById("aiSendBtn");
+  if (sendBtn) sendBtn.disabled = true;
+
+  const loadingDiv = document.createElement("div");
+  loadingDiv.className = "ai-msg assistant";
+  loadingDiv.textContent = get("pages.ai.thinking", "思考中...");
+  loadingDiv.id = "aiLoading";
+  document.getElementById("aiMessages").appendChild(loadingDiv);
+  document.getElementById("aiMessages").scrollTop = 99999;
+
+  try {
+    const reply = await callAI(aiCurrentModel, key, aiMessages);
+    aiMessages.push({ role: "assistant", content: reply });
+    aiSaveMessages();
+  } catch (e) {
+    aiMessages.push({
+      role: "assistant",
+      content: get("pages.ai.errorPrefix", "请求失败：") + e.message,
+    });
+    aiSaveMessages();
+  } finally {
+    aiSending = false;
+    if (sendBtn) sendBtn.disabled = false;
+    const l = document.getElementById("aiLoading");
+    if (l) l.remove();
+    renderAIMessages();
+  }
+}
+
+async function callAI(model, key, messages) {
+  if (model === "chatgpt") {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + key,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || "(空响应)";
+  }
+
+  if (model === "deepseek") {
+    const res = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + key,
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || "(空响应)";
+  }
+
+  if (model === "gemini") {
+    const contents = messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "(空响应)";
+  }
+
+  throw new Error("Unknown model");
+}
+
 // 路由渲染
 
 function render() {
@@ -296,6 +589,7 @@ function render() {
   }
 
   app.classList.remove("preview-mode");
+  app.classList.remove("ai-mode");
 
   if (path === "/" || path === "/index.html") {
     const override = sessionStorage.getItem("p5_preview_override");
@@ -321,6 +615,8 @@ function render() {
       <h1>${escapeHtml(about.title || "")}</h1>
       ${paragraphs}
     `;
+  } else if (path === "/ai") {
+    renderAIChat(app);
   } else if (path === "/generator") {
     const g = get("pages.generator", {});
     const labels = g.labels || {};
@@ -466,7 +762,7 @@ window.addEventListener("popstate", function () {
 
 window.addEventListener("load", async function () {
   await loadContent();
-  pickRandomHomeScript(); // 同步，无网络请求
+  pickRandomHomeScript();
   applyI18n();
   updateSidebarPages();
   render();
