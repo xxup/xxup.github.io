@@ -71,17 +71,30 @@ function exportZip() {
 let editor = null;
 let uploadedImageDataUrl = null;
 let theme = 'light';
+let searchTerm = '';
 
 // -------- 侧边栏作品列表 --------
 function updateSidebarPages() {
   const container = document.getElementById('sidebar-pages');
   const pages = getPages();
-  if (!pages.length) {
-    container.innerHTML = '<div class="no-pages">暂无生成的脚本</div>';
+  const term = searchTerm.trim().toLowerCase();
+
+  // 过滤
+  const visible = [];
+  pages.forEach((page, index) => {
+    if (term && !(page.title || '').toLowerCase().includes(term)) return;
+    visible.push({ page, index });
+  });
+
+  if (!visible.length) {
+    container.innerHTML = `<div class="no-pages">${
+      term ? '没有匹配的作品' : '暂无生成的脚本'
+    }</div>`;
     return;
   }
+
   let html = '';
-  pages.forEach((page, index) => {
+  visible.forEach(({ page, index }) => {
     const title = escapeHtml(page.title);
     html += `
       <div class="page-item">
@@ -95,6 +108,12 @@ function updateSidebarPages() {
   });
   container.innerHTML = html;
 }
+
+// 搜索输入监听
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchTerm = this.value;
+  updateSidebarPages();
+});
 
 function navigateToPage(index) {
   const pages = getPages();
@@ -141,10 +160,12 @@ window.renamePage = renamePage;
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('overlay').classList.add('show');
+  document.getElementById('hamburgerBtn').classList.add('hidden'); // 隐藏汉堡按钮
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
+  document.getElementById('hamburgerBtn').classList.remove('hidden'); // 显示汉堡按钮
 }
 
 document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
