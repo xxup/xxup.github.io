@@ -80,7 +80,7 @@ function aiSaveMessages() {
   }
 }
 
-// 加载文本内容
+// 文本内容加载
 
 let CONTENT = null;
 
@@ -198,7 +198,7 @@ let uploadedImageDataUrl = null;
 let theme = "light";
 let searchTerm = "";
 
-// 侧边栏列表
+// 侧边栏作品列表
 
 function updateSidebarPages() {
   const container = document.getElementById("sidebar-pages");
@@ -325,7 +325,7 @@ document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
 
-// AI 助手 - 渲染与逻辑
+// AI 助手
 
 function renderAIChat(app) {
   app.classList.add("ai-mode");
@@ -344,13 +344,11 @@ function renderAIChat(app) {
       <div class="ai-messages" id="aiMessages"></div>
       <div class="ai-input-bar">
         <button class="ai-plus-btn" id="aiPlusBtn" title="选择模型">+</button>
-        <span class="ai-model-badge" id="aiModelBadge" style="display:${aiCurrentModel ? "inline-block" : "none"}">
-          ${aiCurrentModel ? AI_MODELS[aiCurrentModel].name : ""}
-        </span>
         <input type="text" class="ai-input" id="aiInput" placeholder="${escapeHtml(get("pages.ai.placeholder", "输入你的问题..."))}">
         <button class="ai-send-btn" id="aiSendBtn">${escapeHtml(get("pages.ai.sendBtn", "发送"))}</button>
       </div>
     </div>
+    <button class="ai-clear-btn" id="aiClearBtn" title="清除对话">−</button>
   `;
 
   renderAIMessages();
@@ -363,6 +361,9 @@ function renderAIChat(app) {
       aiSendMessage();
     }
   });
+  document
+    .getElementById("aiClearBtn")
+    .addEventListener("click", aiClearMessages);
 }
 
 function renderAIMessages() {
@@ -400,8 +401,8 @@ function showModelMenu() {
   menu.className = "ai-model-menu";
   ["chatgpt", "gemini", "deepseek"].forEach((key) => {
     const item = document.createElement("div");
-    item.className = "item";
-    item.textContent = AI_MODELS[key].name;
+    item.className = "item" + (aiCurrentModel === key ? " selected" : "");
+    item.innerHTML = `<span>${AI_MODELS[key].name}</span><span class="check">✓</span>`;
     item.addEventListener("click", () => {
       menu.remove();
       selectModel(key);
@@ -423,12 +424,6 @@ function showModelMenu() {
 function selectModel(model) {
   aiCurrentModel = model;
   localStorage.setItem("ai_last_model", model);
-  const badge = document.getElementById("aiModelBadge");
-  if (badge) {
-    badge.textContent = AI_MODELS[model].name;
-    badge.style.display = "inline-block";
-  }
-
   aiMessages = aiLoadMessages(model);
   renderAIMessages();
 
@@ -473,6 +468,17 @@ function showApiKeyModal(model) {
   });
 }
 
+// 清除对话
+function aiClearMessages() {
+  if (!aiMessages.length) return;
+  if (!confirm("确定清除当前模型的对话记录吗？")) return;
+  aiMessages = [];
+  aiSaveMessages();
+  renderAIMessages();
+}
+
+// 流式输出 - 发送消息
+
 async function aiSendMessage() {
   if (aiSending) return;
   if (!aiCurrentModel) {
@@ -488,93 +494,175 @@ async function aiSendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
+  // 用户消息入列
   aiMessages.push({ role: "user", content: text });
   aiSaveMessages();
   input.value = "";
   renderAIMessages();
 
+  // 发送前的历史消息（不含即将插入的空助手占位）
+  const historyMessages = aiMessages.slice();
+
+  // 添加空的助手占位
+  aiMessages.push({ role: "assistant", content: "" });
+  const aiMsgDiv = document.createElement("div");
+  aiMsgDiv.className = "ai-msg assistant";
+  aiMsgDiv.textContent = "";
+  const box = document.getElementById("aiMessages");
+  // 移除"暂无消息"提示（如果存在）
+  box.querySelectorAll("p").forEach((p) => p.remove());
+  box.appendChild(aiMsgDiv);
+  box.scrollTop = box.scrollHeight;
+
   aiSending = true;
   const sendBtn = document.getElementById("aiSendBtn");
   if (sendBtn) sendBtn.disabled = true;
 
-  const loadingDiv = document.createElement("div");
-  loadingDiv.className = "ai-msg assistant";
-  loadingDiv.textContent = get("pages.ai.thinking", "思考中...");
-  loadingDiv.id = "aiLoading";
-  document.getElementById("aiMessages").appendChild(loadingDiv);
-  document.getElementById("aiMessages").scrollTop = 99999;
-
   try {
-    const reply = await callAI(aiCurrentModel, key, aiMessages);
-    aiMessages.push({ role: "assistant", content: reply });
+    const reply = await callAIStream(
+      aiCurrentModel,
+      key,
+      historyMessages,
+      (delta, full) => {
+        aiMsgDiv.textContent = full;
+        box.scrollTop = box.scrollHeight;
+      },
+    );
+    aiMessages[aiMessages.length - 1].content = reply || "(空响应)";
     aiSaveMessages();
   } catch (e) {
-    aiMessages.push({
-      role: "assistant",
-      content: get("pages.ai.errorPrefix", "请求失败：") + e.message,
-    });
+    aiMessages[aiMessages.length - 1].content =
+      get("pages.ai.errorPrefix", "请求失败：") + e.message;
     aiSaveMessages();
   } finally {
     aiSending = false;
     if (sendBtn) sendBtn.disabled = false;
-    const l = document.getElementById("aiLoading");
-    if (l) l.remove();
     renderAIMessages();
   }
 }
 
-async function callAI(model, key, messages) {
+// 流式输出 - 调用各模型 API
+
+async function callAIStream(model, key, messages, onChunk) {
   if (model === "chatgpt") {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + key,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "(空响应)";
+    return streamOpenAIStyle(
+      "https://api.openai.com/v1/chat/completions",
+      key,
+      "gpt-4o-mini",
+      messages,
+      onChunk,
+    );
   }
-
   if (model === "deepseek") {
-    const res = await fetch("https://api.deepseek.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + key,
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "(空响应)";
+    return streamOpenAIStyle(
+      "https://api.deepseek.com/chat/completions",
+      key,
+      "deepseek-chat",
+      messages,
+      onChunk,
+    );
   }
-
   if (model === "gemini") {
-    const contents = messages.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "(空响应)";
+    return streamGemini(key, messages, onChunk);
   }
-
   throw new Error("Unknown model");
+}
+
+// OpenAI 格式（ChatGPT / DeepSeek）
+async function streamOpenAIStyle(url, key, modelName, messages, onChunk) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + key,
+    },
+    body: JSON.stringify({
+      model: modelName,
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      stream: true,
+    }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let fullText = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const data = trimmed.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      try {
+        const json = JSON.parse(data);
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) {
+          fullText += delta;
+          onChunk(delta, fullText);
+        }
+      } catch (e) {
+        /* 忽略不完整 JSON */
+      }
+    }
+  }
+  return fullText;
+}
+
+// Gemini 流式
+async function streamGemini(key, messages, onChunk) {
+  const contents = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(key)}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contents }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let fullText = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop();
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const data = trimmed.slice(5).trim();
+      if (!data) continue;
+      try {
+        const json = JSON.parse(data);
+        const txt = json.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (txt) {
+          fullText += txt;
+          onChunk(txt, fullText);
+        }
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+  }
+  return fullText;
 }
 
 // 路由渲染
@@ -748,7 +836,7 @@ function render() {
   }
 }
 
-// 搜索输入监听
+// 搜索输入
 document.getElementById("searchInput").addEventListener("input", function () {
   searchTerm = this.value;
   updateSidebarPages();
