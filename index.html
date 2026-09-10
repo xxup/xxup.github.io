@@ -28,26 +28,28 @@
       color: #ddd;
     }
 
-    /* 浮动汉堡按钮 */
+    /* ============ 汉堡按钮：无底色，加大的三横杠 ============ */
     .hamburger-btn {
       position: fixed;
-      top: 16px;
+      top: 12px;
       left: 16px;
       z-index: 300;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      color: white;
+      background: none;
       border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 26px;
+      color: #333;
+      font-size: 40px;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      transition: background 0.2s;
+      padding: 4px 8px;
       line-height: 1;
+      user-select: none;
+      transition: color 0.3s, transform 0.15s;
     }
     .hamburger-btn:hover {
-      background: rgba(0, 0, 0, 0.8);
+      transform: scale(1.1);
+    }
+    body.dark-mode .hamburger-btn {
+      color: #fff;
     }
 
     /* 侧边栏 */
@@ -156,12 +158,11 @@
       display: block;
     }
 
-    /* 主内容 — 改用 min-height 允许滚动 */
+    /* ============ 主内容：顶部留出空间给汉堡按钮 ============ */
     #app {
       width: 100%;
       min-height: 100vh;
-      padding: 20px;
-      padding-bottom: 40px; /* 额外底部空间 */
+      padding: 70px 20px 40px 20px;  /* 顶部 70px，避开汉堡按钮 */
       background: white;
       transition: background 0.3s;
       box-sizing: border-box;
@@ -210,7 +211,7 @@
     .form-group .CodeMirror {
       border: 1px solid #ccc;
       border-radius: 4px;
-      height: 200px; /* 缩小高度 */
+      height: 200px;
       font-size: 14px;
     }
     body.dark-mode .form-group .CodeMirror {
@@ -267,21 +268,19 @@
         left: -240px;
       }
       .hamburger-btn {
-        top: 12px;
-        left: 12px;
-        padding: 6px 12px;
-        font-size: 22px;
+        top: 8px;
+        left: 10px;
+        font-size: 34px;
       }
       #app {
-        padding: 12px;
-        padding-bottom: 30px;
+        padding: 60px 12px 30px 12px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 浮动汉堡菜单 -->
+  <!-- 浮动汉堡菜单（无底色，仅三横杠） -->
   <button class="hamburger-btn" id="hamburgerBtn">☰</button>
 
   <!-- 侧边栏 -->
@@ -556,7 +555,7 @@
               indentUnit: 2,
               autofocus: true
             });
-            editor.setSize(null, 200); // 高度与CSS一致
+            editor.setSize(null, 200);
           }
         }, 50);
 
