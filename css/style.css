@@ -1,12 +1,270 @@
-body{
-  position:fixed;
-  margin:0;
+/* ============ 全局 ============ */
+* {
+  box-sizing: border-box;
 }
-#test{
-  position:absolute;
-  top:40vh;
-  left:33vw;
-  color:navy;
-  font-size:8vw;
-  z-index:1;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  transition: background 0.3s;
+}
+body.dark-mode {
+  background: #1e1e1e;
+  color: #ddd;
+}
+
+/* ============ 汉堡按钮：无底色，加大的三横杠 ============ */
+.hamburger-btn {
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  z-index: 300;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  user-select: none;
+  transition: color 0.3s, transform 0.15s;
+}
+.hamburger-btn:hover {
+  transform: scale(1.1);
+}
+body.dark-mode .hamburger-btn {
+  color: #fff;
+}
+
+/* ============ 侧边栏 ============ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
+  background: #2c2c2c;
+  color: #eee;
+  transition: left 0.3s ease;
+  z-index: 200;
+  /* 关键：顶部留出 70px 空间，避免与汉堡按钮重叠 */
+  padding: 70px 0 20px 0;
+  overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar.open {
+  left: 0;
+}
+.sidebar .nav-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid #444;
+  cursor: pointer;
+}
+.sidebar .nav-item:hover {
+  background: #3a3a3a;
+}
+.sidebar .divider {
+  border-top: 2px solid #666;
+  margin: 10px 0;
+}
+.sidebar .section-title {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  color: #aaa;
+  font-weight: bold;
+}
+.sidebar .page-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px 8px 30px;
+  border-bottom: 1px solid #3a3a3a;
+  cursor: pointer;
+}
+.sidebar .page-item:hover {
+  background: #3a3a3a;
+}
+.sidebar .page-item .page-title {
+  flex: 1;
+  color: #eee;
+  text-decoration: none;
+}
+.sidebar .page-item .actions button {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 5px;
+}
+.sidebar .page-item .actions button:hover {
+  color: white;
+}
+.sidebar .page-item .actions .del:hover {
+  color: #d9534f;
+}
+.sidebar .page-item .actions .rename:hover {
+  color: #5bc0de;
+}
+.sidebar .no-pages {
+  padding: 12px 20px;
+  color: #888;
+  font-style: italic;
+}
+
+/* 侧边栏底部：主题切换 */
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 2px solid #666;
+  padding: 10px 0;
+}
+.sidebar-footer .nav-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: none;
+}
+.sidebar-footer .nav-item:hover {
+  background: #3a3a3a;
+}
+
+/* ============ 遮罩层 ============ */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 150;
+}
+.overlay.show {
+  display: block;
+}
+
+/* ============ 主内容 ============ */
+#app {
+  width: 100%;
+  min-height: 100vh;
+  padding: 70px 20px 40px 20px; /* 顶部留出 70px 避开汉堡按钮 */
+  background: white;
+  transition: background 0.3s;
+  box-sizing: border-box;
+}
+body.dark-mode #app {
+  background: #2d2d2d;
+  color: #ddd;
+}
+/* 预览模式：完全全屏，无内边距 */
+#app.preview-mode {
+  padding: 0;
+  background: #000;
+  min-height: 100vh;
+}
+#app.preview-mode iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+  display: block;
+}
+
+/* ============ 表单 ============ */
+.form-group {
+  margin-bottom: 15px;
+}
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+}
+body.dark-mode .form-group input,
+body.dark-mode .form-group textarea {
+  background: #3a3a3a;
+  color: #ddd;
+  border-color: #555;
+}
+.form-group .CodeMirror {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 200px;
+  font-size: 14px;
+}
+body.dark-mode .form-group .CodeMirror {
+  border-color: #555;
+}
+
+/* ============ 通用按钮 ============ */
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover {
+  background: #0056b3;
+}
+.result {
+  margin-top: 20px;
+  padding: 10px;
+  background: #e9f7fe;
+  border-radius: 4px;
+}
+body.dark-mode .result {
+  background: #2a4a5a;
+}
+.preview-img {
+  max-width: 200px;
+  max-height: 200px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.action-buttons button {
+  background: #6c757d;
+}
+.action-buttons button.preview {
+  background: #28a745;
+}
+.action-buttons button.zip {
+  background: #17a2b8;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 240px;
+    left: -240px;
+    padding-top: 62px; /* 移动端适当减小 */
+  }
+  .hamburger-btn {
+    top: 8px;
+    left: 10px;
+    font-size: 34px;
+  }
+  #app {
+    padding: 60px 12px 30px 12px;
+  }
 }
