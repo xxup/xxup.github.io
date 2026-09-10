@@ -3,9 +3,9 @@
 // 添加脚本：新建 .js 文件到 p5sketches/ 目录，然后在这里加一行
 // ============================================================
 const HOME_SCRIPTS = [
-  'p5sketches/dots.js',
-  'p5sketches/orbit.js',
-  'p5sketches/rotating-square.js',
+  'p5/dots.js',
+  'p5/orbit.js',
+  'p5/rotating-square.js',
 ];
 
 function pickRandomScriptPath() {
