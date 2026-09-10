@@ -2,6 +2,7 @@
   "nav": {
     "home": "🏠 首页",
     "about": "📖 关于",
+    "ai": "🤖 AI助手",
     "generator": "✏️ 生成脚本",
     "myScripts": "📄 我的脚本",
     "searchPlaceholder": "🔍 搜索作品...",
@@ -14,6 +15,7 @@
         "纯前端工具，基于 localStorage 存储，无需后端。",
         "首页随机展示一个 p5.js 脚本（来自 p5sketches/ 目录）。",
         "生成的页面自动添加到“我的脚本”列表，可重命名、删除、导出 ZIP。",
+        "内置 AI 助手，支持 ChatGPT / Gemini / DeepSeek 对话。",
         "所有界面文本均从 data/content.json 加载，可自由修改。"
       ]
     },
@@ -28,6 +30,17 @@
         "imageInput": "上传图片（可选，脚本可通过 imageUrl 加载）",
         "generateBtn": "生成页面"
       }
+    },
+    "ai": {
+      "title": "🤖 AI助手",
+      "placeholder": "输入你的问题...",
+      "sendBtn": "发送",
+      "apiKeyTitle": "请输入 API Key",
+      "apiKeyHint": "Key 只保存在你的浏览器本地，不会上传到任何服务器。",
+      "noModel": "请先选择模型",
+      "noKey": "请先输入 API Key",
+      "thinking": "思考中...",
+      "errorPrefix": "请求失败："
     },
     "notFound": {
       "title": "📄 页面未找到",
