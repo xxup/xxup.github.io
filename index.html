@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>p5.js 脚本生成器</title>
+
+  <!-- 预加载所有 p5 脚本（浏览器空闲时执行，不阻塞首屏） -->
+  <link rel="prefetch" href="p5sketches/dots.js">
+  <link rel="prefetch" href="p5sketches/orbit.js">
+  <link rel="prefetch" href="p5sketches/rotating-square.js">
+
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css" id="cm-theme">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" id="cm-theme-dark" disabled>
+
   <!-- 自定义样式 -->
   <link rel="stylesheet" href="css/style.css">
 </head>
