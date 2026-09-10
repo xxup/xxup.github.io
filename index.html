@@ -1,60 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>p5.js 脚本生成器</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>randomArt脚本编辑</title>
 
-  <!-- 预加载所有 p5 脚本（浏览器空闲时执行，不阻塞首屏） -->
-  <link rel="prefetch" href="p5sketches/dots.js">
-  <link rel="prefetch" href="p5sketches/orbit.js">
-  <link rel="prefetch" href="p5sketches/rotating-square.js">
+    <link rel="prefetch" href="p5sketches/dots.js" />
+    <link rel="prefetch" href="p5sketches/orbit.js" />
+    <link rel="prefetch" href="p5sketches/rotating-square.js" />
 
-  <!-- CodeMirror -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css" id="cm-theme">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" id="cm-theme-dark" disabled>
+    <!-- CodeMirror -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css"
+      id="cm-theme"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"
+      id="cm-theme-dark"
+      disabled
+    />
 
-  <!-- 自定义样式 -->
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- 浮动汉堡 -->
+    <button class="hamburger-btn" id="hamburgerBtn">☰</button>
 
-  <!-- 浮动汉堡菜单 -->
-  <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+      <!-- 搜索框 -->
+      <div class="sidebar-search">
+        <input type="text" id="searchInput" placeholder="🔍 搜索作品..." />
+      </div>
 
-  <!-- 侧边栏 -->
-  <div class="sidebar" id="sidebar">
-    <!-- 搜索框 -->
-    <div class="sidebar-search">
-      <input type="text" id="searchInput" placeholder="🔍 搜索作品...">
+      <div class="nav-item" data-path="/" data-i18n="nav.home">🏠 首页</div>
+      <div class="nav-item" data-path="/about" data-i18n="nav.about">
+        📖 关于
+      </div>
+      <div class="nav-item" data-path="/generator" data-i18n="nav.generator">
+        ✏️ 生成脚本
+      </div>
+
+      <div class="section-title" data-i18n="nav.myScripts">📄 我的脚本</div>
+      <div id="sidebar-pages">
+        <div class="no-pages" data-i18n="messages.noPages">暂无生成的脚本</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div
+          class="nav-item"
+          id="themeToggleSidebar"
+          data-i18n="nav.themeToggle"
+        >
+          🌓 切换主题
+        </div>
+      </div>
     </div>
+    <div class="overlay" id="overlay"></div>
 
-    <div class="nav-item" data-path="/" data-i18n="nav.home">🏠 首页</div>
-    <div class="nav-item" data-path="/about" data-i18n="nav.about">📖 关于</div>
-    <div class="nav-item" data-path="/generator" data-i18n="nav.generator">✏️ 生成脚本</div>
+    <div id="app">加载中...</div>
 
-    <div class="section-title" data-i18n="nav.myScripts">📄 我的脚本</div>
-    <div id="sidebar-pages">
-      <div class="no-pages" data-i18n="messages.noPages">暂无生成的脚本</div>
-    </div>
-
-    <!-- 底部仅主题切换 -->
-    <div class="sidebar-footer">
-      <div class="nav-item" id="themeToggleSidebar" data-i18n="nav.themeToggle">🌓 切换主题</div>
-    </div>
-  </div>
-  <div class="overlay" id="overlay"></div>
-
-  <!-- 主内容 -->
-  <div id="app">加载中...</div>
-
-  <!-- JSZip -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- CodeMirror -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-  <!-- 自定义脚本 -->
-  <script src="js/script.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- CodeMirror -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="js/script.js"></script>
+  </body>
 </html>
