@@ -1,9 +1,9 @@
 // 首页随机脚本
 
 const HOME_SCRIPTS = [
-  "p5sketches/dots.js",
-  "p5sketches/orbit.js",
-  "p5sketches/rotating-square.js",
+  "p5/dots.js",
+  "p5/orbit.js",
+  "p5/rotating-square.js",
 ];
 
 function pickRandomScriptPath() {
