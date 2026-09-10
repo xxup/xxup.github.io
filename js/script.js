@@ -1,5 +1,49 @@
 // ============================================================
-// 全局配置：从 data/content.json 加载
+// 首页随机 p5 脚本：硬编码路径列表（无需 JSON 请求）
+// 添加脚本：新建 .js 文件到 p5sketches/ 目录，然后在这里加一行
+// ============================================================
+const HOME_SCRIPTS = [
+  'p5sketches/dots.js',
+  'p5sketches/orbit.js',
+  'p5sketches/rotating-square.js',
+];
+
+function pickRandomScriptPath() {
+  if (!HOME_SCRIPTS.length) return null;
+  return HOME_SCRIPTS[Math.floor(Math.random() * HOME_SCRIPTS.length)];
+}
+
+// 生成 iframe 内嵌页面：直接用 <script src>，走浏览器缓存
+function buildHomeFrameHtml(scriptPath) {
+  // 拼成绝对路径，确保 srcdoc 中能正确加载
+  const absPath = new URL(scriptPath, window.location.href).href;
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="${absPath}"><\/script>
+</body>
+</html>`;
+}
+
+let homeScriptPath = null;
+let homeScriptHtml = null;
+
+function pickRandomHomeScript() {
+  homeScriptPath = pickRandomScriptPath();
+  homeScriptHtml = homeScriptPath ? buildHomeFrameHtml(homeScriptPath) : null;
+}
+
+// ============================================================
+// 加载文本内容
 // ============================================================
 let CONTENT = null;
 
@@ -10,31 +54,24 @@ async function loadContent() {
     CONTENT = await res.json();
   } catch (e) {
     console.error('加载 content.json 失败:', e);
-    alert('无法加载 data/content.json，请通过 HTTP 服务器访问本页面（如 python -m http.server）。');
-    // 兜底：使用空对象，避免后续代码崩溃
-    CONTENT = {
-      nav: {}, pages: {}, messages: {}, meta: {}
-    };
+    CONTENT = { nav: {}, pages: {}, messages: {}, meta: {} };
   }
 }
 
-// 读取嵌套属性，如 get('pages.home.title')
 function get(path, fallback = '') {
   if (!CONTENT) return fallback;
-  return path.split('.').reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), CONTENT) ?? fallback;
+  return path.split('.').reduce((obj, key) =>
+    (obj && obj[key] !== undefined ? obj[key] : undefined), CONTENT) ?? fallback;
 }
 
-// 应用 HTML 中带有 data-i18n 的元素
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const value = get(key);
     if (value) el.textContent = value;
   });
-  // placeholder 特殊处理
   const searchInput = document.getElementById('searchInput');
   if (searchInput) searchInput.placeholder = get('nav.searchPlaceholder', '搜索...');
-  // 页面标题
   document.title = get('meta.pageTitle', 'p5.js 脚本生成器');
 }
 
@@ -49,12 +86,15 @@ function savePages(pages) {
 }
 
 // ============================================================
-// 工具函数
+// 工具
 // ============================================================
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+function escapeAttr(text) {
+  return escapeHtml(text).replace(/"/g, '&quot;');
 }
 
 function generatePageHtml(title, script, imageDataUrl) {
@@ -67,6 +107,7 @@ function generatePageHtml(title, script, imageDataUrl) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${safeTitle}</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
+  <style>html, body { margin: 0; padding: 0; overflow: hidden; background: #000; } canvas { display: block; }</style>
 </head>
 <body>
   <script>
@@ -75,16 +116,6 @@ function generatePageHtml(title, script, imageDataUrl) {
   <\/script>
 </body>
 </html>`;
-}
-
-function previewPage(htmlContent) {
-  const win = window.open('', '_blank');
-  if (win) {
-    win.document.write(htmlContent);
-    win.document.close();
-  } else {
-    alert(get('messages.popupBlocked', '请允许弹出窗口。'));
-  }
 }
 
 function exportZip() {
@@ -154,13 +185,13 @@ function updateSidebarPages() {
   container.innerHTML = html;
 }
 
+// 点击作品 → 设为首页并返回首页
 function navigateToPage(index) {
   const pages = getPages();
   if (!pages[index]) return;
-  const content = pages[index].html;
-  const app = document.getElementById('app');
-  app.innerHTML = `<iframe srcdoc="${escapeHtml(content).replace(/"/g, '&quot;')}"></iframe>`;
-  app.classList.add('preview-mode');
+  sessionStorage.setItem('p5_preview_override', pages[index].html);
+  history.pushState(null, '', '/');
+  render();
   closeSidebar();
 }
 window.navigateToPage = navigateToPage;
@@ -171,14 +202,7 @@ function deletePage(index) {
   pages.splice(index, 1);
   savePages(pages);
   updateSidebarPages();
-  const app = document.getElementById('app');
-  if (app.classList.contains('preview-mode')) {
-    app.classList.remove('preview-mode');
-    history.pushState(null, '', '/');
-    render();
-  } else {
-    render();
-  }
+  render();
 }
 window.deletePage = deletePage;
 
@@ -215,11 +239,12 @@ document.getElementById('overlay').addEventListener('click', closeSidebar);
 document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
   el.addEventListener('click', function() {
     const path = this.getAttribute('data-path');
-    history.pushState(null, '', path);
-    const app = document.getElementById('app');
-    if (app.classList.contains('preview-mode')) {
-      app.classList.remove('preview-mode');
+    if (path === '/') {
+      // 回到首页：清除 override 并重新随机
+      sessionStorage.removeItem('p5_preview_override');
+      pickRandomHomeScript();
     }
+    history.pushState(null, '', path);
     render();
     closeSidebar();
   });
@@ -255,22 +280,28 @@ function render() {
   const path = window.location.pathname;
   const app = document.getElementById('app');
 
-  if (app.classList.contains('preview-mode') && path !== '/') {
-    app.classList.remove('preview-mode');
-  }
-
   if (editor) {
     editor.toTextArea();
     editor = null;
   }
 
+  app.classList.remove('preview-mode');
+
   if (path === '/' || path === '/index.html') {
-    const home = get('pages.home', {});
-    const paragraphs = (home.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
-    app.innerHTML = `
-      <h1>${escapeHtml(home.title || '')}</h1>
-      ${paragraphs}
-    `;
+    const override = sessionStorage.getItem('p5_preview_override');
+    let html = override || homeScriptHtml;
+
+    if (!html) {
+      pickRandomHomeScript();
+      html = homeScriptHtml;
+    }
+
+    if (html) {
+      app.classList.add('preview-mode');
+      app.innerHTML = `<iframe srcdoc="${escapeAttr(html)}"></iframe>`;
+    } else {
+      app.innerHTML = `<p style="text-align:center;padding:60px;">${escapeHtml(get('messages.noScripts', '暂无脚本'))}</p>`;
+    }
   } else if (path === '/about') {
     const about = get('pages.about', {});
     const paragraphs = (about.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
@@ -359,18 +390,24 @@ function render() {
 
       resultDiv.innerHTML = '';
       const msg = document.createElement('p');
-      msg.textContent = get('messages.generateSuccess', '✅ 页面生成成功！');
+      msg.textContent = get('messages.generateSuccess', '✅ 页面生成成功！已保存到本地存储。');
       resultDiv.appendChild(msg);
 
       const btnContainer = document.createElement('div');
       btnContainer.className = 'action-buttons';
 
+      // 🏠 返回首页预览
       const previewBtn = document.createElement('button');
       previewBtn.className = 'preview';
-      previewBtn.textContent = get('messages.previewBtn', '👁️ 预览');
-      previewBtn.addEventListener('click', function() { previewPage(htmlContent); });
+      previewBtn.textContent = get('messages.previewBtn', '🏠 返回首页预览');
+      previewBtn.addEventListener('click', function() {
+        sessionStorage.setItem('p5_preview_override', htmlContent);
+        history.pushState(null, '', '/');
+        render();
+      });
       btnContainer.appendChild(previewBtn);
 
+      // 📦 导出所有作品 ZIP
       const zipBtn = document.createElement('button');
       zipBtn.className = 'zip';
       zipBtn.textContent = get('messages.zipBtn', '📦 导出所有作品 (ZIP)');
@@ -397,30 +434,22 @@ function render() {
   }
 }
 
-// ============================================================
 // 搜索输入监听
-// ============================================================
 document.getElementById('searchInput').addEventListener('input', function() {
   searchTerm = this.value;
   updateSidebarPages();
 });
 
-// ============================================================
-// 事件监听
-// ============================================================
 window.addEventListener('popstate', function() {
-  const app = document.getElementById('app');
-  if (app.classList.contains('preview-mode')) {
-    app.classList.remove('preview-mode');
-  }
   render();
 });
 
 // ============================================================
-// 初始化（先加载 JSON，再应用文本并渲染）
+// 初始化
 // ============================================================
 window.addEventListener('load', async function() {
   await loadContent();
+  pickRandomHomeScript();       // 同步，无网络请求
   applyI18n();
   updateSidebarPages();
   render();
