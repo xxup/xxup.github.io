@@ -1,11 +1,10 @@
-// ============================================================
-// 首页随机 p5 脚本：硬编码路径列表（无需 JSON 请求）
-// 添加脚本：新建 .js 文件到 p5sketches/ 目录，然后在这里加一行
-// ============================================================
+
+// 首页随机脚本
+
 const HOME_SCRIPTS = [
-  'p5/dots.js',
-  'p5/orbit.js',
-  'p5/rotating-square.js',
+  "p5/dots.js",
+  "p5/orbit.js",
+  "p5/rotating-square.js",
 ];
 
 function pickRandomScriptPath() {
@@ -13,9 +12,7 @@ function pickRandomScriptPath() {
   return HOME_SCRIPTS[Math.floor(Math.random() * HOME_SCRIPTS.length)];
 }
 
-// 生成 iframe 内嵌页面：直接用 <script src>，走浏览器缓存
 function buildHomeFrameHtml(scriptPath) {
-  // 拼成绝对路径，确保 srcdoc 中能正确加载
   const absPath = new URL(scriptPath, window.location.href).href;
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -42,64 +39,74 @@ function pickRandomHomeScript() {
   homeScriptHtml = homeScriptPath ? buildHomeFrameHtml(homeScriptPath) : null;
 }
 
-// ============================================================
 // 加载文本内容
-// ============================================================
+
 let CONTENT = null;
 
 async function loadContent() {
   try {
-    const res = await fetch('data/content.json');
+    const res = await fetch("data/content.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     CONTENT = await res.json();
   } catch (e) {
-    console.error('加载 content.json 失败:', e);
+    console.error("加载 content.json 失败:", e);
     CONTENT = { nav: {}, pages: {}, messages: {}, meta: {} };
   }
 }
 
-function get(path, fallback = '') {
+function get(path, fallback = "") {
   if (!CONTENT) return fallback;
-  return path.split('.').reduce((obj, key) =>
-    (obj && obj[key] !== undefined ? obj[key] : undefined), CONTENT) ?? fallback;
+  return (
+    path
+      .split(".")
+      .reduce(
+        (obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined),
+        CONTENT,
+      ) ?? fallback
+  );
 }
 
 function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.getAttribute("data-i18n");
     const value = get(key);
     if (value) el.textContent = value;
   });
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) searchInput.placeholder = get('nav.searchPlaceholder', '搜索...');
-  document.title = get('meta.pageTitle', 'p5.js 脚本生成器');
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput)
+    searchInput.placeholder = get("nav.searchPlaceholder", "搜索...");
+  document.title = get("meta.pageTitle", "p5.js 脚本生成器");
 }
 
-// ============================================================
 // 本地存储
-// ============================================================
+
 function getPages() {
-  try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem("p5_pages")) || [];
+  } catch {
+    return [];
+  }
 }
 function savePages(pages) {
-  localStorage.setItem('p5_pages', JSON.stringify(pages));
+  localStorage.setItem("p5_pages", JSON.stringify(pages));
 }
 
-// ============================================================
 // 工具
-// ============================================================
+
 function escapeHtml(text) {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
 function escapeAttr(text) {
-  return escapeHtml(text).replace(/"/g, '&quot;');
+  return escapeHtml(text).replace(/"/g, "&quot;");
 }
 
 function generatePageHtml(title, script, imageDataUrl) {
-  const safeTitle = escapeHtml(title) || 'Untitled';
-  const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl}";` : 'var imageUrl = null;';
+  const safeTitle = escapeHtml(title) || "Untitled";
+  const imgVar = imageDataUrl
+    ? `var imageUrl = "${imageDataUrl}";`
+    : "var imageUrl = null;";
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -121,18 +128,21 @@ function generatePageHtml(title, script, imageDataUrl) {
 function exportZip() {
   const pages = getPages();
   if (!pages.length) {
-    alert(get('messages.zipEmpty', '没有可导出的作品。'));
+    alert(get("messages.zipEmpty", "没有可导出的作品。"));
     return;
   }
   const zip = new JSZip();
   pages.forEach((page, idx) => {
-    const filename = `p5_${page.title || 'untitled'}_${idx+1}.html`.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filename = `p5_${page.title || "untitled"}_${idx + 1}.html`.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_",
+    );
     zip.file(filename, page.html);
   });
-  zip.generateAsync({ type: 'blob' }).then(blob => {
-    const link = document.createElement('a');
+  zip.generateAsync({ type: "blob" }).then((blob) => {
+    const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = 'p5_works.zip';
+    link.download = "p5_works.zip";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -140,36 +150,36 @@ function exportZip() {
   });
 }
 
-// ============================================================
 // 状态
-// ============================================================
+
 let editor = null;
 let uploadedImageDataUrl = null;
-let theme = 'light';
-let searchTerm = '';
+let theme = "light";
+let searchTerm = "";
 
-// ============================================================
 // 侧边栏作品列表
-// ============================================================
+
 function updateSidebarPages() {
-  const container = document.getElementById('sidebar-pages');
+  const container = document.getElementById("sidebar-pages");
   const pages = getPages();
   const term = searchTerm.trim().toLowerCase();
 
   const visible = [];
   pages.forEach((page, index) => {
-    if (term && !(page.title || '').toLowerCase().includes(term)) return;
+    if (term && !(page.title || "").toLowerCase().includes(term)) return;
     visible.push({ page, index });
   });
 
   if (!visible.length) {
     container.innerHTML = `<div class="no-pages">${
-      term ? get('messages.noMatches', '没有匹配的作品') : get('messages.noPages', '暂无生成的脚本')
+      term
+        ? get("messages.noMatches", "没有匹配的作品")
+        : get("messages.noPages", "暂无生成的脚本")
     }</div>`;
     return;
   }
 
-  let html = '';
+  let html = "";
   visible.forEach(({ page, index }) => {
     const title = escapeHtml(page.title);
     html += `
@@ -185,19 +195,18 @@ function updateSidebarPages() {
   container.innerHTML = html;
 }
 
-// 点击作品 → 设为首页并返回首页
 function navigateToPage(index) {
   const pages = getPages();
   if (!pages[index]) return;
-  sessionStorage.setItem('p5_preview_override', pages[index].html);
-  history.pushState(null, '', '/');
+  sessionStorage.setItem("p5_preview_override", pages[index].html);
+  history.pushState(null, "", "/");
   render();
   closeSidebar();
 }
 window.navigateToPage = navigateToPage;
 
 function deletePage(index) {
-  if (!confirm(get('messages.deleteConfirm', '确定删除该作品吗？'))) return;
+  if (!confirm(get("messages.deleteConfirm", "确定删除该作品吗？"))) return;
   const pages = getPages();
   pages.splice(index, 1);
   savePages(pages);
@@ -210,8 +219,11 @@ function renamePage(index) {
   const pages = getPages();
   const page = pages[index];
   if (!page) return;
-  const newTitle = prompt(get('messages.renamePrompt', '请输入新标题：'), page.title);
-  if (newTitle === null || newTitle.trim() === '') return;
+  const newTitle = prompt(
+    get("messages.renamePrompt", "请输入新标题："),
+    page.title,
+  );
+  if (newTitle === null || newTitle.trim() === "") return;
   page.title = newTitle.trim();
   savePages(pages);
   updateSidebarPages();
@@ -219,76 +231,74 @@ function renamePage(index) {
 }
 window.renamePage = renamePage;
 
-// ============================================================
 // 侧边栏控制
-// ============================================================
+
 function openSidebar() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('hamburgerBtn').classList.add('hidden');
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("hamburgerBtn").classList.add("hidden");
 }
 function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-  document.getElementById('hamburgerBtn').classList.remove('hidden');
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("hamburgerBtn").classList.remove("hidden");
 }
 
-document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
-document.getElementById('overlay').addEventListener('click', closeSidebar);
+document.getElementById("hamburgerBtn").addEventListener("click", openSidebar);
+document.getElementById("overlay").addEventListener("click", closeSidebar);
 
-document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
-  el.addEventListener('click', function() {
-    const path = this.getAttribute('data-path');
-    if (path === '/') {
-      // 回到首页：清除 override 并重新随机
-      sessionStorage.removeItem('p5_preview_override');
+document.querySelectorAll(".sidebar .nav-item[data-path]").forEach((el) => {
+  el.addEventListener("click", function () {
+    const path = this.getAttribute("data-path");
+    if (path === "/") {
+      sessionStorage.removeItem("p5_preview_override");
       pickRandomHomeScript();
     }
-    history.pushState(null, '', path);
+    history.pushState(null, "", path);
     render();
     closeSidebar();
   });
 });
 
-// ============================================================
 // 主题切换
-// ============================================================
+
 function toggleTheme() {
   const body = document.body;
-  const lightTheme = document.getElementById('cm-theme');
-  const darkTheme = document.getElementById('cm-theme-dark');
-  if (theme === 'light') {
-    body.classList.add('dark-mode');
+  const lightTheme = document.getElementById("cm-theme");
+  const darkTheme = document.getElementById("cm-theme-dark");
+  if (theme === "light") {
+    body.classList.add("dark-mode");
     lightTheme.disabled = true;
     darkTheme.disabled = false;
-    theme = 'dark';
-    if (editor) editor.setOption('theme', 'dracula');
+    theme = "dark";
+    if (editor) editor.setOption("theme", "dracula");
   } else {
-    body.classList.remove('dark-mode');
+    body.classList.remove("dark-mode");
     lightTheme.disabled = false;
     darkTheme.disabled = true;
-    theme = 'light';
-    if (editor) editor.setOption('theme', 'default');
+    theme = "light";
+    if (editor) editor.setOption("theme", "default");
   }
 }
-document.getElementById('themeToggleSidebar').addEventListener('click', toggleTheme);
+document
+  .getElementById("themeToggleSidebar")
+  .addEventListener("click", toggleTheme);
 
-// ============================================================
 // 路由渲染
-// ============================================================
+
 function render() {
   const path = window.location.pathname;
-  const app = document.getElementById('app');
+  const app = document.getElementById("app");
 
   if (editor) {
     editor.toTextArea();
     editor = null;
   }
 
-  app.classList.remove('preview-mode');
+  app.classList.remove("preview-mode");
 
-  if (path === '/' || path === '/index.html') {
-    const override = sessionStorage.getItem('p5_preview_override');
+  if (path === "/" || path === "/index.html") {
+    const override = sessionStorage.getItem("p5_preview_override");
     let html = override || homeScriptHtml;
 
     if (!html) {
@@ -297,84 +307,90 @@ function render() {
     }
 
     if (html) {
-      app.classList.add('preview-mode');
+      app.classList.add("preview-mode");
       app.innerHTML = `<iframe srcdoc="${escapeAttr(html)}"></iframe>`;
     } else {
-      app.innerHTML = `<p style="text-align:center;padding:60px;">${escapeHtml(get('messages.noScripts', '暂无脚本'))}</p>`;
+      app.innerHTML = `<p style="text-align:center;padding:60px;">${escapeHtml(get("messages.noScripts", "暂无脚本"))}</p>`;
     }
-  } else if (path === '/about') {
-    const about = get('pages.about', {});
-    const paragraphs = (about.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+  } else if (path === "/about") {
+    const about = get("pages.about", {});
+    const paragraphs = (about.paragraphs || [])
+      .map((p) => `<p>${escapeHtml(p)}</p>`)
+      .join("");
     app.innerHTML = `
-      <h1>${escapeHtml(about.title || '')}</h1>
+      <h1>${escapeHtml(about.title || "")}</h1>
       ${paragraphs}
     `;
-  } else if (path === '/generator') {
-    const g = get('pages.generator', {});
+  } else if (path === "/generator") {
+    const g = get("pages.generator", {});
     const labels = g.labels || {};
-    const scriptPlaceholder = escapeHtml(labels.scriptPlaceholder || '');
+    const scriptPlaceholder = escapeHtml(labels.scriptPlaceholder || "");
     app.innerHTML = `
-      <h1>${escapeHtml(g.title || '')}</h1>
-      <p>${escapeHtml(g.description || '')}</p>
+      <h1>${escapeHtml(g.title || "")}</h1>
+      <p>${escapeHtml(g.description || "")}</p>
       <div class="form-group">
-        <label for="title">${escapeHtml(labels.titleInput || '页面标题')}</label>
-        <input type="text" id="title" placeholder="${escapeHtml(labels.titlePlaceholder || '')}">
+        <label for="title">${escapeHtml(labels.titleInput || "页面标题")}</label>
+        <input type="text" id="title" placeholder="${escapeHtml(labels.titlePlaceholder || "")}">
       </div>
       <div class="form-group">
-        <label for="script">${escapeHtml(labels.scriptInput || 'p5.js 脚本代码')}</label>
+        <label for="script">${escapeHtml(labels.scriptInput || "p5.js 脚本代码")}</label>
         <textarea id="script" placeholder="${scriptPlaceholder}"></textarea>
       </div>
       <div class="form-group">
-        <label for="image">${escapeHtml(labels.imageInput || '上传图片')}</label>
+        <label for="image">${escapeHtml(labels.imageInput || "上传图片")}</label>
         <input type="file" id="image" accept="image/*" onchange="handleImageUpload(this)">
         <div id="image-preview"></div>
       </div>
-      <button onclick="buildPage()">${escapeHtml(labels.generateBtn || '生成页面')}</button>
+      <button onclick="buildPage()">${escapeHtml(labels.generateBtn || "生成页面")}</button>
       <div id="result" class="result" style="display:none;"></div>
     `;
 
     setTimeout(() => {
-      const textarea = document.getElementById('script');
+      const textarea = document.getElementById("script");
       if (textarea && !editor) {
-        const themeName = theme === 'dark' ? 'dracula' : 'default';
+        const themeName = theme === "dark" ? "dracula" : "default";
         editor = CodeMirror.fromTextArea(textarea, {
-          mode: 'javascript',
+          mode: "javascript",
           lineNumbers: true,
           theme: themeName,
           tabSize: 2,
           indentUnit: 2,
-          autofocus: true
+          autofocus: true,
         });
         editor.setSize(null, 200);
       }
     }, 50);
 
     uploadedImageDataUrl = null;
-    document.getElementById('image-preview').innerHTML = '';
+    document.getElementById("image-preview").innerHTML = "";
 
-    window.handleImageUpload = function(input) {
+    window.handleImageUpload = function (input) {
       const file = input.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         uploadedImageDataUrl = e.target.result;
-        document.getElementById('image-preview').innerHTML =
+        document.getElementById("image-preview").innerHTML =
           `<p>✅ 图片上传成功</p><img src="${e.target.result}" class="preview-img">`;
       };
       reader.readAsDataURL(file);
     };
 
-    window.buildPage = function() {
-      const title = document.getElementById('title').value.trim() || get('messages.emptyTitle', '未命名脚本');
-      const script = editor ? editor.getValue().trim() : document.getElementById('script').value.trim();
+    window.buildPage = function () {
+      const title =
+        document.getElementById("title").value.trim() ||
+        get("messages.emptyTitle", "未命名脚本");
+      const script = editor
+        ? editor.getValue().trim()
+        : document.getElementById("script").value.trim();
       if (!script) {
-        alert(get('messages.scriptRequired', '请填写 p5.js 脚本代码'));
+        alert(get("messages.scriptRequired", "请填写 p5.js 脚本代码"));
         return;
       }
-      const imageDataUrl = uploadedImageDataUrl || '';
-      const resultDiv = document.getElementById('result');
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = get('messages.generating', '正在生成...');
+      const imageDataUrl = uploadedImageDataUrl || "";
+      const resultDiv = document.getElementById("result");
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = get("messages.generating", "正在生成...");
 
       const htmlContent = generatePageHtml(title, script, imageDataUrl);
 
@@ -383,73 +399,74 @@ function render() {
         id: Date.now(),
         title: title,
         html: htmlContent,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       savePages(pages);
       updateSidebarPages();
 
-      resultDiv.innerHTML = '';
-      const msg = document.createElement('p');
-      msg.textContent = get('messages.generateSuccess', '✅ 页面生成成功！已保存到本地存储。');
+      resultDiv.innerHTML = "";
+      const msg = document.createElement("p");
+      msg.textContent = get(
+        "messages.generateSuccess",
+        "✅ 页面生成成功！已保存到本地存储。",
+      );
       resultDiv.appendChild(msg);
 
-      const btnContainer = document.createElement('div');
-      btnContainer.className = 'action-buttons';
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "action-buttons";
 
-      // 🏠 返回首页预览
-      const previewBtn = document.createElement('button');
-      previewBtn.className = 'preview';
-      previewBtn.textContent = get('messages.previewBtn', '🏠 返回首页预览');
-      previewBtn.addEventListener('click', function() {
-        sessionStorage.setItem('p5_preview_override', htmlContent);
-        history.pushState(null, '', '/');
+      const previewBtn = document.createElement("button");
+      previewBtn.className = "preview";
+      previewBtn.textContent = get("messages.previewBtn", "🏠 返回首页预览");
+      previewBtn.addEventListener("click", function () {
+        sessionStorage.setItem("p5_preview_override", htmlContent);
+        history.pushState(null, "", "/");
         render();
       });
       btnContainer.appendChild(previewBtn);
 
-      // 📦 导出所有作品 ZIP
-      const zipBtn = document.createElement('button');
-      zipBtn.className = 'zip';
-      zipBtn.textContent = get('messages.zipBtn', '📦 导出所有作品 (ZIP)');
-      zipBtn.addEventListener('click', exportZip);
+      const zipBtn = document.createElement("button");
+      zipBtn.className = "zip";
+      zipBtn.textContent = get("messages.zipBtn", "📦 导出所有作品 (ZIP)");
+      zipBtn.addEventListener("click", exportZip);
       btnContainer.appendChild(zipBtn);
 
       resultDiv.appendChild(btnContainer);
 
-      // 重置表单
-      document.getElementById('title').value = '';
-      if (editor) editor.setValue('');
-      else document.getElementById('script').value = '';
-      uploadedImageDataUrl = '';
-      document.getElementById('image-preview').innerHTML = '';
-      document.getElementById('image').value = '';
+      document.getElementById("title").value = "";
+      if (editor) editor.setValue("");
+      else document.getElementById("script").value = "";
+      uploadedImageDataUrl = "";
+      document.getElementById("image-preview").innerHTML = "";
+      document.getElementById("image").value = "";
     };
   } else {
-    const nf = get('pages.notFound', {});
-    const paragraphs = (nf.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+    const nf = get("pages.notFound", {});
+    const paragraphs = (nf.paragraphs || [])
+      .map((p) => `<p>${escapeHtml(p)}</p>`)
+      .join("");
     app.innerHTML = `
-      <h1>${escapeHtml(nf.title || '📄 页面未找到')}</h1>
+      <h1>${escapeHtml(nf.title || "📄 页面未找到")}</h1>
       ${paragraphs || `<p>${escapeHtml(path)}</p>`}
     `;
   }
 }
 
 // 搜索输入监听
-document.getElementById('searchInput').addEventListener('input', function() {
+document.getElementById("searchInput").addEventListener("input", function () {
   searchTerm = this.value;
   updateSidebarPages();
 });
 
-window.addEventListener('popstate', function() {
+window.addEventListener("popstate", function () {
   render();
 });
 
-// ============================================================
 // 初始化
-// ============================================================
-window.addEventListener('load', async function() {
+
+window.addEventListener("load", async function () {
   await loadContent();
-  pickRandomHomeScript();       // 同步，无网络请求
+  pickRandomHomeScript(); // 同步，无网络请求
   applyI18n();
   updateSidebarPages();
   render();
