@@ -6,8 +6,9 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>randomArt脚本编辑</title>
+    <title>randomArt创意脚本编辑</title>
 
+    <!-- 预加载所有脚本 -->
     <link rel="prefetch" href="p5/dots.js" />
     <link rel="prefetch" href="p5/orbit.js" />
     <link rel="prefetch" href="p5/rotating-square.js" />
@@ -29,15 +30,15 @@
       disabled
     />
 
+    <!-- 自定义样式 -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <!-- 浮动汉堡 -->
+    <!-- 浮动汉堡菜单 -->
     <button class="hamburger-btn" id="hamburgerBtn">☰</button>
 
     <!-- 侧边栏 -->
     <div class="sidebar" id="sidebar">
-      <!-- 搜索框 -->
       <div class="sidebar-search">
         <input type="text" id="searchInput" placeholder="🔍 搜索作品..." />
       </div>
@@ -46,6 +47,7 @@
       <div class="nav-item" data-path="/about" data-i18n="nav.about">
         📖 关于
       </div>
+      <div class="nav-item" data-path="/ai" data-i18n="nav.ai">🤖 AI助手</div>
       <div class="nav-item" data-path="/generator" data-i18n="nav.generator">
         ✏️ 生成脚本
       </div>
@@ -70,7 +72,6 @@
     <div id="app">加载中...</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- CodeMirror -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
     <script src="js/script.js"></script>
