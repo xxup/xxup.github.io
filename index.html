@@ -18,14 +18,20 @@
 
   <!-- 侧边栏 -->
   <div class="sidebar" id="sidebar">
+    <!-- 搜索框（最顶部） -->
+    <div class="sidebar-search">
+      <input type="text" id="searchInput" placeholder="🔍 搜索作品...">
+    </div>
+
     <div class="nav-item" data-path="/">🏠 首页</div>
     <div class="nav-item" data-path="/about">📖 关于</div>
     <div class="nav-item" data-path="/generator">✏️ 生成脚本</div>
-    <div class="divider"></div>
+
     <div class="section-title">📄 我的脚本</div>
     <div id="sidebar-pages">
       <div class="no-pages">暂无生成的脚本</div>
     </div>
+
     <!-- 底部仅主题切换 -->
     <div class="sidebar-footer">
       <div class="nav-item" id="themeToggleSidebar">🌓 切换主题</div>
