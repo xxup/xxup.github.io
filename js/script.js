@@ -1,4 +1,46 @@
-// -------- 本地存储 --------
+// ============================================================
+// 全局配置：从 data/content.json 加载
+// ============================================================
+let CONTENT = null;
+
+async function loadContent() {
+  try {
+    const res = await fetch('data/content.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    CONTENT = await res.json();
+  } catch (e) {
+    console.error('加载 content.json 失败:', e);
+    alert('无法加载 data/content.json，请通过 HTTP 服务器访问本页面（如 python -m http.server）。');
+    // 兜底：使用空对象，避免后续代码崩溃
+    CONTENT = {
+      nav: {}, pages: {}, messages: {}, meta: {}
+    };
+  }
+}
+
+// 读取嵌套属性，如 get('pages.home.title')
+function get(path, fallback = '') {
+  if (!CONTENT) return fallback;
+  return path.split('.').reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined), CONTENT) ?? fallback;
+}
+
+// 应用 HTML 中带有 data-i18n 的元素
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const value = get(key);
+    if (value) el.textContent = value;
+  });
+  // placeholder 特殊处理
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.placeholder = get('nav.searchPlaceholder', '搜索...');
+  // 页面标题
+  document.title = get('meta.pageTitle', 'p5.js 脚本生成器');
+}
+
+// ============================================================
+// 本地存储
+// ============================================================
 function getPages() {
   try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { return []; }
 }
@@ -6,7 +48,9 @@ function savePages(pages) {
   localStorage.setItem('p5_pages', JSON.stringify(pages));
 }
 
-// -------- 工具函数 --------
+// ============================================================
+// 工具函数
+// ============================================================
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
@@ -14,7 +58,7 @@ function escapeHtml(text) {
 }
 
 function generatePageHtml(title, script, imageDataUrl) {
-  const safeTitle = escapeHtml(title) || '未命名页面';
+  const safeTitle = escapeHtml(title) || 'Untitled';
   const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl}";` : 'var imageUrl = null;';
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -33,22 +77,20 @@ function generatePageHtml(title, script, imageDataUrl) {
 </html>`;
 }
 
-// -------- 预览（新窗口）--------
 function previewPage(htmlContent) {
   const win = window.open('', '_blank');
   if (win) {
     win.document.write(htmlContent);
     win.document.close();
   } else {
-    alert('请允许弹出窗口。');
+    alert(get('messages.popupBlocked', '请允许弹出窗口。'));
   }
 }
 
-// -------- 导出所有作品为 ZIP --------
 function exportZip() {
   const pages = getPages();
   if (!pages.length) {
-    alert('没有可导出的作品。');
+    alert(get('messages.zipEmpty', '没有可导出的作品。'));
     return;
   }
   const zip = new JSZip();
@@ -67,19 +109,22 @@ function exportZip() {
   });
 }
 
-// -------- 状态 --------
+// ============================================================
+// 状态
+// ============================================================
 let editor = null;
 let uploadedImageDataUrl = null;
 let theme = 'light';
 let searchTerm = '';
 
-// -------- 侧边栏作品列表 --------
+// ============================================================
+// 侧边栏作品列表
+// ============================================================
 function updateSidebarPages() {
   const container = document.getElementById('sidebar-pages');
   const pages = getPages();
   const term = searchTerm.trim().toLowerCase();
 
-  // 过滤
   const visible = [];
   pages.forEach((page, index) => {
     if (term && !(page.title || '').toLowerCase().includes(term)) return;
@@ -88,7 +133,7 @@ function updateSidebarPages() {
 
   if (!visible.length) {
     container.innerHTML = `<div class="no-pages">${
-      term ? '没有匹配的作品' : '暂无生成的脚本'
+      term ? get('messages.noMatches', '没有匹配的作品') : get('messages.noPages', '暂无生成的脚本')
     }</div>`;
     return;
   }
@@ -109,12 +154,6 @@ function updateSidebarPages() {
   container.innerHTML = html;
 }
 
-// 搜索输入监听
-document.getElementById('searchInput').addEventListener('input', function() {
-  searchTerm = this.value;
-  updateSidebarPages();
-});
-
 function navigateToPage(index) {
   const pages = getPages();
   if (!pages[index]) return;
@@ -127,7 +166,7 @@ function navigateToPage(index) {
 window.navigateToPage = navigateToPage;
 
 function deletePage(index) {
-  if (!confirm('确定删除该作品吗？')) return;
+  if (!confirm(get('messages.deleteConfirm', '确定删除该作品吗？'))) return;
   const pages = getPages();
   pages.splice(index, 1);
   savePages(pages);
@@ -147,7 +186,7 @@ function renamePage(index) {
   const pages = getPages();
   const page = pages[index];
   if (!page) return;
-  const newTitle = prompt('请输入新标题：', page.title);
+  const newTitle = prompt(get('messages.renamePrompt', '请输入新标题：'), page.title);
   if (newTitle === null || newTitle.trim() === '') return;
   page.title = newTitle.trim();
   savePages(pages);
@@ -156,16 +195,18 @@ function renamePage(index) {
 }
 window.renamePage = renamePage;
 
-// -------- 侧边栏控制 --------
+// ============================================================
+// 侧边栏控制
+// ============================================================
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('overlay').classList.add('show');
-  document.getElementById('hamburgerBtn').classList.add('hidden'); // 隐藏汉堡按钮
+  document.getElementById('hamburgerBtn').classList.add('hidden');
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
-  document.getElementById('hamburgerBtn').classList.remove('hidden'); // 显示汉堡按钮
+  document.getElementById('hamburgerBtn').classList.remove('hidden');
 }
 
 document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
@@ -184,7 +225,9 @@ document.querySelectorAll('.sidebar .nav-item[data-path]').forEach(el => {
   });
 });
 
-// -------- 主题切换 --------
+// ============================================================
+// 主题切换
+// ============================================================
 function toggleTheme() {
   const body = document.body;
   const lightTheme = document.getElementById('cm-theme');
@@ -205,7 +248,9 @@ function toggleTheme() {
 }
 document.getElementById('themeToggleSidebar').addEventListener('click', toggleTheme);
 
-// -------- 路由渲染 --------
+// ============================================================
+// 路由渲染
+// ============================================================
 function render() {
   const path = window.location.pathname;
   const app = document.getElementById('app');
@@ -220,38 +265,40 @@ function render() {
   }
 
   if (path === '/' || path === '/index.html') {
+    const home = get('pages.home', {});
+    const paragraphs = (home.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
     app.innerHTML = `
-      <h1>🎨 p5.js 脚本生成器</h1>
-      <p>所有数据保存在本地浏览器中，无需服务器。</p>
-      <p>编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。</p>
-      <p>支持预览、导出 ZIP、删除和重命名作品。</p>
-      <p>点击左上角 ☰ 菜单查看所有作品。</p>
+      <h1>${escapeHtml(home.title || '')}</h1>
+      ${paragraphs}
     `;
   } else if (path === '/about') {
+    const about = get('pages.about', {});
+    const paragraphs = (about.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
     app.innerHTML = `
-      <h1>📖 关于</h1>
-      <p>纯前端工具，基于 localStorage 存储，无需后端。</p>
-      <p>使用 CodeMirror 实现代码高亮，支持亮色/暗色主题。</p>
-      <p>所有作品均可导出为 ZIP 包。</p>
+      <h1>${escapeHtml(about.title || '')}</h1>
+      ${paragraphs}
     `;
   } else if (path === '/generator') {
+    const g = get('pages.generator', {});
+    const labels = g.labels || {};
+    const scriptPlaceholder = escapeHtml(labels.scriptPlaceholder || '');
     app.innerHTML = `
-      <h1>✏️ 编写 p5.js 脚本</h1>
-      <p>输入页面标题和 p5.js 代码，上传图片（可选），点击生成。</p>
+      <h1>${escapeHtml(g.title || '')}</h1>
+      <p>${escapeHtml(g.description || '')}</p>
       <div class="form-group">
-        <label for="title">页面标题</label>
-        <input type="text" id="title" placeholder="例如：我的创意绘图">
+        <label for="title">${escapeHtml(labels.titleInput || '页面标题')}</label>
+        <input type="text" id="title" placeholder="${escapeHtml(labels.titlePlaceholder || '')}">
       </div>
       <div class="form-group">
-        <label for="script">p5.js 脚本代码</label>
-        <textarea id="script" placeholder="例如：&#10;function setup() {&#10;  createCanvas(400, 400);&#10;  background(220);&#10;}&#10;function draw() {&#10;  ellipse(mouseX, mouseY, 50, 50);&#10;}"></textarea>
+        <label for="script">${escapeHtml(labels.scriptInput || 'p5.js 脚本代码')}</label>
+        <textarea id="script" placeholder="${scriptPlaceholder}"></textarea>
       </div>
       <div class="form-group">
-        <label for="image">上传图片（可选，脚本可通过 <code>imageUrl</code> 加载）</label>
+        <label for="image">${escapeHtml(labels.imageInput || '上传图片')}</label>
         <input type="file" id="image" accept="image/*" onchange="handleImageUpload(this)">
         <div id="image-preview"></div>
       </div>
-      <button onclick="buildPage()">生成页面</button>
+      <button onclick="buildPage()">${escapeHtml(labels.generateBtn || '生成页面')}</button>
       <div id="result" class="result" style="display:none;"></div>
     `;
 
@@ -280,22 +327,23 @@ function render() {
       const reader = new FileReader();
       reader.onload = function(e) {
         uploadedImageDataUrl = e.target.result;
-        document.getElementById('image-preview').innerHTML = `<p>✅ 图片上传成功</p><img src="${e.target.result}" class="preview-img">`;
+        document.getElementById('image-preview').innerHTML =
+          `<p>✅ 图片上传成功</p><img src="${e.target.result}" class="preview-img">`;
       };
       reader.readAsDataURL(file);
     };
 
     window.buildPage = function() {
-      const title = document.getElementById('title').value.trim() || '未命名脚本';
+      const title = document.getElementById('title').value.trim() || get('messages.emptyTitle', '未命名脚本');
       const script = editor ? editor.getValue().trim() : document.getElementById('script').value.trim();
       if (!script) {
-        alert('请填写 p5.js 脚本代码');
+        alert(get('messages.scriptRequired', '请填写 p5.js 脚本代码'));
         return;
       }
       const imageDataUrl = uploadedImageDataUrl || '';
       const resultDiv = document.getElementById('result');
       resultDiv.style.display = 'block';
-      resultDiv.innerHTML = '正在生成...';
+      resultDiv.innerHTML = get('messages.generating', '正在生成...');
 
       const htmlContent = generatePageHtml(title, script, imageDataUrl);
 
@@ -311,7 +359,7 @@ function render() {
 
       resultDiv.innerHTML = '';
       const msg = document.createElement('p');
-      msg.textContent = '✅ 页面生成成功！已保存到本地存储。';
+      msg.textContent = get('messages.generateSuccess', '✅ 页面生成成功！');
       resultDiv.appendChild(msg);
 
       const btnContainer = document.createElement('div');
@@ -319,15 +367,13 @@ function render() {
 
       const previewBtn = document.createElement('button');
       previewBtn.className = 'preview';
-      previewBtn.textContent = '👁️ 预览';
-      previewBtn.addEventListener('click', function() {
-        previewPage(htmlContent);
-      });
+      previewBtn.textContent = get('messages.previewBtn', '👁️ 预览');
+      previewBtn.addEventListener('click', function() { previewPage(htmlContent); });
       btnContainer.appendChild(previewBtn);
 
       const zipBtn = document.createElement('button');
       zipBtn.className = 'zip';
-      zipBtn.textContent = '📦 导出所有作品 (ZIP)';
+      zipBtn.textContent = get('messages.zipBtn', '📦 导出所有作品 (ZIP)');
       zipBtn.addEventListener('click', exportZip);
       btnContainer.appendChild(zipBtn);
 
@@ -342,11 +388,26 @@ function render() {
       document.getElementById('image').value = '';
     };
   } else {
-    app.innerHTML = `<h1>📄 页面 ${path}</h1><p>内容未定义。</p>`;
+    const nf = get('pages.notFound', {});
+    const paragraphs = (nf.paragraphs || []).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+    app.innerHTML = `
+      <h1>${escapeHtml(nf.title || '📄 页面未找到')}</h1>
+      ${paragraphs || `<p>${escapeHtml(path)}</p>`}
+    `;
   }
 }
 
-// -------- 事件监听 --------
+// ============================================================
+// 搜索输入监听
+// ============================================================
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchTerm = this.value;
+  updateSidebarPages();
+});
+
+// ============================================================
+// 事件监听
+// ============================================================
 window.addEventListener('popstate', function() {
   const app = document.getElementById('app');
   if (app.classList.contains('preview-mode')) {
@@ -355,7 +416,12 @@ window.addEventListener('popstate', function() {
   render();
 });
 
-window.onload = function() {
+// ============================================================
+// 初始化（先加载 JSON，再应用文本并渲染）
+// ============================================================
+window.addEventListener('load', async function() {
+  await loadContent();
+  applyI18n();
   updateSidebarPages();
   render();
-};
+});
