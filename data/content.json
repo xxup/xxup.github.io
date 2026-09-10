@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "home": "🏠 首页",
+    "about": "📖 关于",
+    "generator": "✏️ 生成脚本",
+    "myScripts": "📄 我的脚本",
+    "searchPlaceholder": "🔍 搜索作品...",
+    "themeToggle": "🌓 切换主题"
+  },
+  "pages": {
+    "home": {
+      "title": "🎨 p5.js 脚本生成器",
+      "paragraphs": [
+        "所有数据保存在本地浏览器中，无需服务器。",
+        "编写 p5.js 脚本，上传图片素材，生成独立的 HTML 页面。",
+        "支持预览、导出 ZIP、删除和重命名作品。",
+        "点击左上角 ☰ 菜单查看所有作品。"
+      ]
+    },
+    "about": {
+      "title": "📖 关于",
+      "paragraphs": [
+        "纯前端工具，基于 localStorage 存储，无需后端。",
+        "使用 CodeMirror 实现代码高亮，支持亮色/暗色主题。",
+        "所有作品均可导出为 ZIP 包。",
+        "所有界面文本均从 data/content.json 加载，可自由修改。"
+      ]
+    },
+    "generator": {
+      "title": "✏️ 编写 p5.js 脚本",
+      "description": "输入页面标题和 p5.js 代码，上传图片（可选），点击生成。",
+      "labels": {
+        "titleInput": "页面标题",
+        "titlePlaceholder": "例如：我的创意绘图",
+        "scriptInput": "p5.js 脚本代码",
+        "scriptPlaceholder": "例如：\nfunction setup() {\n  createCanvas(400, 400);\n  background(220);\n}\nfunction draw() {\n  ellipse(mouseX, mouseY, 50, 50);\n}",
+        "imageInput": "上传图片（可选，脚本可通过 imageUrl 加载）",
+        "generateBtn": "生成页面"
+      }
+    },
+    "notFound": {
+      "title": "📄 页面未找到",
+      "paragraphs": ["该路径未定义。"]
+    }
+  },
+  "messages": {
+    "noPages": "暂无生成的脚本",
+    "noMatches": "没有匹配的作品",
+    "generateSuccess": "✅ 页面生成成功！已保存到本地存储。",
+    "generating": "正在生成...",
+    "previewBtn": "👁️ 预览",
+    "zipBtn": "📦 导出所有作品 (ZIP)",
+    "renamePrompt": "请输入新标题：",
+    "deleteConfirm": "确定删除该作品吗？",
+    "emptyTitle": "未命名脚本",
+    "zipEmpty": "没有可导出的作品。",
+    "popupBlocked": "请允许弹出窗口。",
+    "scriptRequired": "请填写 p5.js 脚本代码"
+  },
+  "meta": {
+    "pageTitle": "p5.js 脚本生成器"
+  }
+}
