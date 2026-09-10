@@ -1,16 +1,15 @@
-let x = 0;
-
-function setup() {
+function setup(){
   createCanvas(windowWidth, windowHeight);
-  background(30);
+  gradientColor(20);
 }
 
-function draw() {
-  fill(255, 100);
+function gradientColor(r){
   noStroke();
-  ellipse(mouseX, mouseY, 30, 30);
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+colorMode(HSB,width,height,100);
+  for(let x=0; x<width; x+=r){
+   for(let y=0; y<height; y+=r){
+  fill(x,height-y,100);
+  rect(x,y,r,r);
+    }
+  }
 }
