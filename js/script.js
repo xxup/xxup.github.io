@@ -1,3 +1,32 @@
+
+// 动态设置
+
+function updateAppHeight() {
+  const app = document.getElementById("app");
+  if (!app) return;
+  if (
+    app.classList.contains("ai-mode") ||
+    app.classList.contains("preview-mode")
+  ) {
+    const h =
+      (window.visualViewport && window.visualViewport.height) ||
+      window.innerHeight ||
+      document.documentElement.clientHeight;
+    app.style.height = h + "px";
+  } else {
+    app.style.height = "";
+  }
+}
+
+window.addEventListener("resize", updateAppHeight);
+window.addEventListener("orientationchange", () =>
+  setTimeout(updateAppHeight, 100),
+);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", updateAppHeight);
+  window.visualViewport.addEventListener("scroll", updateAppHeight);
+}
+
 // 首页随机脚本
 
 const HOME_SCRIPTS = [
@@ -17,15 +46,31 @@ function buildHomeFrameHtml(scriptPath) {
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
   <style>
-    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      touch-action: none;
+    }
     canvas { display: block; }
   </style>
 </head>
 <body>
   <script src="${absPath}"><\/script>
+  <script>
+    // 若用户脚本未定义 windowResized，则自动补一个
+    window.addEventListener('resize', function() {
+      if (typeof resizeCanvas === 'function') {
+        try { resizeCanvas(windowWidth, windowHeight); } catch (e) {}
+      }
+    });
+  <\/script>
 </body>
 </html>`;
 }
@@ -152,10 +197,16 @@ function generatePageHtml(title, script, imageDataUrl) {
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>${safeTitle}</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
-  <style>html, body { margin: 0; padding: 0; overflow: hidden; background: #000; } canvas { display: block; }</style>
+  <style>
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; background: #000; touch-action: none;
+    }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
   <script>
@@ -325,7 +376,7 @@ document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
 
-// AI 助手
+// AI 助手 - 聊天页面
 
 function renderAIChat(app) {
   app.classList.add("ai-mode");
@@ -364,6 +415,8 @@ function renderAIChat(app) {
   document
     .getElementById("aiClearBtn")
     .addEventListener("click", aiClearMessages);
+
+  setTimeout(updateAppHeight, 0);
 }
 
 function renderAIMessages() {
@@ -375,6 +428,7 @@ function renderAIMessages() {
     tip.style.color = "#999";
     tip.style.textAlign = "center";
     tip.style.marginTop = "40px";
+    tip.style.background = "transparent";
     tip.textContent = aiCurrentModel
       ? `当前模型：${AI_MODELS[aiCurrentModel].name}`
       : "点击左下角 + 选择模型开始对话";
@@ -468,7 +522,6 @@ function showApiKeyModal(model) {
   });
 }
 
-// 清除对话
 function aiClearMessages() {
   if (!aiMessages.length) return;
   if (!confirm("确定清除当前模型的对话记录吗？")) return;
@@ -477,7 +530,7 @@ function aiClearMessages() {
   renderAIMessages();
 }
 
-// 流式输出 - 发送消息
+// 流式输出
 
 async function aiSendMessage() {
   if (aiSending) return;
@@ -494,22 +547,18 @@ async function aiSendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  // 用户消息入列
   aiMessages.push({ role: "user", content: text });
   aiSaveMessages();
   input.value = "";
   renderAIMessages();
 
-  // 发送前的历史消息（不含即将插入的空助手占位）
   const historyMessages = aiMessages.slice();
 
-  // 添加空的助手占位
   aiMessages.push({ role: "assistant", content: "" });
   const aiMsgDiv = document.createElement("div");
   aiMsgDiv.className = "ai-msg assistant";
   aiMsgDiv.textContent = "";
   const box = document.getElementById("aiMessages");
-  // 移除"暂无消息"提示（如果存在）
   box.querySelectorAll("p").forEach((p) => p.remove());
   box.appendChild(aiMsgDiv);
   box.scrollTop = box.scrollHeight;
@@ -541,7 +590,7 @@ async function aiSendMessage() {
   }
 }
 
-// 流式输出 - 调用各模型 API
+// 流式输出 - 调用各模型API
 
 async function callAIStream(model, key, messages, onChunk) {
   if (model === "chatgpt") {
@@ -568,7 +617,6 @@ async function callAIStream(model, key, messages, onChunk) {
   throw new Error("Unknown model");
 }
 
-// OpenAI 格式（ChatGPT / DeepSeek）
 async function streamOpenAIStyle(url, key, modelName, messages, onChunk) {
   const res = await fetch(url, {
     method: "POST",
@@ -609,15 +657,12 @@ async function streamOpenAIStyle(url, key, modelName, messages, onChunk) {
           fullText += delta;
           onChunk(delta, fullText);
         }
-      } catch (e) {
-        /* 忽略不完整 JSON */
-      }
+      } catch (e) {}
     }
   }
   return fullText;
 }
 
-// Gemini 流式
 async function streamGemini(key, messages, onChunk) {
   const contents = messages.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
@@ -657,9 +702,7 @@ async function streamGemini(key, messages, onChunk) {
           fullText += txt;
           onChunk(txt, fullText);
         }
-      } catch (e) {
-        /* 忽略 */
-      }
+      } catch (e) {}
     }
   }
   return fullText;
@@ -678,6 +721,7 @@ function render() {
 
   app.classList.remove("preview-mode");
   app.classList.remove("ai-mode");
+  app.style.height = "";
 
   if (path === "/" || path === "/index.html") {
     const override = sessionStorage.getItem("p5_preview_override");
@@ -690,7 +734,8 @@ function render() {
 
     if (html) {
       app.classList.add("preview-mode");
-      app.innerHTML = `<iframe srcdoc="${escapeAttr(html)}"></iframe>`;
+      app.innerHTML = `<iframe srcdoc="${escapeAttr(html)}" allow="fullscreen"></iframe>`;
+      setTimeout(updateAppHeight, 0);
     } else {
       app.innerHTML = `<p style="text-align:center;padding:60px;">${escapeHtml(get("messages.noScripts", "暂无脚本"))}</p>`;
     }
@@ -768,7 +813,7 @@ function render() {
         ? editor.getValue().trim()
         : document.getElementById("script").value.trim();
       if (!script) {
-        alert(get("messages.scriptRequired", "请填写 p5.js 脚本代码"));
+        alert(get("messages.scriptRequired", "请填写p5.js 脚本代码"));
         return;
       }
       const imageDataUrl = uploadedImageDataUrl || "";
@@ -836,7 +881,6 @@ function render() {
   }
 }
 
-// 搜索输入
 document.getElementById("searchInput").addEventListener("input", function () {
   searchTerm = this.value;
   updateSidebarPages();
@@ -845,8 +889,6 @@ document.getElementById("searchInput").addEventListener("input", function () {
 window.addEventListener("popstate", function () {
   render();
 });
-
-// 初始化
 
 window.addEventListener("load", async function () {
   await loadContent();
