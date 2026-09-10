@@ -232,14 +232,23 @@ body.dark-mode #app {
   background: #2d2d2d;
   color: #ddd;
 }
+
+/* 首页预览模式：全屏 fixed 布局 */
 #app.preview-mode {
   padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   background: #000;
-  min-height: 100vh;
+  overflow: hidden;
+  z-index: 10;
 }
 #app.preview-mode iframe {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   border: none;
   display: block;
 }
@@ -337,20 +346,20 @@ body.dark-mode .result {
   #app {
     padding: 60px 12px 30px 12px;
   }
+  #app.preview-mode {
+    padding: 0;
+  }
 }
 
-/*AI 助手*/
-
+/*AI 助手 */
 #app.ai-mode {
   padding: 0;
   position: fixed;
   top: 0;
-  right: 0;
-  bottom: 0;
   left: 0;
+  right: 0;
   width: 100%;
-  height: 100vh;
-  height: 100dvh; 
+  /* 高度由 JS 动态设置 */
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -371,16 +380,16 @@ body.dark-mode #app.ai-mode {
 }
 
 .ai-messages {
-  flex: 1 1 0; 
-  min-height: 0; 
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
   padding: 70px 16px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   -webkit-overflow-scrolling: touch;
+  background: transparent;
 }
-
 .ai-msg {
   max-width: 80%;
   padding: 10px 14px;
@@ -407,7 +416,6 @@ body.dark-mode .ai-msg.assistant {
   color: #ddd;
 }
 
-/* 输入栏固定在底部 */
 .ai-input-bar {
   flex: 0 0 auto;
   display: flex;
@@ -495,10 +503,10 @@ body.dark-mode .ai-input {
   top: 14px;
   right: 18px;
   z-index: 300;
-  background: none;
+  background: transparent;
   border: none;
   color: #333;
-  font-size: 24px; 
+  font-size: 22px;
   font-weight: normal;
   cursor: pointer;
   padding: 2px 6px;
@@ -510,6 +518,13 @@ body.dark-mode .ai-input {
 }
 .ai-clear-btn:hover {
   transform: scale(1.15);
+}
+.ai-clear-btn:focus,
+.ai-clear-btn:active,
+.ai-clear-btn:focus-visible {
+  outline: none;
+  background: transparent;
+  box-shadow: none;
 }
 body.dark-mode .ai-clear-btn {
   color: #fff;
