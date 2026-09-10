@@ -31,13 +31,18 @@ body.dark-mode {
   padding: 4px 8px;
   line-height: 1;
   user-select: none;
-  transition: color 0.3s, transform 0.15s;
+  transition: color 0.3s, transform 0.15s, opacity 0.25s ease;
 }
 .hamburger-btn:hover {
   transform: scale(1.1);
 }
 body.dark-mode .hamburger-btn {
   color: #fff;
+}
+/* 打开侧边栏时隐藏汉堡按钮 */
+.hamburger-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ============ 侧边栏 ============ */
@@ -47,64 +52,125 @@ body.dark-mode .hamburger-btn {
   left: -280px;
   width: 280px;
   height: 100%;
-  background: #2c2c2c;
-  color: #eee;
+  /* 底色与页面背景一致 */
+  background: #f5f5f5;
+  color: #333;
   transition: left 0.3s ease;
   z-index: 200;
-  /* 关键：顶部留出 70px 空间，避免与汉堡按钮重叠 */
+  /* 顶部留出空间给汉堡按钮 + 搜索框 */
   padding: 70px 0 20px 0;
   overflow-y: auto;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+  /* 内阴影效果 */
+  box-shadow: inset -10px 0 20px -12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+body.dark-mode .sidebar {
+  background: #1e1e1e;
+  color: #ddd;
+  box-shadow: inset -10px 0 20px -12px rgba(0, 0, 0, 0.7);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 .sidebar.open {
   left: 0;
 }
+
+/* ---------- 搜索框 ---------- */
+.sidebar-search {
+  padding: 0 16px 14px 16px;
+}
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  color: #333;
+  transition: border-color 0.2s, background 0.3s, color 0.3s;
+}
+.sidebar-search input:focus {
+  border-color: #007bff;
+}
+body.dark-mode .sidebar-search input {
+  background: #2d2d2d;
+  color: #ddd;
+  border-color: #444;
+}
+body.dark-mode .sidebar-search input:focus {
+  border-color: #4dabf7;
+}
+
+/* ---------- 导航项 ---------- */
 .sidebar .nav-item {
   padding: 12px 20px;
-  border-bottom: 1px solid #444;
   cursor: pointer;
+  color: #333;
+  transition: background 0.2s;
 }
 .sidebar .nav-item:hover {
-  background: #3a3a3a;
+  background: rgba(0, 0, 0, 0.06);
 }
-.sidebar .divider {
-  border-top: 2px solid #666;
-  margin: 10px 0;
+body.dark-mode .sidebar .nav-item {
+  color: #ddd;
 }
+body.dark-mode .sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ---------- 区域标题（我的脚本） ---------- */
 .sidebar .section-title {
-  padding: 8px 20px;
-  font-size: 0.9rem;
-  color: #aaa;
+  padding: 10px 20px 6px 20px;
+  font-size: 0.85rem;
+  color: #888;
   font-weight: bold;
+  letter-spacing: 0.5px;
 }
+body.dark-mode .sidebar .section-title {
+  color: #888;
+}
+
+/* ---------- 作品条目 ---------- */
 .sidebar .page-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 20px 8px 30px;
-  border-bottom: 1px solid #3a3a3a;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .sidebar .page-item:hover {
-  background: #3a3a3a;
+  background: rgba(0, 0, 0, 0.06);
+}
+body.dark-mode .sidebar .page-item:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 .sidebar .page-item .page-title {
   flex: 1;
-  color: #eee;
+  color: #333;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.dark-mode .sidebar .page-item .page-title {
+  color: #ddd;
 }
 .sidebar .page-item .actions button {
   background: none;
   border: none;
-  color: #aaa;
+  color: #999;
   cursor: pointer;
   font-size: 0.8rem;
   padding: 2px 5px;
 }
 .sidebar .page-item .actions button:hover {
-  color: white;
+  color: #333;
+}
+body.dark-mode .sidebar .page-item .actions button:hover {
+  color: #fff;
 }
 .sidebar .page-item .actions .del:hover {
   color: #d9534f;
@@ -114,23 +180,32 @@ body.dark-mode .hamburger-btn {
 }
 .sidebar .no-pages {
   padding: 12px 20px;
-  color: #888;
+  color: #999;
   font-style: italic;
+  font-size: 0.9rem;
+}
+body.dark-mode .sidebar .no-pages {
+  color: #777;
 }
 
-/* 侧边栏底部：主题切换 */
+/* ---------- 侧边栏底部：主题切换 ---------- */
 .sidebar-footer {
   margin-top: auto;
-  border-top: 2px solid #666;
-  padding: 10px 0;
+  padding: 10px 0 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.dark-mode .sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .sidebar-footer .nav-item {
   padding: 10px 20px;
   cursor: pointer;
-  border-bottom: none;
 }
 .sidebar-footer .nav-item:hover {
-  background: #3a3a3a;
+  background: rgba(0, 0, 0, 0.06);
+}
+body.dark-mode .sidebar-footer .nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* ============ 遮罩层 ============ */
@@ -141,7 +216,7 @@ body.dark-mode .hamburger-btn {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.25);
   z-index: 150;
 }
 .overlay.show {
@@ -152,7 +227,7 @@ body.dark-mode .hamburger-btn {
 #app {
   width: 100%;
   min-height: 100vh;
-  padding: 70px 20px 40px 20px; /* 顶部留出 70px 避开汉堡按钮 */
+  padding: 70px 20px 40px 20px;
   background: white;
   transition: background 0.3s;
   box-sizing: border-box;
@@ -161,7 +236,7 @@ body.dark-mode #app {
   background: #2d2d2d;
   color: #ddd;
 }
-/* 预览模式：完全全屏，无内边距 */
+/* 预览模式：完全全屏 */
 #app.preview-mode {
   padding: 0;
   background: #000;
@@ -257,7 +332,7 @@ body.dark-mode .result {
   .sidebar {
     width: 240px;
     left: -240px;
-    padding-top: 62px; /* 移动端适当减小 */
+    padding-top: 62px;
   }
   .hamburger-btn {
     top: 8px;
