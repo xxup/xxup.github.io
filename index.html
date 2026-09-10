@@ -18,23 +18,23 @@
 
   <!-- 侧边栏 -->
   <div class="sidebar" id="sidebar">
-    <!-- 搜索框（最顶部） -->
+    <!-- 搜索框 -->
     <div class="sidebar-search">
       <input type="text" id="searchInput" placeholder="🔍 搜索作品...">
     </div>
 
-    <div class="nav-item" data-path="/">🏠 首页</div>
-    <div class="nav-item" data-path="/about">📖 关于</div>
-    <div class="nav-item" data-path="/generator">✏️ 生成脚本</div>
+    <div class="nav-item" data-path="/" data-i18n="nav.home">🏠 首页</div>
+    <div class="nav-item" data-path="/about" data-i18n="nav.about">📖 关于</div>
+    <div class="nav-item" data-path="/generator" data-i18n="nav.generator">✏️ 生成脚本</div>
 
-    <div class="section-title">📄 我的脚本</div>
+    <div class="section-title" data-i18n="nav.myScripts">📄 我的脚本</div>
     <div id="sidebar-pages">
-      <div class="no-pages">暂无生成的脚本</div>
+      <div class="no-pages" data-i18n="messages.noPages">暂无生成的脚本</div>
     </div>
 
     <!-- 底部仅主题切换 -->
     <div class="sidebar-footer">
-      <div class="nav-item" id="themeToggleSidebar">🌓 切换主题</div>
+      <div class="nav-item" id="themeToggleSidebar" data-i18n="nav.themeToggle">🌓 切换主题</div>
     </div>
   </div>
   <div class="overlay" id="overlay"></div>
