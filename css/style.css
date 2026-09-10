@@ -342,25 +342,39 @@ body.dark-mode .result {
 /* AI 助手 */
 #app.ai-mode {
   padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  max-height: 100vh;
-  min-height: 100vh;
+  background: #fff;
 }
+body.dark-mode #app.ai-mode {
+  background: #2d2d2d;
+}
+
 .ai-chat-wrap {
   display: flex;
   flex-direction: column;
-  height: 100vh;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
+
 .ai-messages {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   padding: 70px 16px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 .ai-msg {
   max-width: 80%;
@@ -388,7 +402,9 @@ body.dark-mode .ai-msg.assistant {
   color: #ddd;
 }
 
+/* 输入栏固定底部 */
 .ai-input-bar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   padding: 10px 12px;
@@ -401,6 +417,7 @@ body.dark-mode .ai-input-bar {
   background: #2d2d2d;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .ai-plus-btn {
   flex: 0 0 auto;
   width: 36px;
@@ -467,21 +484,33 @@ body.dark-mode .ai-input {
   cursor: not-allowed;
 }
 
-.ai-model-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  background: #e9f7fe;
-  color: #0d6efd;
-  font-size: 12px;
+/* 右上角清除按钮 */
+.ai-clear-btn {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 300;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 40px;
   font-weight: bold;
-  flex: 0 0 auto;
-  white-space: nowrap;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  user-select: none;
+  transition:
+    color 0.3s,
+    transform 0.15s;
 }
-body.dark-mode .ai-model-badge {
-  background: #2a4a5a;
-  color: #6ec1ff;
+.ai-clear-btn:hover {
+  transform: scale(1.1);
+}
+body.dark-mode .ai-clear-btn {
+  color: #fff;
 }
 
+/* 模型选择菜单 */
 .ai-model-menu {
   position: fixed;
   left: 16px;
@@ -490,16 +519,20 @@ body.dark-mode .ai-model-badge {
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   z-index: 400;
-  min-width: 160px;
+  min-width: 180px;
   overflow: hidden;
 }
 body.dark-mode .ai-model-menu {
   background: #3a3a3a;
 }
 .ai-model-menu .item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px 16px;
   cursor: pointer;
   font-size: 14px;
+  gap: 12px;
 }
 .ai-model-menu .item:hover {
   background: #f0f0f0;
@@ -510,7 +543,16 @@ body.dark-mode .ai-model-menu .item {
 body.dark-mode .ai-model-menu .item:hover {
   background: #4a4a4a;
 }
+.ai-model-menu .check {
+  color: #007bff;
+  font-weight: bold;
+  visibility: hidden;
+}
+.ai-model-menu .item.selected .check {
+  visibility: visible;
+}
 
+/* API Key 弹窗 */
 .ai-modal-overlay {
   position: fixed;
   inset: 0;
