@@ -1,37 +1,8 @@
-
-// 动态设置
-
-function updateAppHeight() {
-  const app = document.getElementById("app");
-  if (!app) return;
-  if (
-    app.classList.contains("ai-mode") ||
-    app.classList.contains("preview-mode")
-  ) {
-    const h =
-      (window.visualViewport && window.visualViewport.height) ||
-      window.innerHeight ||
-      document.documentElement.clientHeight;
-    app.style.height = h + "px";
-  } else {
-    app.style.height = "";
-  }
-}
-
-window.addEventListener("resize", updateAppHeight);
-window.addEventListener("orientationchange", () =>
-  setTimeout(updateAppHeight, 100),
-);
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", updateAppHeight);
-  window.visualViewport.addEventListener("scroll", updateAppHeight);
-}
-
 // 首页随机脚本
 
 const HOME_SCRIPTS = [
   "p5/dots.js",
-  "p5/orbit.js",
+  "p5orbit.js",
   "p5/rotating-square.js",
 ];
 
@@ -64,7 +35,6 @@ function buildHomeFrameHtml(scriptPath) {
 <body>
   <script src="${absPath}"><\/script>
   <script>
-    // 若用户脚本未定义 windowResized，则自动补一个
     window.addEventListener('resize', function() {
       if (typeof resizeCanvas === 'function') {
         try { resizeCanvas(windowWidth, windowHeight); } catch (e) {}
@@ -376,7 +346,7 @@ document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
 
-// AI 助手 - 聊天页面
+// AI 助手-聊天页面
 
 function renderAIChat(app) {
   app.classList.add("ai-mode");
@@ -415,8 +385,6 @@ function renderAIChat(app) {
   document
     .getElementById("aiClearBtn")
     .addEventListener("click", aiClearMessages);
-
-  setTimeout(updateAppHeight, 0);
 }
 
 function renderAIMessages() {
@@ -530,7 +498,7 @@ function aiClearMessages() {
   renderAIMessages();
 }
 
-// 流式输出
+// 流式输出 - 发送消息
 
 async function aiSendMessage() {
   if (aiSending) return;
@@ -721,7 +689,6 @@ function render() {
 
   app.classList.remove("preview-mode");
   app.classList.remove("ai-mode");
-  app.style.height = "";
 
   if (path === "/" || path === "/index.html") {
     const override = sessionStorage.getItem("p5_preview_override");
@@ -735,7 +702,6 @@ function render() {
     if (html) {
       app.classList.add("preview-mode");
       app.innerHTML = `<iframe srcdoc="${escapeAttr(html)}" allow="fullscreen"></iframe>`;
-      setTimeout(updateAppHeight, 0);
     } else {
       app.innerHTML = `<p style="text-align:center;padding:60px;">${escapeHtml(get("messages.noScripts", "暂无脚本"))}</p>`;
     }
@@ -813,7 +779,7 @@ function render() {
         ? editor.getValue().trim()
         : document.getElementById("script").value.trim();
       if (!script) {
-        alert(get("messages.scriptRequired", "请填写p5.js 脚本代码"));
+        alert(get("messages.scriptRequired", "请填写 p5.js 脚本代码"));
         return;
       }
       const imageDataUrl = uploadedImageDataUrl || "";
