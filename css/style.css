@@ -294,23 +294,6 @@ body.dark-mode .form-group .CodeMirror {
   border-color: #555;
 }
 
-.CodeMirror-placeholder {
-  white-space: pre-wrap;
-  color: #999 !important;
-  font-style: italic;
-  opacity: 1;
-}
-body.dark-mode .CodeMirror-placeholder {
-  color: #666 !important;
-}
-.CodeMirror-placeholder {
-  white-space: pre-wrap;
-  color: #999 !important;
-  font-style: italic;
-}
-body.dark-mode .CodeMirror-placeholder {
-  color: #666 !important;
-}
 /* CodeMirror placeholder 显示样式 */
 .CodeMirror-placeholder {
   white-space: pre-wrap;
