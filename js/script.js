@@ -1,5 +1,5 @@
 // ============================================================
-// 预览 iframe：srcdoc + 智能 canvas 尺寸修正（避免频繁 resize）
+// 预览 iframe：用 contentDocument.write 直接写入（避开 srcdoc 时序问题）
 // ============================================================
 function setPreviewIframe(app, html) {
   app.classList.add('preview-mode');
@@ -11,53 +11,13 @@ function setPreviewIframe(app, html) {
   iframe.style.height = '100%';
   iframe.style.border = 'none';
   iframe.style.display = 'block';
-  iframe.srcdoc = html;
   app.appendChild(iframe);
 
-  // 父页面侧：只在必要时修正，尺寸正确后立即停止
-  let checks = 0;
-  const maxChecks = 30;   // 最多 3 秒（100ms × 30）
-  const iv = setInterval(function() {
-    checks++;
-    try {
-      const w = iframe.contentWindow;
-      if (!w || !w.document) {
-        if (checks >= maxChecks) clearInterval(iv);
-        return;
-      }
-      const c = w.document.querySelector('canvas');
-      if (!c) {
-        if (checks >= maxChecks) clearInterval(iv);
-        return;
-      }
-      const iw = w.innerWidth;
-      const ih = w.innerHeight;
-      if (iw <= 0 || ih <= 0) {
-        if (checks >= maxChecks) clearInterval(iv);
-        return;
-      }
-
-      // 用 p5 全局 CSS 像素 width/height 判断，避免 pixelDensity 误判
-      const pw = (typeof w.width === 'number') ? w.width : null;
-      const ph = (typeof w.height === 'number') ? w.height : null;
-
-      if (pw === null || ph === null) {
-        if (checks >= maxChecks) clearInterval(iv);
-        return;
-      }
-
-      if (Math.abs(pw - iw) > 1 || Math.abs(ph - ih) > 1) {
-        if (typeof w.resizeCanvas === 'function') {
-          try { w.resizeCanvas(iw, ih); } catch (e) {}
-        }
-      } else {
-        clearInterval(iv);
-      }
-    } catch (e) {
-      if (checks >= maxChecks) clearInterval(iv);
-    }
-    if (checks >= maxChecks) clearInterval(iv);
-  }, 100);
+  // 同源直接写入，尺寸与事件都正常
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
 }
 
 // ============================================================
@@ -74,7 +34,7 @@ function pickRandomScriptPath() {
   return HOME_SCRIPTS[Math.floor(Math.random() * HOME_SCRIPTS.length)];
 }
 
-// p5 页面通用外壳（含 iframe 内智能修正）
+// p5 页面外壳（干净，不做任何 resize 干扰）
 function buildP5PageHtml(title, bodyContent) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -93,35 +53,6 @@ function buildP5PageHtml(title, bodyContent) {
 </head>
 <body>
   ${bodyContent}
-  <script>
-    // iframe 内智能修正：用 p5 的 CSS 像素 width/height 对比视口
-    (function() {
-      var startTime = Date.now();
-      var done = false;
-      function fixCanvas() {
-        if (done) return;
-        var w = window.innerWidth || document.documentElement.clientWidth || 0;
-        var h = window.innerHeight || document.documentElement.clientHeight || 0;
-        if (w > 0 && h > 0) {
-          if (typeof window.width === 'number' && typeof window.height === 'number') {
-            if (Math.abs(window.width - w) > 1 || Math.abs(window.height - h) > 1) {
-              if (typeof window.resizeCanvas === 'function') {
-                try { window.resizeCanvas(w, h); } catch (e) {}
-              }
-            } else {
-              done = true;
-              return;
-            }
-          }
-        }
-        if (Date.now() - startTime < 3000) {
-          requestAnimationFrame(fixCanvas);
-        }
-      }
-      window.addEventListener('load', fixCanvas);
-      requestAnimationFrame(fixCanvas);
-    })();
-  <\/script>
 </body>
 </html>`;
 }
@@ -780,7 +711,7 @@ function render() {
           tabSize: 2,
           indentUnit: 2,
           autofocus: true,
-          placeholder: scriptPlaceholder   // ★ CodeMirror placeholder 支持
+          placeholder: scriptPlaceholder
         });
         editor.setSize(null, 200);
       }
