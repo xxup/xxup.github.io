@@ -233,7 +233,7 @@ body.dark-mode #app {
   color: #ddd;
 }
 
-/* 首页预览模式：全屏 fixed 布局 */
+/*首页预览全屏*/
 #app.preview-mode {
   padding: 0;
   position: fixed;
@@ -242,6 +242,7 @@ body.dark-mode #app {
   right: 0;
   bottom: 0;
   width: 100%;
+  height: 100%; 
   background: #000;
   overflow: hidden;
   z-index: 10;
@@ -351,15 +352,16 @@ body.dark-mode .result {
   }
 }
 
-/*AI 助手 */
+/*AI 助手全屏 */
 #app.ai-mode {
   padding: 0;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   width: 100%;
-  /* 高度由 JS 动态设置 */
+  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
