@@ -11,6 +11,7 @@ body {
   font-family: Arial, sans-serif;
   background: #f5f5f5;
   transition: background 0.3s;
+  -webkit-tap-highlight-color: transparent;
 }
 body.dark-mode {
   background: #1e1e1e;
@@ -32,6 +33,10 @@ body.dark-mode {
   padding: 4px 8px;
   line-height: 1;
   user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
   transition:
     color 0.3s,
     transform 0.15s,
@@ -161,6 +166,8 @@ body.dark-mode .sidebar .page-item .page-title {
   cursor: pointer;
   font-size: 0.8rem;
   padding: 2px 5px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .sidebar .page-item .actions button:hover {
   color: #333;
@@ -214,9 +221,11 @@ body.dark-mode .sidebar-footer .nav-item:hover {
   height: 100%;
   background: rgba(0, 0, 0, 0.25);
   z-index: 150;
+  pointer-events: none;
 }
 .overlay.show {
   display: block;
+  pointer-events: auto;
 }
 
 /* 主内容 */
@@ -233,7 +242,7 @@ body.dark-mode #app {
   color: #ddd;
 }
 
-/* 首页iframe全屏 */
+/* 首页预览 */
 #app.preview-mode {
   padding: 0;
   position: fixed;
@@ -293,6 +302,8 @@ button {
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 button:hover {
   background: #0056b3;
@@ -350,7 +361,6 @@ body.dark-mode .result {
 }
 
 /* AI 助手 */
-
 #app.ai-mode {
   padding: 0;
   background: #fff;
@@ -360,7 +370,6 @@ body.dark-mode #app.ai-mode {
   background: #2d2d2d;
 }
 
-/* 消息区：底部留出120px空间给固定的输入栏 */
 .ai-messages {
   padding: 70px 16px 120px 16px;
   display: flex;
@@ -394,7 +403,6 @@ body.dark-mode .ai-msg.assistant {
   color: #ddd;
 }
 
-/* 输入栏：直接钉在视口底部 */
 .ai-input-bar {
   position: fixed;
   bottom: 0;
@@ -431,6 +439,10 @@ body.dark-mode .ai-input-bar {
   justify-content: center;
   transition: background 0.2s;
   padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .ai-plus-btn:hover {
   background: #e0e0e0;
@@ -472,6 +484,8 @@ body.dark-mode .ai-input {
   border: none;
   cursor: pointer;
   font-size: 14px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .ai-send-btn:hover {
   background: #0056b3;
@@ -496,19 +510,27 @@ body.dark-mode .ai-input {
   padding: 2px 6px;
   line-height: 1;
   user-select: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-appearance: none;
+  appearance: none;
   transition:
     color 0.3s,
     transform 0.15s;
 }
-.ai-clear-btn:hover {
-  transform: scale(1.15);
-}
+.ai-clear-btn:hover,
 .ai-clear-btn:focus,
 .ai-clear-btn:active,
-.ai-clear-btn:focus-visible {
-  outline: none;
-  background: transparent;
-  box-shadow: none;
+.ai-clear-btn:focus-visible,
+.ai-clear-btn:focus-within {
+  background: transparent !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.ai-clear-btn:hover {
+  transform: scale(1.15);
 }
 body.dark-mode .ai-clear-btn {
   color: #fff;
@@ -590,6 +612,7 @@ body.dark-mode .ai-modal {
   font-family: monospace;
   font-size: 13px;
   box-sizing: border-box;
+  outline: none;
 }
 body.dark-mode .ai-modal input {
   background: #3a3a3a;
