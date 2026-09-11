@@ -2,7 +2,7 @@
 
 const HOME_SCRIPTS = [
   "p5/dots.js",
-  "p5orbit.js",
+  "p5/orbit.js",
   "p5/rotating-square.js",
 ];
 
