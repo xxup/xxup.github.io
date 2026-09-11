@@ -303,6 +303,14 @@ body.dark-mode .form-group .CodeMirror {
 body.dark-mode .CodeMirror-placeholder {
   color: #666 !important;
 }
+.CodeMirror-placeholder {
+  white-space: pre-wrap;
+  color: #999 !important;
+  font-style: italic;
+}
+body.dark-mode .CodeMirror-placeholder {
+  color: #666 !important;
+}
 
 /* 通用按钮 */
 button {
