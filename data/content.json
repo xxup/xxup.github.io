@@ -3,7 +3,7 @@
     "home": "🏠 首页",
     "about": "📖 关于",
     "ai": "🤖 AI助手",
-    "generator": "✏️ 生成脚本",
+    "generator": "✏️ 编写脚本",
     "myScripts": "📄 我的脚本",
     "searchPlaceholder": "🔍 搜索作品...",
     "themeToggle": "🌓 切换主题"
@@ -14,14 +14,14 @@
       "paragraphs": [
         "纯前端工具，基于localStorage存储，无需后端",
         "首页随机展示p5js创意脚本",
-        "编辑的脚本点击提交会自动添加到左侧栏列表中，可重命名、删除、导出ZIP",
+        "编写的脚本点击“提交脚本”会返回首页预览效果并自动添加到左侧栏列表中，可重命名、删除、导出ZIP",
         "内置AI助手，支持ChatGPT | Gemini | DeepSeek对话",
         "所有界面文本均可自由修改"
       ]
     },
     "generator": {
       "title": "编写创意脚本",
-      "description": "输入页面标题和p5.js代码，上传图片（可选），点击脚本提交后可直接返回首页预览。",
+      "description": "输入标题和p5.js代码，上传图片（可选）供脚本加载，提交脚本后可直接返回首页预览。",
       "labels": {
         "titleInput": "标题",
         "titlePlaceholder": "例如：我的创意绘图脚本",
