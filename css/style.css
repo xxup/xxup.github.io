@@ -64,7 +64,7 @@ body.dark-mode .hamburger-btn {
   color: #333;
   transition: left 0.3s ease;
   z-index: 200;
-  padding: 70px 0 20px 0;
+  padding: 60px 0 10px 0;
   overflow-y: auto;
   box-shadow: inset -10px 0 20px -12px rgba(0, 0, 0, 0.25);
   display: flex;
@@ -195,7 +195,7 @@ body.dark-mode .sidebar .no-pages {
 /* 侧边栏底部：主题和导出并排竖线分隔*/
 .sidebar-footer {
   margin-top: auto;
-  padding: 0;
+  padding: 0 0 15px 0;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: row;
