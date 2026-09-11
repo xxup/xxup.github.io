@@ -263,7 +263,7 @@ let theme = "light";
 let searchTerm = "";
 
 // ============================================================
-// 侧边栏作品列表
+// 侧边栏作品列表（数据索引）
 // ============================================================
 function updateSidebarPages() {
   const container = document.getElementById("sidebar-pages");
@@ -290,16 +290,40 @@ function updateSidebarPages() {
     const title = escapeHtml(page.title);
     html += `
       <div class="page-item">
-        <span class="page-title" onclick="navigateToPage(${index})">${title}</span>
+        <span class="page-title" data-action="open" data-index="${index}">${title}</span>
         <div class="actions">
-          <button class="rename" onclick="event.stopPropagation(); renamePage(${index})" title="重命名">✏️</button>
-          <button class="del" onclick="event.stopPropagation(); deletePage(${index})" title="删除">🗑️</button>
+          <button class="rename" data-action="rename" data-index="${index}" title="重命名">✏️</button>
+          <button class="del" data-action="delete" data-index="${index}" title="删除">🗑️</button>
         </div>
       </div>
     `;
   });
   container.innerHTML = html;
 }
+
+// ★ 事件委托：把侧边栏所有点击都绑定到一个监听器
+(function bindSidebarDelegation() {
+  document.addEventListener("click", function(e) {
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
+    const action = el.getAttribute("data-action");
+    const index = parseInt(el.getAttribute("data-index"), 10);
+    if (isNaN(index)) return;
+
+    if (action === "open") {
+      e.preventDefault();
+      navigateToPage(index);
+    } else if (action === "rename") {
+      e.preventDefault();
+      e.stopPropagation();
+      renamePage(index);
+    } else if (action === "delete") {
+      e.preventDefault();
+      e.stopPropagation();
+      deletePage(index);
+    }
+  });
+})();
 
 function navigateToPage(index) {
   const pages = getPages();
@@ -309,7 +333,6 @@ function navigateToPage(index) {
   render();
   closeSidebar();
 }
-window.navigateToPage = navigateToPage;
 
 function deletePage(index) {
   if (!confirm(get("messages.deleteConfirm", "确定删除该作品吗？"))) return;
@@ -319,7 +342,6 @@ function deletePage(index) {
   updateSidebarPages();
   render();
 }
-window.deletePage = deletePage;
 
 function renamePage(index) {
   const pages = getPages();
@@ -335,7 +357,6 @@ function renamePage(index) {
   updateSidebarPages();
   render();
 }
-window.renamePage = renamePage;
 
 // ============================================================
 // 侧边栏控制
@@ -429,9 +450,15 @@ function renderAIChat(app) {
       aiSendMessage();
     }
   });
+  // ★ 清除按钮：加 preventDefault + stopPropagation 确保生效
   document
     .getElementById("aiClearBtn")
-    .addEventListener("click", aiClearMessages);
+    .addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      aiClearMessages();
+      this.blur();
+    });
 }
 
 function renderAIMessages() {
