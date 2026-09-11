@@ -14,18 +14,18 @@
       "paragraphs": [
         "纯前端工具，基于localStorage存储，无需后端",
         "首页随机展示p5js创意脚本",
-        "编辑的脚本点击提交会自动添加到“我的脚本”列表，可重命名、删除、导出ZIP。",
-        "内置AI助手，支持 ChatGPT | Gemini | DeepSeek对话。",
-        "所有界面文本均可自由修改。"
+        "编辑的脚本点击提交会自动添加到左侧栏列表中，可重命名、删除、导出ZIP",
+        "内置AI助手，支持ChatGPT | Gemini | DeepSeek对话",
+        "所有界面文本均可自由修改"
       ]
     },
     "generator": {
-      "title": "✏️编写创意脚本",
+      "title": "编写创意脚本",
       "description": "输入页面标题和p5.js代码，上传图片（可选），点击提交。提交后可直接返回首页预览。",
       "labels": {
         "titleInput": "页面标题",
         "titlePlaceholder": "例如：我的创意绘图",
-        "scriptInput": "p5脚本代码",
+        "scriptInput": "p5js脚本代码",
         "scriptPlaceholder": "例如：\nlet bg;\nfunction preload() {\n  if (imageUrl) bg = loadImage(imageUrl);\n}\nfunction setup() {\n  createCanvas(720, 400);\n}\nfunction draw() {\n  if (bg) image(bg, 0, 0, width, height);\n}",
         "imageInput": "上传图片（可选，脚本可通过imageUrl加载）",
         "generateBtn": "提交页面"
