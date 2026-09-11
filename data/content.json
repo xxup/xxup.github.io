@@ -21,14 +21,14 @@
     },
     "generator": {
       "title": "编写创意脚本",
-      "description": "输入页面标题和p5.js代码，上传图片（可选），点击提交。提交后可直接返回首页预览。",
+      "description": "输入页面标题和p5.js代码，上传图片（可选），点击脚本提交后可直接返回首页预览。",
       "labels": {
-        "titleInput": "页面标题",
-        "titlePlaceholder": "例如：我的创意绘图",
+        "titleInput": "标题",
+        "titlePlaceholder": "例如：我的创意绘图脚本",
         "scriptInput": "p5js脚本代码",
         "scriptPlaceholder": "例如：\nlet bg;\nfunction preload() {\n  if (imageUrl) bg = loadImage(imageUrl);\n}\nfunction setup() {\n  createCanvas(720, 400);\n}\nfunction draw() {\n  if (bg) image(bg, 0, 0, width, height);\n}",
-        "imageInput": "上传图片（可选，脚本可通过imageUrl加载）",
-        "generateBtn": "提交页面"
+        "imageInput": "上传图片(可选，脚本可通过 imageUrl 加载）",
+        "generateBtn": "提交脚本"
       }
     },
     "ai": {
