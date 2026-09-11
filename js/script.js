@@ -84,7 +84,7 @@ function pickRandomHomeScript() {
   homeScriptHtml = homeScriptPath ? buildHomeFrameHtml(homeScriptPath) : null;
 }
 
-// AI助手
+// AI 助手
 
 const AI_MODELS = {
   chatgpt: {
@@ -124,6 +124,62 @@ function aiSaveMessages() {
       JSON.stringify(aiMessages),
     );
   }
+}
+
+// 导出AI对话为Markdown（全部模型）
+
+function exportAIChatsMarkdown() {
+  const sections = [];
+
+  ["chatgpt", "gemini", "deepseek"].forEach((key) => {
+    const msgs = aiLoadMessages(key);
+    if (!msgs.length) return; // 跳过空对话
+
+    let md = `## 📌 ${AI_MODELS[key].name}\n\n`;
+    msgs.forEach((m) => {
+      if (m.role === "user") {
+        md += `### 👤 用户\n\n${m.content}\n\n`;
+      } else {
+        md += `### 🤖 ${AI_MODELS[key].name}\n\n${m.content}\n\n`;
+      }
+    });
+    sections.push(md);
+  });
+
+  if (!sections.length) {
+    alert("暂无对话记录可导出。");
+    return;
+  }
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const timeStr =
+    now.getFullYear() +
+    "-" +
+    pad(now.getMonth() + 1) +
+    "-" +
+    pad(now.getDate()) +
+    " " +
+    pad(now.getHours()) +
+    ":" +
+    pad(now.getMinutes());
+
+  const content =
+    `# AI 助手对话记录\n\n` +
+    `导出时间：${timeStr}\n\n` +
+    `---\n\n` +
+    sections.join("\n---\n\n");
+
+  const filename = `ai_chats_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}.md`;
+
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
 }
 
 // 文本内容加载
@@ -251,7 +307,7 @@ let uploadedImageDataUrl = null;
 let theme = "light";
 let searchTerm = "";
 
-// 侧边栏作品列表（数据索引）
+// 侧边栏作品列表（事件委托）
 
 function updateSidebarPages() {
   const container = document.getElementById("sidebar-pages");
@@ -289,29 +345,27 @@ function updateSidebarPages() {
   container.innerHTML = html;
 }
 
-// 事件委托：把侧边栏所有点击都绑定到一个监听器
-(function bindSidebarDelegation() {
-  document.addEventListener("click", function (e) {
-    const el = e.target.closest("[data-action]");
-    if (!el) return;
-    const action = el.getAttribute("data-action");
-    const index = parseInt(el.getAttribute("data-index"), 10);
-    if (isNaN(index)) return;
+// 事件委托
+document.addEventListener("click", function (e) {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const action = el.getAttribute("data-action");
+  const index = parseInt(el.getAttribute("data-index"), 10);
+  if (isNaN(index)) return;
 
-    if (action === "open") {
-      e.preventDefault();
-      navigateToPage(index);
-    } else if (action === "rename") {
-      e.preventDefault();
-      e.stopPropagation();
-      renamePage(index);
-    } else if (action === "delete") {
-      e.preventDefault();
-      e.stopPropagation();
-      deletePage(index);
-    }
-  });
-})();
+  if (action === "open") {
+    e.preventDefault();
+    navigateToPage(index);
+  } else if (action === "rename") {
+    e.preventDefault();
+    e.stopPropagation();
+    renamePage(index);
+  } else if (action === "delete") {
+    e.preventDefault();
+    e.stopPropagation();
+    deletePage(index);
+  }
+});
 
 function navigateToPage(index) {
   const pages = getPages();
@@ -375,7 +429,7 @@ document.querySelectorAll(".sidebar .nav-item[data-path]").forEach((el) => {
   });
 });
 
-// 主题切换
+// 主题切换 & 导出对话
 
 function toggleTheme() {
   const body = document.body;
@@ -398,6 +452,10 @@ function toggleTheme() {
 document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
+
+document
+  .getElementById("exportChatSidebar")
+  .addEventListener("click", exportAIChatsMarkdown);
 
 // AI 助手 - 聊天页面
 
@@ -435,7 +493,6 @@ function renderAIChat(app) {
       aiSendMessage();
     }
   });
-
   document.getElementById("aiClearBtn").addEventListener("click", function (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -615,7 +672,7 @@ async function aiSendMessage() {
   }
 }
 
-// 流式输出 - 调用各模型 API
+// 流式输出 - 调用各模型API
 
 async function callAIStream(model, key, messages, onChunk) {
   if (model === "chatgpt") {
