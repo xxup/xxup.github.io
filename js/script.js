@@ -1,4 +1,3 @@
-
 // p5鼠标事件兜底脚本
 
 function p5MouseFallbackScript() {
