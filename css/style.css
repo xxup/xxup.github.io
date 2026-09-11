@@ -294,6 +294,16 @@ body.dark-mode .form-group .CodeMirror {
   border-color: #555;
 }
 
+.CodeMirror-placeholder {
+  white-space: pre-wrap;
+  color: #999 !important;
+  font-style: italic;
+  opacity: 1;
+}
+body.dark-mode .CodeMirror-placeholder {
+  color: #666 !important;
+}
+
 /* 通用按钮 */
 button {
   background: #007bff;
