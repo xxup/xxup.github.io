@@ -523,13 +523,13 @@ body.dark-mode .ai-input {
 /* 右上角清除按钮 */
 .ai-clear-btn {
   position: fixed;
-  top: 14px;
+  top: 18px;
   right: 18px;
   z-index: 300;
   background: transparent;
   border: none;
   color: #333;
-  font-size: 22px;
+  font-size: 30px;
   font-weight: normal;
   cursor: pointer;
   padding: 2px 6px;
