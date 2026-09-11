@@ -4,14 +4,16 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>randomArt创意脚本编辑</title>
 
+    <!-- 预加载 p5 脚本 -->
     <link rel="prefetch" href="p5/dots.js" />
     <link rel="prefetch" href="p5/orbit.js" />
     <link rel="prefetch" href="p5/rotating-square.js" />
 
+    <!-- CodeMirror -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
@@ -28,6 +30,7 @@
       disabled
     />
 
+    <!-- 自定义样式 -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
@@ -49,27 +52,21 @@
 
       <div class="section-title" data-i18n="nav.myScripts">📄 我的脚本</div>
       <div id="sidebar-pages">
-        <div class="no-pages" data-i18n="messages.noPages">暂无编写的脚本</div>
+        <div class="no-pages" data-i18n="messages.noPages">暂无生成的脚本</div>
       </div>
 
       <div class="sidebar-footer">
-        <div
-          class="nav-item"
-          id="themeToggleSidebar"
-          data-i18n="nav.themeToggle"
-        >
-          🌓 切换主题
-        </div>
+        <div class="nav-item" id="themeToggleSidebar">🌓 主题</div>
+        <div class="nav-item" id="exportChatSidebar">📥 导出对话</div>
       </div>
     </div>
     <div class="overlay" id="overlay"></div>
 
-    <div id="app"> </div>
+    <div id="app">加载中...</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
