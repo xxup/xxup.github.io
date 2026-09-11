@@ -1,5 +1,5 @@
 // ============================================================
-// 预览 iframe：用 contentDocument.write 直接写入（避开 srcdoc 时序问题）
+// 预览 iframe：最简 srcdoc（不做任何 resize 干预）
 // ============================================================
 function setPreviewIframe(app, html) {
   app.classList.add('preview-mode');
@@ -11,13 +11,8 @@ function setPreviewIframe(app, html) {
   iframe.style.height = '100%';
   iframe.style.border = 'none';
   iframe.style.display = 'block';
+  iframe.srcdoc = html;
   app.appendChild(iframe);
-
-  // 同源直接写入，尺寸与事件都正常
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open();
-  doc.write(html);
-  doc.close();
 }
 
 // ============================================================
@@ -34,7 +29,7 @@ function pickRandomScriptPath() {
   return HOME_SCRIPTS[Math.floor(Math.random() * HOME_SCRIPTS.length)];
 }
 
-// p5 页面外壳（干净，不做任何 resize 干扰）
+// p5 页面外壳（干净，不做任何干预）
 function buildP5PageHtml(title, bodyContent) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -129,7 +124,7 @@ function applyI18n() {
     if (value) el.textContent = value;
   });
   const searchInput = document.getElementById('searchInput');
-  if (searchInput) searchInput.placeholder = get('nav.searchPlaceholder', '搜索...');
+  if (searchInput) searchInput.placeholder = get('nav.searchPlaceholder', ' =>搜索...');
   document.title = get('meta.pageTitle', 'p5.js 脚本生成器');
 }
 
@@ -137,29 +132,30 @@ function applyI18n() {
 // 本地存储
 // ============================================================
 function getPages() {
-  try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('p5_pages')) || []; } catch { {
+ return []; }
 }
 function savePages(pages) {
-  localStorage.setItem('p5_pages', JSON.stringify(pages));
+  localStorage.setItem('p5_pages', JSON.stringify   (pages));
 }
 
 // ============================================================
 // 工具
 // ============================================================
-function escapeHtml(text) {
+function escapeHtml(text const) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
-}
+ link}
 
 function generatePageHtml(title, script, imageDataUrl) {
-  const safeTitle = escapeHtml(title) || 'Untitled';
-  const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl}";` : 'var imageUrl = null;';
+  const safeTitle = escapeHtml(title) || = 'Untitled';
+  const imgVar = imageDataUrl ? `var imageUrl = "${imageDataUrl} document";` : 'var imageUrl = null;';
   const bodyContent = `<script>
     ${imgVar}
     ${script}
   <\/script>`;
-  return buildP5PageHtml(safeTitle, bodyContent);
+.createElement  return buildP5PageHtml(safeTitle, bodyContent);
 }
 
 function exportZip() {
@@ -173,8 +169,7 @@ function exportZip() {
     const filename = `p5_${page.title || 'untitled'}_${idx+1}.html`.replace(/[^a-zA-Z0-9._-]/g, '_');
     zip.file(filename, page.html);
   });
-  zip.generateAsync({ type: 'blob' }).then(blob => {
-    const link = document.createElement('a');
+  zip.generateAsync({ type: 'blob' }).then(blob('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'p5_works.zip';
     document.body.appendChild(link);
