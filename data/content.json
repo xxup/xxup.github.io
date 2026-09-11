@@ -10,58 +10,58 @@
   },
   "pages": {
     "about": {
-      "title": "📖 关于",
+      "title": "关于",
       "paragraphs": [
-        "纯前端工具，基于 localStorage 存储，无需后端。",
-        "首页随机展示一个 p5.js 脚本（来自 p5sketches/ 目录）。",
-        "生成的页面自动添加到“我的脚本”列表，可重命名、删除、导出 ZIP。",
-        "内置 AI 助手，支持 ChatGPT / Gemini / DeepSeek 对话。",
-        "所有界面文本均从 data/content.json 加载，可自由修改。"
+        "纯前端工具，基于localStorage存储，无需后端",
+        "首页随机展示p5js创意脚本",
+        "编辑的脚本点击提交会自动添加到“我的脚本”列表，可重命名、删除、导出ZIP。",
+        "内置AI助手，支持 ChatGPT | Gemini | DeepSeek对话。",
+        "所有界面文本均可自由修改。"
       ]
     },
     "generator": {
-      "title": "✏️ 编写 p5.js 脚本",
-      "description": "输入页面标题和 p5.js 代码，上传图片（可选），点击生成。生成后可直接返回首页预览。",
+      "title": "✏️编写创意脚本",
+      "description": "输入页面标题和p5.js代码，上传图片（可选），点击提交。提交后可直接返回首页预览。",
       "labels": {
         "titleInput": "页面标题",
         "titlePlaceholder": "例如：我的创意绘图",
-        "scriptInput": "p5.js 脚本代码",
+        "scriptInput": "p5脚本代码",
         "scriptPlaceholder": "例如：\nlet bg;\nfunction preload() {\n  if (imageUrl) bg = loadImage(imageUrl);\n}\nfunction setup() {\n  createCanvas(720, 400);\n}\nfunction draw() {\n  if (bg) image(bg, 0, 0, width, height);\n}",
-        "imageInput": "上传图片（可选，脚本可通过 imageUrl 加载）",
-        "generateBtn": "生成页面"
+        "imageInput": "上传图片（可选，脚本可通过imageUrl加载）",
+        "generateBtn": "提交页面"
       }
     },
     "ai": {
-      "title": "🤖 AI助手",
+      "title": "🤖AI助手",
       "placeholder": "输入你的问题...",
       "sendBtn": "发送",
-      "apiKeyTitle": "请输入 API Key",
-      "apiKeyHint": "Key 只保存在你的浏览器本地，不会上传到任何服务器。",
+      "apiKeyTitle": "请输入API Key",
+      "apiKeyHint": "Key只保存在浏览器本地，不会上传到任何服务器。",
       "noModel": "请先选择模型",
-      "noKey": "请先输入 API Key",
+      "noKey": "请先输入API Key",
       "thinking": "思考中...",
       "errorPrefix": "请求失败："
     },
     "notFound": {
-      "title": "📄 页面未找到",
+      "title": "📄页面未找到",
       "paragraphs": ["该路径未定义。"]
     }
   },
   "messages": {
     "noPages": "暂无生成的脚本",
     "noMatches": "没有匹配的作品",
-    "generateSuccess": "✅ 页面生成成功！已保存到本地存储。",
+    "generateSuccess": "✅ 页面提交成功！已保存到本地存储。",
     "generating": "正在生成...",
-    "previewBtn": "🏠 返回首页预览",
-    "zipBtn": "📦 导出所有作品 (ZIP)",
+    "previewBtn": "返回首页预览",
+    "zipBtn": "导出所有脚本",
     "renamePrompt": "请输入新标题：",
     "deleteConfirm": "确定删除该作品吗？",
     "emptyTitle": "未命名脚本",
     "zipEmpty": "没有可导出的作品。",
-    "scriptRequired": "请填写 p5.js 脚本代码",
-    "noScripts": "暂无 p5.js 脚本，请在 js/script.js 的 HOME_SCRIPTS 中添加。"
+    "scriptRequired": "请填写p5.js脚本代码",
+    "noScripts": "暂无脚本，请添加。"
   },
   "meta": {
-    "pageTitle": "p5.js 脚本生成器"
+    "pageTitle": "创意脚本编辑工具"
   }
 }
