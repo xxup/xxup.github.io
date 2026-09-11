@@ -311,6 +311,16 @@ body.dark-mode .CodeMirror-placeholder {
 body.dark-mode .CodeMirror-placeholder {
   color: #666 !important;
 }
+/* CodeMirror placeholder 显示样式 */
+.CodeMirror-placeholder {
+  white-space: pre-wrap;
+  color: #999 !important;
+  font-style: italic;
+}
+body.dark-mode .CodeMirror-placeholder {
+  color: #666 !important;
+}
+
 
 /* 通用按钮 */
 button {
