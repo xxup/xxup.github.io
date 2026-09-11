@@ -1,5 +1,41 @@
-// 首页随机脚本
+// ============================================================
+// p5 鼠标事件兜底脚本（注入到每个 p5 页面）
+// ============================================================
+function p5MouseFallbackScript() {
+  return `<script>
+(function() {
+  function setPos(x, y) {
+    var mx = window.mouseX, my = window.mouseY;
+    window.pmouseX = (typeof mx === 'number') ? mx : x;
+    window.pmouseY = (typeof my === 'number') ? my : y;
+    window.mouseX = x;
+    window.mouseY = y;
+  }
+  document.addEventListener('mousemove', function(e) {
+    var c = document.querySelector('canvas');
+    if (!c) return;
+    var r = c.getBoundingClientRect();
+    setPos(e.clientX - r.left, e.clientY - r.top);
+  }, true);
+  document.addEventListener('touchmove', function(e) {
+    var c = document.querySelector('canvas');
+    if (!c || !e.touches[0]) return;
+    var r = c.getBoundingClientRect();
+    setPos(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+  }, { passive: true, capture: true });
+  document.addEventListener('touchstart', function(e) {
+    var c = document.querySelector('canvas');
+    if (!c || !e.touches[0]) return;
+    var r = c.getBoundingClientRect();
+    setPos(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+  }, { passive: true, capture: true });
+})();
+<\/script>`;
+}
 
+// ============================================================
+// 首页随机脚本
+// ============================================================
 const HOME_SCRIPTS = [
   "p5/dots.js",
   "p5/orbit.js",
@@ -34,6 +70,7 @@ function buildHomeFrameHtml(scriptPath) {
 </head>
 <body>
   <script src="${absPath}"><\/script>
+  ${p5MouseFallbackScript()}
   <script>
     window.addEventListener('resize', function() {
       if (typeof resizeCanvas === 'function') {
@@ -53,8 +90,9 @@ function pickRandomHomeScript() {
   homeScriptHtml = homeScriptPath ? buildHomeFrameHtml(homeScriptPath) : null;
 }
 
+// ============================================================
 // AI 助手
-
+// ============================================================
 const AI_MODELS = {
   chatgpt: {
     name: "ChatGPT",
@@ -95,8 +133,9 @@ function aiSaveMessages() {
   }
 }
 
+// ============================================================
 // 文本内容加载
-
+// ============================================================
 let CONTENT = null;
 
 async function loadContent() {
@@ -134,8 +173,9 @@ function applyI18n() {
   document.title = get("meta.pageTitle", "p5.js 脚本生成器");
 }
 
+// ============================================================
 // 本地存储
-
+// ============================================================
 function getPages() {
   try {
     return JSON.parse(localStorage.getItem("p5_pages")) || [];
@@ -147,8 +187,9 @@ function savePages(pages) {
   localStorage.setItem("p5_pages", JSON.stringify(pages));
 }
 
+// ============================================================
 // 工具
-
+// ============================================================
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
@@ -183,6 +224,7 @@ function generatePageHtml(title, script, imageDataUrl) {
     ${imgVar}
     ${script}
   <\/script>
+  ${p5MouseFallbackScript()}
 </body>
 </html>`;
 }
@@ -212,15 +254,17 @@ function exportZip() {
   });
 }
 
+// ============================================================
 // 状态
-
+// ============================================================
 let editor = null;
 let uploadedImageDataUrl = null;
 let theme = "light";
 let searchTerm = "";
 
+// ============================================================
 // 侧边栏作品列表
-
+// ============================================================
 function updateSidebarPages() {
   const container = document.getElementById("sidebar-pages");
   const pages = getPages();
@@ -293,8 +337,9 @@ function renamePage(index) {
 }
 window.renamePage = renamePage;
 
+// ============================================================
 // 侧边栏控制
-
+// ============================================================
 function openSidebar() {
   document.getElementById("sidebar").classList.add("open");
   document.getElementById("overlay").classList.add("show");
@@ -322,8 +367,9 @@ document.querySelectorAll(".sidebar .nav-item[data-path]").forEach((el) => {
   });
 });
 
+// ============================================================
 // 主题切换
-
+// ============================================================
 function toggleTheme() {
   const body = document.body;
   const lightTheme = document.getElementById("cm-theme");
@@ -346,8 +392,9 @@ document
   .getElementById("themeToggleSidebar")
   .addEventListener("click", toggleTheme);
 
-// AI 助手-聊天页面
-
+// ============================================================
+// AI 助手 - 聊天页面
+// ============================================================
 function renderAIChat(app) {
   app.classList.add("ai-mode");
   app.classList.remove("preview-mode");
@@ -498,8 +545,9 @@ function aiClearMessages() {
   renderAIMessages();
 }
 
+// ============================================================
 // 流式输出 - 发送消息
-
+// ============================================================
 async function aiSendMessage() {
   if (aiSending) return;
   if (!aiCurrentModel) {
@@ -558,8 +606,9 @@ async function aiSendMessage() {
   }
 }
 
-// 流式输出 - 调用各模型API
-
+// ============================================================
+// 流式输出 - 调用各模型 API
+// ============================================================
 async function callAIStream(model, key, messages, onChunk) {
   if (model === "chatgpt") {
     return streamOpenAIStyle(
@@ -676,8 +725,9 @@ async function streamGemini(key, messages, onChunk) {
   return fullText;
 }
 
+// ============================================================
 // 路由渲染
-
+// ============================================================
 function render() {
   const path = window.location.pathname;
   const app = document.getElementById("app");
