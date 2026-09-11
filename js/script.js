@@ -38,9 +38,9 @@ function setPreviewIframe(app, html) {
 // 首页随机 p5 脚本
 // ============================================================
 const HOME_SCRIPTS = [
-  'p5sketches/dots.js',
-  'p5sketches/orbit.js',
-  'p5sketches/rotating-square.js',
+  'p5/dots.js',
+  'p5/orbit.js',
+  'p5/rotating-square.js',
 ];
 
 function pickRandomScriptPath() {
