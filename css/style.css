@@ -1,4 +1,17 @@
 /* 全局 */
+:root {
+        --bg-light: #f5f5f5;
+        --bg-dark: #1e1e1e;
+        --surface-light: #ffffff;
+        --surface-dark: #2d2d2d;
+        --text-light: #222222;
+        --text-dark: #dddddd;
+        --hover-light: rgba(0, 0, 0, 0.055);
+        --hover-dark: rgba(255, 255, 255, 0.07);
+        --line-light: rgba(0, 0, 0, 0.08);
+        --line-dark: rgba(255, 255, 255, 0.08);
+        --sidebar-w: min(280px, 78vw);
+      }
 * {
   box-sizing: border-box;
 }
