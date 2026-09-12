@@ -101,8 +101,9 @@ sidebar {
       }
 
 .sidebar-search {
-  padding: 0 16px 14px 16px;
-}
+        padding: 0 clamp(14px, 4vw, 18px) 12px;
+        margin-top: -4px;
+      }
 .sidebar-search input {
   width: 100%;
   padding: 8px 12px;
