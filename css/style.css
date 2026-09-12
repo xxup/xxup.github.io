@@ -192,20 +192,35 @@ body.dark-mode .sidebar .no-pages {
   color: #777;
 }
 
+/* 侧边栏底部：主题和导出并排竖线分隔*/
 .sidebar-footer {
   margin-top: auto;
-  padding: 10px 0 0 0;
+  padding: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-body.dark-mode .sidebar-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: row;
 }
 .sidebar-footer .nav-item {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 12px 8px;
   cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  transition: background 0.2s;
+}
+.sidebar-footer .nav-item:last-child {
+  border-right: none;
 }
 .sidebar-footer .nav-item:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+body.dark-mode .sidebar-footer .nav-item {
+  border-right-color: rgba(255, 255, 255, 0.08);
 }
 body.dark-mode .sidebar-footer .nav-item:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -242,7 +257,7 @@ body.dark-mode #app {
   color: #ddd;
 }
 
-/* 首页预览 */
+/* 首页预览iframe 全屏 */
 #app.preview-mode {
   padding: 0;
   position: fixed;
@@ -294,7 +309,7 @@ body.dark-mode .form-group .CodeMirror {
   border-color: #555;
 }
 
-/* CodeMirror placeholder 显示样式 */
+/* CodeMirror placeholder显示 */
 .CodeMirror-placeholder {
   white-space: pre-wrap;
   color: #999 !important;
@@ -303,7 +318,6 @@ body.dark-mode .form-group .CodeMirror {
 body.dark-mode .CodeMirror-placeholder {
   color: #666 !important;
 }
-
 
 /* 通用按钮 */
 button {
@@ -515,7 +529,7 @@ body.dark-mode .ai-input {
   background: transparent;
   border: none;
   color: #333;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: normal;
   cursor: pointer;
   padding: 2px 6px;
