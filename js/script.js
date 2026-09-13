@@ -10,15 +10,14 @@
   var P5_CDN = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
   var P5_FILES = ["dots.js", "orbit.js", "rotating-square.js"];
 
-  /* 主题系统（新增）*/
+  /* 主题系统 */
   var THEMES = [
     { id: "light", label: "亮色", bodyClass: "", cmTheme: "default" },
     { id: "dark", label: "暗色", bodyClass: "dark-mode", cmTheme: "dracula" },
-    // 未来扩展示例（CSS 中同步加 body.theme-green { ... } 变量块即可）：
-    // { id: "green", label: "护眼绿", bodyClass: "theme-green", cmTheme: "default" },
+    { id: "green", label: "护眼绿", bodyClass: "theme-green", cmTheme: "default" },
   ];
 
-  /* 根据 id 查找主题配置；未命中返回 null */
+  /* 根据id查找主题配置；未命中返回 null */
   function themeConf(id) {
     for (var i = 0; i < THEMES.length; i++) {
       if (THEMES[i].id === id) return THEMES[i];
