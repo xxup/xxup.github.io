@@ -8,12 +8,6 @@
     />
     <title>randomArt创意脚本编辑</title>
 
-    <!-- 预加载 p5 脚本 -->
-    <link rel="prefetch" href="p5/dots.js" />
-    <link rel="prefetch" href="p5/orbit.js" />
-    <link rel="prefetch" href="p5/rotating-square.js" />
-
-    <!-- CodeMirror -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
@@ -21,7 +15,7 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/default.min.css"
-      id="cm-theme"
+      id="cm-theme-light"
     />
     <link
       rel="stylesheet"
@@ -30,45 +24,92 @@
       disabled
     />
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <!-- 自定义样式 -->
     <link rel="stylesheet" href="css/style.css" />
+
   </head>
   <body>
-    <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+    <button
+      class="hamburger-btn"
+      id="hamburgerBtn"
+      aria-label="打开菜单"
+      aria-expanded="false"
+      aria-controls="sidebar"
+    >
+      ☰
+    </button>
 
-    <div class="sidebar" id="sidebar">
+    <nav class="sidebar" id="sidebar" aria-label="主导航">
+      <!-- 搜索框 -->
       <div class="sidebar-search">
-        <input type="text" id="searchInput" placeholder="🔍 搜索脚本..." />
+        <input
+          type="search"
+          id="sidebarSearch"
+          placeholder="🔍搜索脚本..."
+          autocomplete="off"
+          aria-label="搜索脚本"
+        />
       </div>
 
-      <div class="nav-item" data-path="/" data-i18n="nav.home">🏠 首页</div>
-      <div class="nav-item" data-path="/about" data-i18n="nav.about">
+      <div class="nav-item" data-path="#/" role="button" tabindex="0">
+        🏠 首页
+      </div>
+      <div class="nav-item" data-path="#/about" role="button" tabindex="0">
         📖 关于
       </div>
-      <div class="nav-item" data-path="/ai" data-i18n="nav.ai">🤖 AI助手</div>
-      <div class="nav-item" data-path="/generator" data-i18n="nav.generator">
+      <div class="nav-item" data-path="#/ai" role="button" tabindex="0">
+        🤖 AI助手
+      </div>
+      <div class="nav-item" data-path="#/generator" role="button" tabindex="0">
         ✏️ 编写脚本
       </div>
-
-      <div class="section-title" data-i18n="nav.myScripts">📄 我的脚本</div>
+      <div class="divider"></div>
+      <div class="section-title">📄 我的脚本</div>
       <div id="sidebar-pages">
-        <div class="no-pages" data-i18n="messages.noPages">暂无生成的脚本</div>
+        <div class="no-pages">暂无生成的脚本</div>
       </div>
 
+      <!-- 底部 -->
       <div class="sidebar-footer">
-        <div class="nav-item" id="themeToggleSidebar">🌓 主题</div>
-        <div class="nav-item" id="exportChatSidebar">📥 导出对话</div>
+        <div class="footer-row">
+          <div
+            class="nav-item footer-item"
+            id="exportZipSidebar"
+            role="button"
+            tabindex="0"
+          >
+            📦 导出ZIP
+          </div>
+          <div class="footer-vdivider"></div>
+          <div
+            class="nav-item footer-item"
+            id="themeToggleSidebar"
+            role="button"
+            tabindex="0"
+          >
+            🌓 切换主题
+          </div>
+        </div>
       </div>
-    </div>
+    </nav>
     <div class="overlay" id="overlay"></div>
 
-    <div id="app">加载中...</div>
+    <main id="app">加载中…</main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <div
+      class="modal-backdrop"
+      id="modalBackdrop"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="modal" id="modalBox"></div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
-    
+
     <script src="js/script.js"></script>
   </body>
 </html>
