@@ -9,7 +9,7 @@
   var P5_DIR = "p5/";
   var P5_CDN =
     "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
-  var P5_FILES = ["sketch1.js", "sketch2.js", "sketch3.js"];
+  var P5_FILES = ["dots.js", "orbit.js", "rotating-square.js"];
 
   /* AI助手配置 */
   var AI_KEY_STORAGE = "p5_ai_keys";
