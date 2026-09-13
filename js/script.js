@@ -822,48 +822,25 @@
   var editor = null;
   var uploadedImageDataUrl = null;
 
-  /* ⭐ ============================================================
-       ⭐ 主题应用（重写）
-       ⭐ ------------------------------------------------------------
-       ⭐ 原实现只能识别 "light"/"dark" 两个硬编码值，写死了 dark-mode
-       ⭐ 类名与 CodeMirror 主题名。现改为数据驱动：
-       ⭐
-       ⭐   1. 先移除所有已知主题的 bodyClass（避免多主题叠加）
-       ⭐   2. 从 THEMES 里解析目标主题（未知 id 自动 fallback 到首项）
-       ⭐   3. 挂上新的 bodyClass（"" 表示直接用 :root 默认值）
-       ⭐   4. 按 cmTheme 切换 CodeMirror 的亮/暗 CSS link
-       ⭐   5. 如果编辑器实例存在，同步 setOption("theme", ...)
-       ⭐
-       ⭐ 加新主题时只需改 THEMES 数组和 CSS，本函数零改动。
-       ⭐ ============================================================ */
+  /* 主题应用 */
   function applyTheme(themeId) {
-    /* ① 移除所有旧主题类，避免"暗色+护眼绿"同时挂着 */
     THEMES.forEach(function (t) {
       if (t.bodyClass) document.body.classList.remove(t.bodyClass);
     });
-
-    /* ② 解析目标主题；未命中时退回 THEMES[0]（即 light） */
     var conf = themeConf(themeId) || THEMES[0];
 
-    /* ③ 应用 bodyClass；空串表示不附加任何类（用默认 :root 变量） */
     if (conf.bodyClass) document.body.classList.add(conf.bodyClass);
 
-    /* ④ 切换 CodeMirror 主题 CSS link
-         约定：只有 "default" 视为亮色，其它主题名一律走暗色 link。
-         若未来引入更多 CM 主题 CSS，可在此按名字查找对应 <link>。 */
     var lightLink = $("#cm-theme-light");
     var darkLink = $("#cm-theme-dark");
     var useDarkCm = conf.cmTheme !== "default";
     if (lightLink) lightLink.disabled = useDarkCm;
     if (darkLink) darkLink.disabled = !useDarkCm;
 
-    /* ⑤ 编辑器实例存在则同步刷新主题 */
     if (editor) editor.setOption("theme", conf.cmTheme);
   }
 
-  /* ⭐ 返回当前生效的主题 id
-       - 遍历 THEMES，看 body 上挂了哪个 bodyClass 就返回对应 id
-       - 都没命中（即 body 无任何主题类）→ 返回默认主题 THEMES[0].id */
+  /* 返回当前生效的主题 */
   function currentTheme() {
     for (var i = 0; i < THEMES.length; i++) {
       var t = THEMES[i];
@@ -874,9 +851,7 @@
     return THEMES[0].id;
   }
 
-  /* ⭐ 在 THEMES 数组里循环切换：
-       light → dark → (green) → light ...
-       主题数量从 2 变 N 后依然可用，无需改动此处逻辑。 */
+  /* 在THEMES数组里循环切换 */
   function toggleTheme() {
     var cur = currentTheme();
     var idx = 0;
@@ -933,7 +908,7 @@
     wrap.className = "generator-page";
     wrap.innerHTML =
       "<h1>编写p5.js脚本</h1>" +
-      "<p>输入标题和p5.js代码，上传图片（可选）点击提交脚本</p>" +
+      "<p>输入标题和p5.js代码，上传图片（可选）点击提交脚本 </p>" +
       '<div class="form-group">' +
       '  <label for="title">标题</label>' +
       '  <input type="text" id="title" placeholder="例如：我的创意绘图">' +
@@ -943,7 +918,7 @@
       '  <textarea id="script"></textarea>' +
       "</div>" +
       '<div class="form-group">' +
-      '  <label for="image">上传图片（可选，脚本可通过 <code>imageUrl</code> 加载）</label>' +
+      '  <label>上传图片（可选，脚本可通过 <code>imageUrl</code> 加载）</label>' +
       '  <input type="file" id="image" accept="image/*">' +
       '  <div id="image-preview"></div>' +
       "</div>" +
