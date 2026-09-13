@@ -1,67 +1,122 @@
 {
-  "nav": {
-    "home": "🏠 首页",
-    "about": "📖 关于",
-    "ai": "🤖 AI助手",
-    "generator": "✏️ 编写脚本",
+  "meta": {
+    "title": "randomArt创意脚本编辑",
+    "loading": "加载中…",
+    "contentLoadFailed": "内容加载失败：{msg}。请通过 HTTP 服务器访问（例如：python -m http.server）。"
+  },
+  "sidebar": {
+    "searchPlaceholder": "🔍搜索脚本...",
+    "searchAriaLabel": "搜索脚本",
+    "menuAriaLabel": "打开菜单",
+    "navAriaLabel": "主导航",
+    "navHome": "🏠 首页",
+    "navAbout": "📖 关于",
+    "navAI": "🤖 AI助手",
+    "navGenerator": "✏️ 编写脚本",
     "myScripts": "📄 我的脚本",
-    "searchPlaceholder": "🔍 搜索脚本...",
+    "emptyPages": "暂无生成的脚本",
+    "noSearchResult": "没有找到匹配的脚本",
+    "exportZip": "📦 导出ZIP",
     "themeToggle": "🌓 切换主题"
   },
-  "pages": {
-    "about": {
-      "title": "关于",
-      "paragraphs": [
-        "纯前端工具，基于localStorage存储，无需后端",
-        "首页随机展示p5js创意脚本",
-        "编写的脚本点击“提交脚本”会返回首页预览效果并自动添加到左侧栏列表中，可重命名、删除、导出ZIP",
-        "内置AI助手，支持ChatGPT | Gemini | DeepSeek对话",
-        "所有界面文本均可自由修改"
-      ]
-    },
-    "generator": {
-      "title": "编写创意脚本",
-      "description": "输入标题和p5.js代码，上传图片（可选）供脚本加载，提交脚本后可直接返回首页预览。",
-      "labels": {
-        "titleInput": "标题",
-        "titlePlaceholder": "例如：我的创意绘图脚本",
-        "scriptInput": "编写p5.js脚本代码",
-        "scriptPlaceholder": "例如：\nlet bg;\nfunction preload() {\n  if (imageUrl) bg = loadImage(imageUrl);\n}\nfunction setup() {\n  createCanvas(720, 400);\n}\nfunction draw() {\n  if (bg) image(bg, 0, 0, width, height);\n}",
-        "imageInput": "上传图片(可选，脚本可通过 imageUrl 加载）",
-        "generateBtn": "提交脚本"
-      }
-    },
-    "ai": {
-      "title": "🤖AI助手",
-      "placeholder": "输入你的问题...",
-      "sendBtn": "发送",
-      "apiKeyTitle": "请输入API Key",
-      "apiKeyHint": "Key只保存在你的浏览器本地，不会上传到任何服务器。",
-      "noModel": "请先选择模型",
-      "noKey": "请先输入API Key",
-      "thinking": "思考中...",
-      "errorPrefix": "请求失败："
-    },
-    "notFound": {
-      "title": "📄页面未找到",
-      "paragraphs": ["该路径未定义。"]
-    }
+  "home": {
+    "noScriptsTitle": "还没有可运行的脚本",
+    "noScriptsDesc": "请把脚本放进与本页面同级的文件夹，并在页面代码顶部的数组里写上文件名"
   },
-  "messages": {
-    "noPages": "暂无编写的脚本",
-    "noMatches": "没有匹配的作品",
-    "generateSuccess": "✅ 页面提交成功！已保存到本地存储。",
-    "generating": "正在提交...",
-    "previewBtn": "返回首页预览",
-    "zipBtn": "导出所有脚本",
-    "renamePrompt": "请输入新标题：",
-    "deleteConfirm": "确定删除该作品吗？",
-    "emptyTitle": "未命名脚本",
-    "zipEmpty": "没有可导出的作品。",
-    "scriptRequired": "请填写p5.js脚本代码",
-    "noScripts": "暂无脚本，请添加。"
+  "about": {
+    "title": "关于",
+    "paragraphs": [
+      "纯前端工具，基于localStorage存储，无需后端。",
+      "使用CodeMirror实现代码高亮，支持亮色/暗色主题。",
+      "所有脚本均可导出为ZIP包，也可单独下载为HTML。",
+      "首页随机加载运行p5.js脚本，编写脚本后提交脚本点击预览可运行该脚本，或在侧边栏中选择脚本名点击即可直接运行该脚本，再点击其它导航项会回到随机状态。",
+      "AI助手支持ChatGPT / Gemini / DeepSeek流式输出，每个模型可单独设置API Key与系统提示词，并可导出对话内容为Markdown格式。"
+    ]
   },
-  "meta": {
-    "pageTitle": "创意脚本编辑工具"
+  "generator": {
+    "title": "编写p5.js脚本",
+    "subtitle": "输入标题和p5.js代码，上传图片（可选）点击提交脚本",
+    "labelTitle": "标题",
+    "placeholderTitle": "例如：我的创意绘图",
+    "labelScript": "p5.js脚本代码",
+    "labelImage": "上传图片（可选，脚本可通过 <code>imageUrl</code> 加载）",
+    "buildBtn": "提交脚本",
+    "defaultTitle": "未命名脚本",
+    "defaultPageTitle": "未命名页面",
+    "scriptPlaceholder": "例如：\nfunction setup() {\n  createCanvas(windowWidth, windowHeight);\n  background(102);\n}\nfunction draw() {\n  variableEllipse(mouseX, mouseY, pmouseX, pmouseY);\n}\nfunction variableEllipse(x, y, px, py) {\n  let speed = abs(x - px) + abs(y - py);\n  stroke(speed);\n  ellipse(x, y, speed, speed);\n}",
+    "imageSuccess": "✅ 图片上传成功",
+    "imageAlt": "上传预览",
+    "resultSuccess": "✅ 页面生成成功！已保存到本地存储。",
+    "previewBtn": "▶️ 预览",
+    "downloadBtn": "⬇️ 下载HTML",
+    "filePrefix": "p5_",
+    "zipName": "p5_works.zip"
+  },
+  "runner": {
+    "iframeTitle": "p5 运行"
+  },
+  "ai": {
+    "clearBtnTitle": "清除当前模型的对话内容",
+    "modelBtnTitle": "选择模型",
+    "inputPlaceholder": "输入消息回车发送，Shift+回车换行",
+    "sendBtnTitle": "发送",
+    "emptyNoModel": "还没有选择模型\n\n点击左下角的 + 选择一个模型\n并输入API Key后开始对话",
+    "emptyStart": "开始与 {model} 对话吧",
+    "thinking": "正在思考…",
+    "emptyReply": "(空回复)",
+    "modelPromptTitle": "设置系统提示词",
+    "modelKeyTitle": "设置 / 更新 API Key",
+    "modelDownloadTitle": "下载该模型的对话 (Markdown)",
+    "promptKeyTitle": "设置 {model} API Key",
+    "promptSystemTitle": "设置 {model} 系统提示词",
+    "promptSystemHint": "这段提示词会作为 system 消息在每次对话时发送给模型，用于设定角色、语气或规则。留空则不发送。Ctrl+Enter 可快速保存。",
+    "promptSystemPlaceholder": "例如：你是一位擅长p5.js生成艺术的助手，回答简洁专业，代码附注释。",
+    "downloadHeader": "# {model} 对话记录",
+    "downloadSysSection": "## 🎭 系统提示词",
+    "downloadUserSection": "## 🧑 我",
+    "downloadAssistantSection": "## 🤖 {model}",
+    "filePrefix": "ai_chat_"
+  },
+  "modal": {
+    "ok": "知道了",
+    "confirm": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "clearPrompt": "清除提示词"
+  },
+  "unknown": {
+    "titlePrefix": "页面 ",
+    "desc": "内容未定义。"
+  },
+  "alerts": {
+    "storageFullTitle": "本地存储已满",
+    "storageFullDesc": "请删除部分作品，或上传更小的图片后再试。",
+    "saveFailedTitle": "保存失败",
+    "invalidFileTypeTitle": "文件类型不支持",
+    "invalidFileTypeDesc": "请选择图片文件。",
+    "imageTooLargeTitle": "图片太大",
+    "imageTooLargeDesc": "单张图片请小于 1.5MB，以免本地存储空间耗尽。",
+    "readFailedTitle": "读取失败",
+    "readFailedDesc": "无法读取该图片，请重试。",
+    "missingScriptTitle": "缺少脚本",
+    "missingScriptDesc": "请填写 p5.js 脚本代码。",
+    "downloadFailedTitle": "下载失败",
+    "cannotExportTitle": "无法导出",
+    "cannotExportDesc": "当前没有可导出的作品。",
+    "exportFailedTitle": "导出失败",
+    "deleteTitle": "删除作品",
+    "deleteConfirm": "确定要删除「{title}」吗？此操作不可恢复。",
+    "renameTitle": "重命名作品",
+    "needModelTitle": "请先选择模型",
+    "needModelDesc": "点击左下角的 + 按钮选择一个模型并设置Key。",
+    "requestFailedTitle": "请求失败",
+    "requestFailedDesc": "网络错误，请检查 API Key 或稍后重试。",
+    "noNeedClearTitle": "无需清除",
+    "noNeedClearModelDesc": "还没有选择模型，请点击左下角的 + 选择一个模型。",
+    "noNeedClearChatDesc": "「{model}」当前没有对话内容。",
+    "clearChatTitle": "清除对话",
+    "clearChatConfirm": "确定要清除与「{model}」的全部对话内容吗？",
+    "cannotDownloadTitle": "无法下载",
+    "cannotDownloadDesc": "「{model}」还没有对话内容。"
   }
 }
