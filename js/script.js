@@ -14,8 +14,10 @@
   var THEMES = [
     { id: "light", label: "亮色", bodyClass: "", cmTheme: "default" },
     { id: "dark", label: "暗色", bodyClass: "dark-mode", cmTheme: "dracula" },
+    /*
     { id: "green", label: "护眼绿", bodyClass: "theme-green", cmTheme: "default" },
   ];
+  */
 
   /* 根据id查找主题配置；未命中返回 null */
   function themeConf(id) {
