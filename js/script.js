@@ -487,8 +487,8 @@
       '  <meta charset="UTF-8">\n' +
       '  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">\n' +
       "  <style>\n" +
-      "    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }\n" +
-      "    canvas { display: block; }\n" +
+      "    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; touch-action: none; }\n" +
+      "    canvas { display: block; touch-action: none; }\n" +
       "  </style>\n" +
       '  <script src="' +
       P5_CDN +
