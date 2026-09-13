@@ -1721,8 +1721,8 @@
 
     initAIState();
 
-    /* ⭐ 读取保存的主题；如果旧数据里存的是未知 id，
-         applyTheme 会自动 fallback 到 THEMES[0]（light） */
+    /* 读取保存的主题；如果旧数据里存的是未知id，
+        applyTheme会自动fallback到THEMES[0]（light） */
     var savedTheme = THEMES[0].id;
     try {
       savedTheme = localStorage.getItem(THEME_KEY) || THEMES[0].id;
