@@ -7,28 +7,15 @@
 
   /* p5脚本文件夹配置 */
   var P5_DIR = "p5/";
-  var P5_CDN = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
-  var P5_FILES = ["dots.js", "orbit.js", "rotating-square.js"];
-
-  /* 主题系统 */
-  var THEMES = [
-    { id: "light", label: "亮色", bodyClass: "", cmTheme: "default" },
-    { id: "dark", label: "暗色", bodyClass: "dark-mode", cmTheme: "dracula" },
-  /* { id: "green", label: "护眼绿", bodyClass: "theme-green", cmTheme: "default" }, */
-  ];
-
-  /* 根据id查找主题配置；未命中返回 null */
-  function themeConf(id) {
-    for (var i = 0; i < THEMES.length; i++) {
-      if (THEMES[i].id === id) return THEMES[i];
-    }
-    return null;
-  }
+  var P5_CDN =
+    "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
+  var P5_FILES = ["sketch1.js", "sketch2.js", "sketch3.js"];
 
   /* AI助手配置 */
   var AI_KEY_STORAGE = "p5_ai_keys";
   var AI_CHAT_STORAGE = "p5_ai_chats";
   var AI_PROMPT_STORAGE = "p5_ai_prompts";
+  var CONTENT_URL = "data/content.json";
 
   var AI_MODELS = [
     {
@@ -52,6 +39,371 @@
     },
   ];
 
+  /* 内容（由 json 填充） */
+  var C = {};
+
+  function t(key) {
+    var parts = String(key).split(".");
+    var cur = C;
+    for (var i = 0; i < parts.length; i++) {
+      if (cur == null) return "";
+      cur = cur[parts[i]];
+    }
+    return cur == null ? "" : cur;
+  }
+
+  function tpl(key, vars) {
+    var s = String(t(key) || "");
+    if (vars) {
+      Object.keys(vars).forEach(function (k) {
+        s = s.split("{" + k + "}").join(vars[k]);
+      });
+    }
+    return s;
+  }
+
+  function loadContent() {
+    return fetch(CONTENT_URL).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    });
+  }
+
+  /* 将 data-i18n / data-i18n-placeholder / data-i18n-title / data-i18n-aria-label 填充 */
+  function applyI18n(root) {
+    var r = root || document;
+    $$("[data-i18n]", r).forEach(function (el) {
+      var v = t(el.getAttribute("data-i18n"));
+      if (v !== "") el.innerHTML = v;
+    });
+    $$("[data-i18n-placeholder]", r).forEach(function (el) {
+      var v = t(el.getAttribute("data-i18n-placeholder"));
+      if (v !== "") el.placeholder = v;
+    });
+    $$("[data-i18n-title]", r).forEach(function (el) {
+      var v = t(el.getAttribute("data-i18n-title"));
+      if (v !== "") el.title = v;
+    });
+    $$("[data-i18n-aria-label]", r).forEach(function (el) {
+      var v = t(el.getAttribute("data-i18n-aria-label"));
+      if (v !== "") el.setAttribute("aria-label", v);
+    });
+  }
+
+  /*  通用工具   */
+  function $(sel, root) {
+    return (root || document).querySelector(sel);
+  }
+  function $$(sel, root) {
+    return Array.prototype.slice.call(
+      (root || document).querySelectorAll(sel),
+    );
+  }
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+  function escapeScriptClose(str) {
+    return String(str).replace(/<\/script/gi, "<\\/script");
+  }
+  function safeFileName(name) {
+    var n = String(name || "")
+      .replace(/[\\/:*?"<>|]/g, "_")
+      .trim();
+    return n || "untitled";
+  }
+
+  /* 本地存储 */
+  function getPages() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  function savePages(pages) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pages));
+      return true;
+    } catch (e) {
+      if (e && (e.name === "QuotaExceededError" || e.code === 22)) {
+        showAlert(
+          t("alerts.storageFullTitle"),
+          t("alerts.storageFullDesc"),
+          true,
+        );
+      } else {
+        showAlert(t("alerts.saveFailedTitle"), String((e && e.message) || e), true);
+      }
+      return false;
+    }
+  }
+
+  /* 弹窗 */
+  var modalBackdrop, modalBox, lastFocused;
+
+  function openModal(builder) {
+    lastFocused = document.activeElement;
+    modalBox.innerHTML = "";
+    builder(modalBox);
+    modalBackdrop.classList.add("show");
+    var f = $("input, textarea, button", modalBox);
+    if (f && f.focus) f.focus();
+  }
+  function closeModal() {
+    modalBackdrop.classList.remove("show");
+    modalBox.innerHTML = "";
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+  function showAlert(title, message, isError) {
+    openModal(function (box) {
+      var h = document.createElement("h3");
+      h.textContent = title;
+      var p = document.createElement("p");
+      p.textContent = message;
+      var a = document.createElement("div");
+      a.className = "modal-actions";
+      var right = document.createElement("div");
+      right.className = "right-group";
+      var ok = document.createElement("button");
+      ok.textContent = t("modal.ok");
+      if (isError) ok.className = "danger";
+      ok.addEventListener("click", closeModal);
+      right.appendChild(ok);
+      a.appendChild(right);
+      box.appendChild(h);
+      box.appendChild(p);
+      box.appendChild(a);
+    });
+  }
+  function showConfirm(title, message, onConfirm, danger) {
+    openModal(function (box) {
+      var h = document.createElement("h3");
+      h.textContent = title;
+      var p = document.createElement("p");
+      p.textContent = message;
+      var a = document.createElement("div");
+      a.className = "modal-actions";
+      var right = document.createElement("div");
+      right.className = "right-group";
+      var cancel = document.createElement("button");
+      cancel.className = "cancel";
+      cancel.textContent = t("modal.cancel");
+      cancel.addEventListener("click", closeModal);
+      var ok = document.createElement("button");
+      ok.textContent = t("modal.confirm");
+      if (danger) ok.className = "danger";
+      ok.addEventListener("click", function () {
+        closeModal();
+        onConfirm();
+      });
+      right.appendChild(cancel);
+      right.appendChild(ok);
+      a.appendChild(right);
+      box.appendChild(h);
+      box.appendChild(p);
+      box.appendChild(a);
+    });
+  }
+  function showPrompt(title, defaultValue, onOk, inputType) {
+    openModal(function (box) {
+      var h = document.createElement("h3");
+      h.textContent = title;
+      var input = document.createElement("input");
+      input.type = inputType || "text";
+      input.value = defaultValue || "";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      var a = document.createElement("div");
+      a.className = "modal-actions";
+      var right = document.createElement("div");
+      right.className = "right-group";
+      var cancel = document.createElement("button");
+      cancel.className = "cancel";
+      cancel.textContent = t("modal.cancel");
+      cancel.addEventListener("click", closeModal);
+      var ok = document.createElement("button");
+      ok.textContent = t("modal.save");
+      ok.addEventListener("click", function () {
+        var v = input.value.trim();
+        if (!v) {
+          input.focus();
+          return;
+        }
+        closeModal();
+        onOk(v);
+      });
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") ok.click();
+      });
+      right.appendChild(cancel);
+      right.appendChild(ok);
+      a.appendChild(right);
+      box.appendChild(h);
+      box.appendChild(input);
+      box.appendChild(a);
+    });
+  }
+
+  /* 多行文本输入弹窗（系统提示词） */
+  function showPromptArea(opts) {
+    openModal(function (box) {
+      var h = document.createElement("h3");
+      h.textContent = opts.title;
+
+      var hint = document.createElement("div");
+      hint.className = "modal-hint";
+      hint.textContent = opts.hint || "";
+
+      var ta = document.createElement("textarea");
+      ta.value = opts.value || "";
+      ta.placeholder = opts.placeholder || "";
+      ta.rows = 7;
+      ta.spellcheck = false;
+
+      var a = document.createElement("div");
+      a.className = "modal-actions";
+
+      var leftWrap = document.createElement("div");
+      if (opts.value && opts.value.trim()) {
+        var clearBtn = document.createElement("button");
+        clearBtn.className = "link-btn";
+        clearBtn.textContent = t("modal.clearPrompt");
+        clearBtn.addEventListener("click", function () {
+          closeModal();
+          if (opts.onClear) opts.onClear();
+        });
+        leftWrap.appendChild(clearBtn);
+      }
+
+      var rightWrap = document.createElement("div");
+      rightWrap.className = "right-group";
+      var cancel = document.createElement("button");
+      cancel.className = "cancel";
+      cancel.textContent = t("modal.cancel");
+      cancel.addEventListener("click", closeModal);
+
+      var ok = document.createElement("button");
+      ok.textContent = t("modal.save");
+      ok.addEventListener("click", function () {
+        var v = ta.value;
+        closeModal();
+        opts.onOk(v);
+      });
+      ta.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          ok.click();
+        }
+      });
+      rightWrap.appendChild(cancel);
+      rightWrap.appendChild(ok);
+
+      a.appendChild(leftWrap);
+      a.appendChild(rightWrap);
+      box.appendChild(h);
+      box.appendChild(hint);
+      box.appendChild(ta);
+      box.appendChild(a);
+    });
+  }
+
+  /* 生成单个HTML */
+  function generatePageHtml(title, script, imageDataUrl) {
+    var safeTitle = escapeHtml(title || t("generator.defaultPageTitle"));
+    var imgVar = imageDataUrl
+      ? 'var imageUrl = "' + imageDataUrl + '";'
+      : "var imageUrl = null;";
+    var safeImgVar = escapeScriptClose(imgVar);
+    var safeScript = escapeScriptClose(script);
+
+    return (
+      "<!DOCTYPE html>\n" +
+      '<html lang="zh-CN">\n' +
+      "<head>\n" +
+      '  <meta charset="UTF-8">\n' +
+      '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+      "  <title>" +
+      safeTitle +
+      "</title>\n" +
+      "  <style>\n" +
+      "    html, body { margin: 0; padding: 0; }\n" +
+      "    canvas { display: block; }\n" +
+      "  </style>\n" +
+      '  <script src="' +
+      P5_CDN +
+      '"><\/script>\n' +
+      "</head>\n" +
+      "<body>\n" +
+      "  <script>\n" +
+      "    " +
+      safeImgVar +
+      "\n" +
+      "    " +
+      safeScript +
+      "\n" +
+      "  <\/script>\n" +
+      "</body>\n" +
+      "</html>"
+    );
+  }
+
+  function downloadSingleHtml(filename, html) {
+    try {
+      var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function () {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (err) {
+      showAlert(t("alerts.downloadFailedTitle"), String((err && err.message) || err), true);
+    }
+  }
+
+  function exportZip() {
+    var pages = getPages();
+    if (!pages.length) {
+      showAlert(t("alerts.cannotExportTitle"), t("alerts.cannotExportDesc"));
+      return;
+    }
+    var zip = new JSZip();
+    var prefix = t("generator.filePrefix") || "p5_";
+    pages.forEach(function (page, idx) {
+      var base = (page.title || "untitled").replace(/[\\/:*?"<>|]/g, "_");
+      zip.file(prefix + base + "_" + (idx + 1) + ".html", page.html);
+    });
+    zip
+      .generateAsync({ type: "blob" })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = t("generator.zipName") || "p5_works.zip";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      })
+      .catch(function (err) {
+        showAlert(t("alerts.exportFailedTitle"), String((err && err.message) || err), true);
+      });
+  }
+
+  /* AI 状态 */
   var aiState = {
     currentModel: null,
     keys: {},
@@ -122,334 +474,10 @@
         aiState.prompts[m.id] = "";
       }
     });
-    /* 默认不选中模型 */
     aiState.currentModel = null;
   }
 
-  var SCRIPT_PLACEHOLDER =
-    "例如：\n" +
-    "function setup() {\n" +
-    "  createCanvas(windowWidth, windowHeight);\n" +
-    "  background(102);\n" +
-    "}\n" +
-    "function draw() {\n" +
-    "  variableEllipse(mouseX, mouseY, pmouseX, pmouseY);\n" +
-    "}\n" +
-    "function variableEllipse(x, y, px, py) {\n" +
-    "  let speed = abs(x - px) + abs(y - py);\n" +
-    "  stroke(speed);\n" +
-    "  ellipse(x, y, speed, speed);\n" +
-    "}";
-
-  function $(sel, root) {
-    return (root || document).querySelector(sel);
-  }
-  function $$(sel, root) {
-    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
-  }
-  function escapeHtml(text) {
-    return String(text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-  function escapeScriptClose(str) {
-    return String(str).replace(/<\/script/gi, "<\\/script");
-  }
-  function safeFileName(name) {
-    var n = String(name || "")
-      .replace(/[\\/:*?"<>|]/g, "_")
-      .trim();
-    return n || "untitled";
-  }
-
-  function getPages() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      var list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list : [];
-    } catch (e) {
-      return [];
-    }
-  }
-  function savePages(pages) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pages));
-      return true;
-    } catch (e) {
-      if (e && (e.name === "QuotaExceededError" || e.code === 22)) {
-        showAlert(
-          "本地存储已满",
-          "请删除部分作品，或上传更小的图片后再试。",
-          true,
-        );
-      } else {
-        showAlert("保存失败", String((e && e.message) || e), true);
-      }
-      return false;
-    }
-  }
-
-  var modalBackdrop, modalBox, lastFocused;
-
-  function openModal(builder) {
-    lastFocused = document.activeElement;
-    modalBox.innerHTML = "";
-    builder(modalBox);
-    modalBackdrop.classList.add("show");
-    var f = $("input, textarea, button", modalBox);
-    if (f && f.focus) f.focus();
-  }
-  function closeModal() {
-    modalBackdrop.classList.remove("show");
-    modalBox.innerHTML = "";
-    if (lastFocused && lastFocused.focus) lastFocused.focus();
-  }
-  function showAlert(title, message, isError) {
-    openModal(function (box) {
-      var h = document.createElement("h3");
-      h.textContent = title;
-      var p = document.createElement("p");
-      p.textContent = message;
-      var a = document.createElement("div");
-      a.className = "modal-actions";
-      var right = document.createElement("div");
-      right.className = "right-group";
-      var ok = document.createElement("button");
-      ok.textContent = "知道了";
-      if (isError) ok.className = "danger";
-      ok.addEventListener("click", closeModal);
-      right.appendChild(ok);
-      a.appendChild(right);
-      box.appendChild(h);
-      box.appendChild(p);
-      box.appendChild(a);
-    });
-  }
-  function showConfirm(title, message, onConfirm, danger) {
-    openModal(function (box) {
-      var h = document.createElement("h3");
-      h.textContent = title;
-      var p = document.createElement("p");
-      p.textContent = message;
-      var a = document.createElement("div");
-      a.className = "modal-actions";
-      var right = document.createElement("div");
-      right.className = "right-group";
-      var cancel = document.createElement("button");
-      cancel.className = "cancel";
-      cancel.textContent = "取消";
-      cancel.addEventListener("click", closeModal);
-      var ok = document.createElement("button");
-      ok.textContent = "确定";
-      if (danger) ok.className = "danger";
-      ok.addEventListener("click", function () {
-        closeModal();
-        onConfirm();
-      });
-      right.appendChild(cancel);
-      right.appendChild(ok);
-      a.appendChild(right);
-      box.appendChild(h);
-      box.appendChild(p);
-      box.appendChild(a);
-    });
-  }
-  function showPrompt(title, defaultValue, onOk, inputType) {
-    openModal(function (box) {
-      var h = document.createElement("h3");
-      h.textContent = title;
-      var input = document.createElement("input");
-      input.type = inputType || "text";
-      input.value = defaultValue || "";
-      input.autocomplete = "off";
-      input.spellcheck = false;
-      var a = document.createElement("div");
-      a.className = "modal-actions";
-      var right = document.createElement("div");
-      right.className = "right-group";
-      var cancel = document.createElement("button");
-      cancel.className = "cancel";
-      cancel.textContent = "取消";
-      cancel.addEventListener("click", closeModal);
-      var ok = document.createElement("button");
-      ok.textContent = "保存";
-      ok.addEventListener("click", function () {
-        var v = input.value.trim();
-        if (!v) {
-          input.focus();
-          return;
-        }
-        closeModal();
-        onOk(v);
-      });
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") ok.click();
-      });
-      right.appendChild(cancel);
-      right.appendChild(ok);
-      a.appendChild(right);
-      box.appendChild(h);
-      box.appendChild(input);
-      box.appendChild(a);
-    });
-  }
-
-  /* 多行文本输入弹窗（用于系统提示词） */
-  function showPromptArea(opts) {
-    openModal(function (box) {
-      var h = document.createElement("h3");
-      h.textContent = opts.title;
-
-      var hint = document.createElement("div");
-      hint.className = "modal-hint";
-      hint.textContent =
-        opts.hint || "提示词会在每次对话时作为系统消息发送给模型。";
-
-      var ta = document.createElement("textarea");
-      ta.value = opts.value || "";
-      ta.placeholder = opts.placeholder || "";
-      ta.rows = 7;
-      ta.spellcheck = false;
-
-      var a = document.createElement("div");
-      a.className = "modal-actions";
-
-      /* 左侧"清除提示词"按钮（仅当已有内容时显示） */
-      var leftWrap = document.createElement("div");
-      if (opts.value && opts.value.trim()) {
-        var clearBtn = document.createElement("button");
-        clearBtn.className = "link-btn";
-        clearBtn.textContent = "清除提示词";
-        clearBtn.addEventListener("click", function () {
-          closeModal();
-          if (opts.onClear) opts.onClear();
-        });
-        leftWrap.appendChild(clearBtn);
-      }
-
-      var rightWrap = document.createElement("div");
-      rightWrap.className = "right-group";
-      var cancel = document.createElement("button");
-      cancel.className = "cancel";
-      cancel.textContent = "取消";
-      cancel.addEventListener("click", closeModal);
-
-      var ok = document.createElement("button");
-      ok.textContent = "保存";
-      ok.addEventListener("click", function () {
-        var v = ta.value; /* 保留用户换行不做trim */
-        closeModal();
-        opts.onOk(v);
-      });
-      ta.addEventListener("keydown", function (e) {
-        /* Ctrl+Enter快速保存 */
-        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-          e.preventDefault();
-          ok.click();
-        }
-      });
-      rightWrap.appendChild(cancel);
-      rightWrap.appendChild(ok);
-
-      a.appendChild(leftWrap);
-      a.appendChild(rightWrap);
-      box.appendChild(h);
-      box.appendChild(hint);
-      box.appendChild(ta);
-      box.appendChild(a);
-    });
-  }
-
-  function generatePageHtml(title, script, imageDataUrl) {
-    var safeTitle = escapeHtml(title || "未命名页面");
-    var imgVar = imageDataUrl
-      ? 'var imageUrl = "' + imageDataUrl + '";'
-      : "var imageUrl = null;";
-    var safeImgVar = escapeScriptClose(imgVar);
-    var safeScript = escapeScriptClose(script);
-
-    return (
-      "<!DOCTYPE html>\n" +
-      '<html lang="zh-CN">\n' +
-      "<head>\n" +
-      '  <meta charset="UTF-8">\n' +
-      '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-      "  <title>" +
-      safeTitle +
-      "</title>\n" +
-      "  <style>\n" +
-      "    html, body { margin: 0; padding: 0; }\n" +
-      "    canvas { display: block; }\n" +
-      "  </style>\n" +
-      '  <script src="' +
-      P5_CDN +
-      '"><\/script>\n' +
-      "</head>\n" +
-      "<body>\n" +
-      "  <script>\n" +
-      "    " +
-      safeImgVar +
-      "\n" +
-      "    " +
-      safeScript +
-      "\n" +
-      "  <\/script>\n" +
-      "</body>\n" +
-      "</html>"
-    );
-  }
-
-  function downloadSingleHtml(filename, html) {
-    try {
-      var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(function () {
-        URL.revokeObjectURL(url);
-      }, 1000);
-    } catch (err) {
-      showAlert("下载失败", String((err && err.message) || err), true);
-    }
-  }
-
-  function exportZip() {
-    var pages = getPages();
-    if (!pages.length) {
-      showAlert("无法导出", "当前没有可导出的作品。");
-      return;
-    }
-    var zip = new JSZip();
-    pages.forEach(function (page, idx) {
-      var base = (page.title || "untitled").replace(/[\\/:*?"<>|]/g, "_");
-      zip.file("p5_" + base + "_" + (idx + 1) + ".html", page.html);
-    });
-    zip
-      .generateAsync({ type: "blob" })
-      .then(function (blob) {
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.href = url;
-        link.download = "p5_works.zip";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(function () {
-          URL.revokeObjectURL(url);
-        }, 1000);
-      })
-      .catch(function (err) {
-        showAlert("导出失败", String((err && err.message) || err), true);
-      });
-  }
-
+  /* 全局 DOM 引用 */
   var sidebarPagesEl, sidebarEl, overlayEl, hamburgerBtn;
   var sidebarSearchEl;
   var sidebarSearchKeyword = "";
@@ -519,7 +547,9 @@
     if (!filtered.length) {
       var empty = document.createElement("div");
       empty.className = "no-pages";
-      empty.textContent = kw ? "没有找到匹配的脚本" : "暂无生成的脚本";
+      empty.textContent = kw
+        ? t("sidebar.noSearchResult")
+        : t("sidebar.emptyPages");
       sidebarPagesEl.replaceChildren(empty);
       return;
     }
@@ -561,6 +591,7 @@
     sidebarPagesEl.replaceChildren(frag);
   }
 
+  /* iframe 事件代理 */
   function bindIframeProxy(iframe) {
     var iwin, idoc;
     try {
@@ -595,7 +626,12 @@
       "click",
       "dblclick",
     ];
-    var TOUCH_TYPES = ["touchstart", "touchmove", "touchend", "touchcancel"];
+    var TOUCH_TYPES = [
+      "touchstart",
+      "touchmove",
+      "touchend",
+      "touchcancel",
+    ];
 
     function relayMouse(e) {
       if (e.target === canvas) return;
@@ -698,8 +734,6 @@
     appEl.style.overflow = "";
   }
 
-  /* 首页运行器 */
-
   function renderRunner() {
     destroyEditor();
     appEl.replaceChildren();
@@ -728,10 +762,12 @@
         unlockAppSize();
         delete appEl.dataset.currentPageId;
         var wrap = document.createElement("div");
-        wrap.innerHTML =
-          "<h1>还没有可运行的脚本</h1>" +
-          "<p>请把脚本放进与本页面同级的文件夹，" +
-          "并在页面代码顶部的数组里写上文件名</p>";
+        var h1 = document.createElement("h1");
+        h1.textContent = t("home.noScriptsTitle");
+        var p = document.createElement("p");
+        p.textContent = t("home.noScriptsDesc");
+        wrap.appendChild(h1);
+        wrap.appendChild(p);
         appEl.appendChild(wrap);
         return;
       }
@@ -744,7 +780,7 @@
     appEl.classList.add("preview-mode");
 
     var iframe = document.createElement("iframe");
-    iframe.setAttribute("title", "p5 运行");
+    iframe.setAttribute("title", t("runner.iframeTitle") || "p5 运行");
     iframe.setAttribute("scrolling", "no");
     iframe.srcdoc = html;
     iframe.addEventListener("load", function () {
@@ -774,8 +810,8 @@
     });
     if (!page) return;
     showConfirm(
-      "删除作品",
-      "确定要删除「" + page.title + "」吗？此操作不可恢复。",
+      t("alerts.deleteTitle"),
+      tpl("alerts.deleteConfirm", { title: page.title }),
       function () {
         var list = getPages().filter(function (p) {
           return p.id !== id;
@@ -798,7 +834,7 @@
       return p.id === id;
     });
     if (!page) return;
-    showPrompt("重命名作品", page.title, function (newTitle) {
+    showPrompt(t("alerts.renameTitle"), page.title, function (newTitle) {
       page.title = newTitle;
       savePages(pages);
       updateSidebarPages();
@@ -822,46 +858,26 @@
   var editor = null;
   var uploadedImageDataUrl = null;
 
-  /* 主题应用 */
-  function applyTheme(themeId) {
-    THEMES.forEach(function (t) {
-      if (t.bodyClass) document.body.classList.remove(t.bodyClass);
-    });
-    var conf = themeConf(themeId) || THEMES[0];
-
-    if (conf.bodyClass) document.body.classList.add(conf.bodyClass);
-
-    var lightLink = $("#cm-theme-light");
-    var darkLink = $("#cm-theme-dark");
-    var useDarkCm = conf.cmTheme !== "default";
-    if (lightLink) lightLink.disabled = useDarkCm;
-    if (darkLink) darkLink.disabled = !useDarkCm;
-
-    if (editor) editor.setOption("theme", conf.cmTheme);
+  function applyTheme(theme) {
+    var lightTheme = $("#cm-theme-light");
+    var darkTheme = $("#cm-theme-dark");
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode");
+      if (lightTheme) lightTheme.disabled = true;
+      if (darkTheme) darkTheme.disabled = false;
+    } else {
+      document.body.classList.remove("dark-mode");
+      if (lightTheme) lightTheme.disabled = false;
+      if (darkTheme) darkTheme.disabled = true;
+    }
+    if (editor)
+      editor.setOption("theme", theme === "dark" ? "dracula" : "default");
   }
-
-  /* 返回当前生效的主题 */
   function currentTheme() {
-    for (var i = 0; i < THEMES.length; i++) {
-      var t = THEMES[i];
-      if (t.bodyClass && document.body.classList.contains(t.bodyClass)) {
-        return t.id;
-      }
-    }
-    return THEMES[0].id;
+    return document.body.classList.contains("dark-mode") ? "dark" : "light";
   }
-
-  /* 在THEMES数组里循环切换 */
   function toggleTheme() {
-    var cur = currentTheme();
-    var idx = 0;
-    for (var i = 0; i < THEMES.length; i++) {
-      if (THEMES[i].id === cur) {
-        idx = i;
-        break;
-      }
-    }
-    var next = THEMES[(idx + 1) % THEMES.length].id;
+    var next = currentTheme() === "dark" ? "light" : "dark";
     applyTheme(next);
     try {
       localStorage.setItem(THEME_KEY, next);
@@ -891,39 +907,46 @@
     }
   }
 
+  /* 关于页 */
   function renderAbout() {
     var wrap = document.createElement("div");
-    wrap.innerHTML =
-      "<h1>关于</h1>" +
-      "<p>纯前端工具，基于localStorage存储，无需后端。</p>" +
-      "<p>使用CodeMirror实现代码高亮，支持亮色/暗色主题。</p>" +
-      "<p>所有脚本均可导出为ZIP包，也可单独下载为HTML。</p>" +
-      "<p>首页随机加载运行p5.js脚本，编写脚本后提交脚本点击预览可运行该脚本或在侧边栏中选择脚本名点击即可直接运行该脚本，再点击其它导航项会回到随机状态。</p>" +
-      "<p>AI助手支持ChatGPT / Gemini / DeepSeek流式输出，" +
-      "每个模型可单独设置API Key与系统提示词，并可导出对话内容为Markdown格式 </p>";
+    var h = document.createElement("h1");
+    h.textContent = t("about.title");
+    wrap.appendChild(h);
+    var paras = t("about.paragraphs");
+    if (Array.isArray(paras)) {
+      paras.forEach(function (text) {
+        var p = document.createElement("p");
+        p.textContent = text;
+        wrap.appendChild(p);
+      });
+    }
     return wrap;
   }
+
+  /* 编写脚本页 */
   function renderGenerator() {
     var wrap = document.createElement("div");
     wrap.className = "generator-page";
     wrap.innerHTML =
-      "<h1>编写p5.js脚本</h1>" +
-      "<p>输入标题和p5.js代码，上传图片（可选）点击提交脚本 </p>" +
+      '<h1 data-i18n="generator.title"></h1>' +
+      '<p data-i18n="generator.subtitle"></p>' +
       '<div class="form-group">' +
-      '  <label for="title">标题</label>' +
-      '  <input type="text" id="title" placeholder="例如：我的创意绘图">' +
+      '  <label for="title" data-i18n="generator.labelTitle"></label>' +
+      '  <input type="text" id="title" data-i18n-placeholder="generator.placeholderTitle">' +
       "</div>" +
       '<div class="form-group">' +
-      '  <label for="script">p5.js脚本代码</label>' +
+      '  <label for="script" data-i18n="generator.labelScript"></label>' +
       '  <textarea id="script"></textarea>' +
       "</div>" +
       '<div class="form-group">' +
-      '  <label>上传图片（可选，脚本可通过 <code>imageUrl</code> 加载）</label>' +
+      '  <label data-i18n="generator.labelImage"></label>' +
       '  <input type="file" id="image" accept="image/*">' +
       '  <div id="image-preview"></div>' +
       "</div>" +
-      '<button id="buildBtn" type="button">提交脚本</button>' +
+      '<button id="buildBtn" type="button" data-i18n="generator.buildBtn"></button>' +
       '<div id="result" class="result" style="display:none;"></div>';
+    applyI18n(wrap);
     return wrap;
   }
 
@@ -939,12 +962,11 @@
 
     destroyEditor();
     if (window.CodeMirror) {
-      /* ⭐ 初始主题名从主题配置读取，不再写死 light→default */
-      var initThemeConf = themeConf(currentTheme()) || THEMES[0];
+      var themeName = currentTheme() === "dark" ? "dracula" : "default";
       editor = window.CodeMirror.fromTextArea(textarea, {
         mode: "javascript",
         lineNumbers: true,
-        theme: initThemeConf.cmTheme,
+        theme: themeName,
         tabSize: 2,
         indentUnit: 2,
         autofocus: true,
@@ -958,7 +980,7 @@
 
       var cmPlaceholderEl = document.createElement("div");
       cmPlaceholderEl.className = "cm-placeholder-overlay";
-      cmPlaceholderEl.textContent = SCRIPT_PLACEHOLDER;
+      cmPlaceholderEl.textContent = t("generator.scriptPlaceholder") || "";
       cmWrapper.appendChild(cmPlaceholderEl);
 
       var gutters = cmWrapper.querySelector(".CodeMirror-gutters");
@@ -981,14 +1003,18 @@
       var file = this.files && this.files[0];
       if (!file) return;
       if (!/^image\//.test(file.type)) {
-        showAlert("文件类型不支持", "请选择图片文件。", true);
+        showAlert(
+          t("alerts.invalidFileTypeTitle"),
+          t("alerts.invalidFileTypeDesc"),
+          true,
+        );
         this.value = "";
         return;
       }
       if (file.size > MAX_IMAGE_BYTES) {
         showAlert(
-          "图片太大",
-          "单张图片请小于 1.5MB，以免本地存储空间耗尽。",
+          t("alerts.imageTooLargeTitle"),
+          t("alerts.imageTooLargeDesc"),
           true,
         );
         this.value = "";
@@ -998,24 +1024,32 @@
       reader.onload = function (e) {
         uploadedImageDataUrl = e.target.result;
         var tip = document.createElement("p");
-        tip.textContent = "✅ 图片上传成功";
+        tip.textContent = t("generator.imageSuccess");
         var img = document.createElement("img");
         img.src = e.target.result;
         img.className = "preview-img";
-        img.alt = "上传预览";
+        img.alt = t("generator.imageAlt");
         previewEl.replaceChildren(tip, img);
       };
       reader.onerror = function () {
-        showAlert("读取失败", "无法读取该图片，请重试。", true);
+        showAlert(
+          t("alerts.readFailedTitle"),
+          t("alerts.readFailedDesc"),
+          true,
+        );
       };
       reader.readAsDataURL(file);
     });
 
     buildBtn.addEventListener("click", function () {
-      var title = titleInput.value.trim() || "未命名脚本";
+      var title = titleInput.value.trim() || t("generator.defaultTitle");
       var script = (editor ? editor.getValue() : textarea.value).trim();
       if (!script) {
-        showAlert("缺少脚本", "请填写 p5.js 脚本代码。", true);
+        showAlert(
+          t("alerts.missingScriptTitle"),
+          t("alerts.missingScriptDesc"),
+          true,
+        );
         return;
       }
       var imageDataUrl = uploadedImageDataUrl || "";
@@ -1035,24 +1069,28 @@
 
       resultEl.style.display = "block";
       var msg = document.createElement("p");
-      msg.textContent = "✅ 页面生成成功！已保存到本地存储。";
+      msg.textContent = t("generator.resultSuccess");
 
       var btnContainer = document.createElement("div");
       btnContainer.className = "action-buttons";
 
       var previewBtn = document.createElement("button");
       previewBtn.className = "preview";
-      previewBtn.textContent = "▶️ 预览";
+      previewBtn.textContent = t("generator.previewBtn");
       previewBtn.addEventListener("click", function () {
         runPage(newId);
       });
 
       var downloadBtn = document.createElement("button");
       downloadBtn.className = "download";
-      downloadBtn.textContent = "⬇️ 下载HTML";
+      downloadBtn.textContent = t("generator.downloadBtn");
       downloadBtn.addEventListener("click", function () {
         downloadSingleHtml(
-          "p5_" + safeFileName(title) + "_" + newId + ".html",
+          (t("generator.filePrefix") || "p5_") +
+            safeFileName(title) +
+            "_" +
+            newId +
+            ".html",
           htmlContent,
         );
       });
@@ -1069,23 +1107,24 @@
     });
   }
 
-  /* AI助手 — 页面渲染 */
+  /* AI 助手 — 页面渲染 */
   function renderAIAssistant() {
     var wrap = document.createElement("div");
     wrap.className = "ai-page";
     wrap.innerHTML =
-      '<button class="ai-clear-btn" id="aiClearBtn" type="button" title="清除当前模型的对话内容">−</button>' +
+      '<button class="ai-clear-btn" id="aiClearBtn" type="button" data-i18n-title="ai.clearBtnTitle">−</button>' +
       '<div class="ai-messages" id="aiMessages"></div>' +
       '<div class="ai-input-wrap">' +
       '  <div class="ai-input-bar">' +
       '    <div class="ai-model-picker">' +
-      '      <button class="ai-model-btn" id="aiModelBtn" type="button" title="选择模型">+</button>' +
+      '      <button class="ai-model-btn" id="aiModelBtn" type="button" data-i18n-title="ai.modelBtnTitle">+</button>' +
       '      <div class="ai-model-menu" id="aiModelMenu"></div>' +
       "    </div>" +
-      '    <textarea id="aiInput" rows="1" placeholder="输入消息回车发送，Shift+回车换行"></textarea>' +
-      '    <button class="ai-send-btn" id="aiSendBtn" type="button" title="发送">↑</button>' +
+      '    <textarea id="aiInput" rows="1" data-i18n-placeholder="ai.inputPlaceholder"></textarea>' +
+      '    <button class="ai-send-btn" id="aiSendBtn" type="button" data-i18n-title="ai.sendBtnTitle">↑</button>' +
       "  </div>" +
       "</div>";
+    applyI18n(wrap);
     return wrap;
   }
 
@@ -1107,30 +1146,27 @@
       name.className = "ai-model-name";
       name.textContent = m.name;
 
-      /* 系统提示词按钮 */
       var promptBtn = document.createElement("button");
       promptBtn.className = "ai-prompt";
       promptBtn.type = "button";
-      promptBtn.title = "设置系统提示词";
+      promptBtn.title = t("ai.modelPromptTitle");
       promptBtn.textContent = "🎭";
       promptBtn.dataset.prompt = m.id;
       if (aiState.prompts[m.id] && aiState.prompts[m.id].trim()) {
         promptBtn.classList.add("has-prompt");
       }
 
-      /* API Key按钮 */
       var keyBtn = document.createElement("button");
       keyBtn.className = "ai-key";
       keyBtn.type = "button";
-      keyBtn.title = "设置 / 更新 API Key";
+      keyBtn.title = t("ai.modelKeyTitle");
       keyBtn.textContent = "🔑";
       keyBtn.dataset.key = m.id;
 
-      /* 下载按钮 */
       var dl = document.createElement("button");
       dl.className = "ai-dl";
       dl.type = "button";
-      dl.title = "下载该模型的对话 (Markdown)";
+      dl.title = t("ai.modelDownloadTitle");
       dl.textContent = "⬇";
       dl.dataset.dl = m.id;
 
@@ -1183,8 +1219,7 @@
     if (!model) {
       var empty = document.createElement("div");
       empty.className = "ai-empty";
-      empty.textContent =
-        "还没有选择模型\n\n点击左下角的 + 选择一个模型\n并输入API Key后开始对话";
+      empty.textContent = t("ai.emptyNoModel");
       box.replaceChildren(empty);
       return;
     }
@@ -1193,7 +1228,7 @@
     if (!chat.length) {
       var empty2 = document.createElement("div");
       empty2.className = "ai-empty";
-      empty2.textContent = "开始与 " + aiModelName(model) + " 对话吧";
+      empty2.textContent = tpl("ai.emptyStart", { model: aiModelName(model) });
       box.replaceChildren(empty2);
       return;
     }
@@ -1206,7 +1241,7 @@
       var b = document.createElement("div");
       b.className = "bubble";
       if (m.role === "assistant" && !m.content) {
-        b.textContent = "正在思考…";
+        b.textContent = t("ai.thinking");
         b.classList.add("pending");
       } else {
         b.textContent = m.content;
@@ -1234,7 +1269,6 @@
   }
 
   /* AI 助手 — 流式请求 */
-
   function streamAI(model, key, messages, systemPrompt, onDelta) {
     var conf = aiModelConf(model);
     var url, options;
@@ -1284,10 +1318,10 @@
 
     return fetch(url, options).then(function (res) {
       if (!res.ok) {
-        return res.text().then(function (t) {
+        return res.text().then(function (txt) {
           var msg = "HTTP " + res.status;
           try {
-            var d = JSON.parse(t);
+            var d = JSON.parse(txt);
             msg =
               (d.error && d.error.message) ||
               d.message ||
@@ -1351,10 +1385,9 @@
     });
   }
 
-  /* 弹出APIKey输入框（密码输入加密显示） */
   function promptAPIKey(model, onSaved) {
     showPrompt(
-      "设置 " + aiModelName(model) + " API Key",
+      tpl("ai.promptKeyTitle", { model: aiModelName(model) }),
       aiState.keys[model] || "",
       function (v) {
         aiState.keys[model] = v;
@@ -1365,17 +1398,13 @@
     );
   }
 
-  /* 弹出系统提示词输入框（多行文本） */
   function promptSystemPrompt(model) {
     var existing = aiState.prompts[model] || "";
     showPromptArea({
-      title: "设置 " + aiModelName(model) + " 系统提示词",
-      hint:
-        "这段提示词会作为system 消息在每次对话时发送给模型，用于设定角色、语气或规则。" +
-        "留空则不发送。Ctrl+Enter 可快速保存。",
+      title: tpl("ai.promptSystemTitle", { model: aiModelName(model) }),
+      hint: t("ai.promptSystemHint"),
       value: existing,
-      placeholder:
-        "例如：你是一位擅长p5.js生成艺术的助手，回答简洁专业，代码附注释。",
+      placeholder: t("ai.promptSystemPlaceholder"),
       onOk: function (v) {
         aiState.prompts[model] = v.trim();
         saveAIPrompts();
@@ -1391,7 +1420,6 @@
     });
   }
 
-  /* 选择和切换模型：无Key时先要求输入Key */
   function selectAIModel(model) {
     if (!aiModelConf(model)) return;
     if (!aiState.keys[model]) {
@@ -1412,20 +1440,28 @@
   function downloadAIChat(model) {
     var chat = aiState.chats[model] || [];
     if (!chat.length) {
-      showAlert("无法下载", "「" + aiModelName(model) + "」还没有对话内容。");
+      showAlert(
+        t("alerts.cannotDownloadTitle"),
+        tpl("alerts.cannotDownloadDesc", { model: aiModelName(model) }),
+      );
       return;
     }
-    var lines = ["# " + aiModelName(model) + " 对话记录", ""];
+    var lines = [
+      tpl("ai.downloadHeader", { model: aiModelName(model) }),
+      "",
+    ];
     var sys = aiState.prompts[model];
     if (sys && sys.trim()) {
-      lines.push("## 🎭 系统提示词");
+      lines.push(t("ai.downloadSysSection"));
       lines.push("");
       lines.push(sys);
       lines.push("");
     }
     chat.forEach(function (m) {
       lines.push(
-        m.role === "user" ? "## 🧑 我" : "## 🤖 " + aiModelName(model),
+        m.role === "user"
+          ? t("ai.downloadUserSection")
+          : tpl("ai.downloadAssistantSection", { model: aiModelName(model) }),
       );
       lines.push("");
       lines.push(m.content);
@@ -1436,7 +1472,8 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "ai_chat_" + model + "_" + Date.now() + ".md";
+    a.download =
+      (t("ai.filePrefix") || "ai_chat_") + model + "_" + Date.now() + ".md";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -1449,11 +1486,7 @@
     if (aiState.busy) return;
     var model = aiState.currentModel;
     if (!model) {
-      showAlert(
-        "请先选择模型",
-        "点击左下角的 + 按钮选择一个模型并设置Key。",
-        true,
-      );
+      showAlert(t("alerts.needModelTitle"), t("alerts.needModelDesc"), true);
       return;
     }
     var key = aiState.keys[model];
@@ -1473,7 +1506,7 @@
     if (!Array.isArray(chat)) chat = aiState.chats[model] = [];
 
     chat.push({ role: "user", content: text });
-    chat.push({ role: "assistant", content: "" }); /* 占位 */
+    chat.push({ role: "assistant", content: "" });
     saveAIChats();
 
     inputEl.value = "";
@@ -1502,11 +1535,11 @@
       if (isGemini) {
         var cand = obj.candidates && obj.candidates[0];
         if (cand && cand.content && cand.content.parts) {
-          var t = "";
+          var s = "";
           for (var i = 0; i < cand.content.parts.length; i++) {
-            t += cand.content.parts[i].text || "";
+            s += cand.content.parts[i].text || "";
           }
-          pushDelta(t);
+          pushDelta(s);
         }
       } else {
         var d = obj.choices && obj.choices[0] && obj.choices[0].delta;
@@ -1514,14 +1547,12 @@
       }
     };
 
-    /* 发送给API的 messages不含最后那个占位assistant */
     var payload = chat.slice(0, -1);
-    /* 取该模型的系统提示词 */
     var systemPrompt = aiState.prompts[model] || "";
 
     streamAI(model, key, payload, systemPrompt, onDelta)
       .then(function () {
-        chat[chat.length - 1].content = accumulated || "(空回复)";
+        chat[chat.length - 1].content = accumulated || t("ai.emptyReply");
         saveAIChats();
         aiState.busy = false;
         updateAISendBtn();
@@ -1538,9 +1569,8 @@
         saveAIChats();
         renderAIMessages();
         showAlert(
-          "请求失败",
-          String((err && err.message) || err) ||
-            "网络错误，请检查 API Key 或稍后重试。",
+          t("alerts.requestFailedTitle"),
+          String((err && err.message) || err) || t("alerts.requestFailedDesc"),
           true,
         );
       });
@@ -1549,17 +1579,23 @@
   function clearAIChat() {
     var model = aiState.currentModel;
     if (!model) {
-      showAlert("无需清除", "还没有选择模型，请点击左下角的 + 选择一个模型。");
+      showAlert(
+        t("alerts.noNeedClearTitle"),
+        t("alerts.noNeedClearModelDesc"),
+      );
       return;
     }
     var chat = aiState.chats[model] || [];
     if (!chat.length) {
-      showAlert("无需清除", "「" + aiModelName(model) + "」当前没有对话内容。");
+      showAlert(
+        t("alerts.noNeedClearTitle"),
+        tpl("alerts.noNeedClearChatDesc", { model: aiModelName(model) }),
+      );
       return;
     }
     showConfirm(
-      "清除对话",
-      "确定要清除与「" + aiModelName(model) + "」的全部对话内容吗？",
+      t("alerts.clearChatTitle"),
+      tpl("alerts.clearChatConfirm", { model: aiModelName(model) }),
       function () {
         aiState.chats[model] = [];
         saveAIChats();
@@ -1590,7 +1626,6 @@
 
     if (modelMenu) {
       modelMenu.addEventListener("click", function (e) {
-        /* 点击 🎭：设置系统提示词 */
         var promptBtn = e.target.closest("[data-prompt]");
         if (promptBtn) {
           e.stopPropagation();
@@ -1598,21 +1633,18 @@
           promptSystemPrompt(promptBtn.dataset.prompt);
           return;
         }
-        /* 点击 🔑：设置 / 更新 Key */
         var keyBtn = e.target.closest("[data-key]");
         if (keyBtn) {
           e.stopPropagation();
           promptAPIKey(keyBtn.dataset.key);
           return;
         }
-        /* 点击 ⬇：下载该模型对话 */
         var dl = e.target.closest("[data-dl]");
         if (dl) {
           e.stopPropagation();
           downloadAIChat(dl.dataset.dl);
           return;
         }
-        /* 点击模型项：选择模型 */
         var item = e.target.closest(".ai-model-item");
         if (item) {
           e.stopPropagation();
@@ -1654,11 +1686,9 @@
   }
 
   /* 路由渲染 */
-
   function render() {
     var path = getRoute();
 
-    /* 离开首页时，若当前是运行指定脚本状态，则重置为随机状态 */
     if (path !== "/" && path !== "" && path !== "/index.html") {
       if (runner.mode === "page") {
         runner.mode = "random";
@@ -1666,13 +1696,11 @@
       }
     }
 
-    /* 首页全屏p5运行器 */
     if (path === "/" || path === "" || path === "/index.html") {
       renderRunner();
       return;
     }
 
-    /* 离开首页：解除全屏锁定，移除AI模式 */
     if (appEl.classList.contains("preview-mode")) {
       appEl.classList.remove("preview-mode");
     }
@@ -1699,9 +1727,9 @@
     } else {
       var wrap = document.createElement("div");
       var h = document.createElement("h1");
-      h.textContent = "页面 " + path;
+      h.textContent = t("unknown.titlePrefix") + path;
       var p = document.createElement("p");
-      p.textContent = "内容未定义。";
+      p.textContent = t("unknown.desc");
       wrap.appendChild(h);
       wrap.appendChild(p);
       appEl.appendChild(wrap);
@@ -1719,13 +1747,16 @@
     appEl = $("#app");
     sidebarSearchEl = $("#sidebarSearch");
 
+    // 填充页面标题与静态文本
+    document.title = t("meta.title") || document.title;
+    applyI18n(document);
+    if (!appEl.textContent.trim()) appEl.textContent = t("meta.loading");
+
     initAIState();
 
-    /* 读取保存的主题；如果旧数据里存的是未知id，
-        applyTheme会自动fallback到THEMES[0]（light） */
-    var savedTheme = THEMES[0].id;
+    var savedTheme = "light";
     try {
-      savedTheme = localStorage.getItem(THEME_KEY) || THEMES[0].id;
+      savedTheme = localStorage.getItem(THEME_KEY) || "light";
     } catch (e) {}
     applyTheme(savedTheme);
 
@@ -1754,8 +1785,8 @@
       function (e) {
         var now = Date.now();
         if (now - lastTouchEnd <= 300) {
-          var t = e.target;
-          var tag = t && t.tagName ? t.tagName.toLowerCase() : "";
+          var tgt = e.target;
+          var tag = tgt && tgt.tagName ? tgt.tagName.toLowerCase() : "";
           if (
             tag !== "input" &&
             tag !== "textarea" &&
@@ -1899,9 +1930,23 @@
     render();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  /* 启动：先加载json */
+  loadContent()
+    .then(function (data) {
+      C = data || {};
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })
+    .catch(function (err) {
+      console.error("加载 content.json 失败：", err);
+      var app = document.getElementById("app");
+      if (app) {
+        app.textContent = tpl("meta.contentLoadFailed", {
+          msg: (err && err.message) || String(err),
+        });
+      }
+    });
 })();
