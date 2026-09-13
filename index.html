@@ -24,50 +24,82 @@
       disabled
     />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
     <!-- 自定义样式 -->
     <link rel="stylesheet" href="css/style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   </head>
   <body>
     <button
       class="hamburger-btn"
       id="hamburgerBtn"
-      aria-label="打开菜单"
+      data-i18n-aria-label="sidebar.menuAriaLabel"
       aria-expanded="false"
       aria-controls="sidebar"
     >
       ☰
     </button>
 
-    <nav class="sidebar" id="sidebar" aria-label="主导航">
+    <nav
+      class="sidebar"
+      id="sidebar"
+      data-i18n-aria-label="sidebar.navAriaLabel"
+    >
       <!-- 搜索框 -->
       <div class="sidebar-search">
         <input
           type="search"
           id="sidebarSearch"
-          placeholder="🔍搜索脚本..."
+          data-i18n-placeholder="sidebar.searchPlaceholder"
+          data-i18n-aria-label="sidebar.searchAriaLabel"
           autocomplete="off"
-          aria-label="搜索脚本"
         />
       </div>
 
-      <div class="nav-item" data-path="#/" role="button" tabindex="0">
+      <div
+        class="nav-item"
+        data-path="#/"
+        data-i18n="sidebar.navHome"
+        role="button"
+        tabindex="0"
+      >
         🏠 首页
       </div>
-      <div class="nav-item" data-path="#/about" role="button" tabindex="0">
+      <div
+        class="nav-item"
+        data-path="#/about"
+        data-i18n="sidebar.navAbout"
+        role="button"
+        tabindex="0"
+      >
         📖 关于
       </div>
-      <div class="nav-item" data-path="#/ai" role="button" tabindex="0">
+      <div
+        class="nav-item"
+        data-path="#/ai"
+        data-i18n="sidebar.navAI"
+        role="button"
+        tabindex="0"
+      >
         🤖 AI助手
       </div>
-      <div class="nav-item" data-path="#/generator" role="button" tabindex="0">
+      <div
+        class="nav-item"
+        data-path="#/generator"
+        data-i18n="sidebar.navGenerator"
+        role="button"
+        tabindex="0"
+      >
         ✏️ 编写脚本
       </div>
       <div class="divider"></div>
-      <div class="section-title">📄 我的脚本</div>
+      <div class="section-title" data-i18n="sidebar.myScripts">
+        📄 我的脚本
+      </div>
       <div id="sidebar-pages">
-        <div class="no-pages">暂无生成的脚本</div>
+        <div class="no-pages" data-i18n="sidebar.emptyPages">
+          暂无生成的脚本
+        </div>
       </div>
 
       <!-- 底部 -->
@@ -78,6 +110,7 @@
             id="exportZipSidebar"
             role="button"
             tabindex="0"
+            data-i18n="sidebar.exportZip"
           >
             📦 导出ZIP
           </div>
@@ -87,6 +120,7 @@
             id="themeToggleSidebar"
             role="button"
             tabindex="0"
+            data-i18n="sidebar.themeToggle"
           >
             🌓 切换主题
           </div>
@@ -109,6 +143,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 
+    <!-- 主脚本 -->
     <script src="js/script.js"></script>
   </body>
 </html>
