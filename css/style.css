@@ -73,6 +73,7 @@ body.dark-mode {
   --hover-prompt: rgba(155, 89, 182, 0.25);
   --hover-dl: rgba(255, 255, 255, 0.14);
 }
+/*
 body.theme-green {
   --bg: #e8f0e8;
   --surface: #f4fbf4;
@@ -80,6 +81,7 @@ body.theme-green {
   --line: rgba(0, 60, 0, 0.1);
   --hover: rgba(0, 60, 0, 0.06);
 }
+*/
 
 /* 全局 */
 * {
