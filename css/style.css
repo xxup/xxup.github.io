@@ -1,4 +1,4 @@
-/* 主题变量（亮色默认值） */
+/* 主题变量 */
 :root {
   /* 固定色（亮暗共用）*/
   --primary: #007bff;
@@ -10,21 +10,21 @@
   --purple: #9b59b6;
   --neutral-btn: #6c757d;
 
-  /* 主题语义色 · 亮色值 */
-  --bg: #f5f5f5; /* 页面底色 */
-  --surface: #ffffff; /* 内容面 */
-  --text: #222222; /* 主文字 */
-  --hamburger: #333333; /* 汉堡按钮专用 */
-  --text-muted: #888888; /* 中性灰（两主题相同） */
-  --text-secondary: #888888; /* section-title / modal-hint */
-  --text-tertiary: #999999; /* ai-empty */
-  --text-placeholder: #9aa0a6; /* 输入框占位 */
-  --hover: rgba(0, 0, 0, 0.055); /* 一般悬停 */
-  --hover-strong: rgba(0, 0, 0, 0.06); /* link-btn 悬停 */
-  --line: rgba(0, 0, 0, 0.08); /* 分隔线 */
-  --border-input: #cccccc; /* 表单/弹窗边框 */
-  --input-bg: transparent; /* sidebar 搜索框底 */
-  --input-bg-fill: #ffffff; /* 表单/弹窗实心输入底 */
+  /* 亮色主题 */
+  --bg: #f5f5f5; /*页面底色*/
+  --surface: #ffffff; /*内容面*/
+  --text: #222222; /*主文字*/
+  --hamburger: #333333; /*汉堡按钮*/
+  --text-muted: #888888; /*中性灰（两相同）*/
+  --text-secondary: #888888; /*section-title/modal-hint*/
+  --text-tertiary: #999999; /*ai-empty*/
+  --text-placeholder: #9aa0a6; /*输入框占位*/
+  --hover: rgba(0, 0, 0, 0.055); /*一般悬停*/
+  --hover-strong: rgba(0, 0, 0, 0.06); /* link-btn悬停 */
+  --line: rgba(0, 0, 0, 0.08); /*分隔线*/
+  --border-input: #cccccc; /*表单弹窗边框*/
+  --input-bg: transparent; /*搜索框底*/
+  --input-bg-fill: #ffffff; /*表单/弹窗实心输入底*/
   --result-bg: #e9f7fe;
   --modal-bg: #ffffff;
   --modal-text: #222222;
@@ -44,7 +44,7 @@
   --sidebar-w: min(280px, 78vw);
 }
 
-/* 暗色主题：仅覆盖变量值 */
+/* 暗色主题 */
 body.dark-mode {
   --bg: #1e1e1e;
   --surface: #2d2d2d;
@@ -74,7 +74,7 @@ body.dark-mode {
   --hover-dl: rgba(255, 255, 255, 0.14);
 }
 
-/* 基础 */
+/* 全局 */
 * {
   box-sizing: border-box;
 }
