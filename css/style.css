@@ -585,7 +585,7 @@ button:disabled {
   color: var(--danger);
 }
 
-/* AI 助手 */
+/* AI助手 */
 .ai-page {
   position: relative;
   display: flex;
