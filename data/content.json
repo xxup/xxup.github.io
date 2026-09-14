@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "而且创意｜可视化编程",
+    "title": "randomArt可视化创意编程",
     "loading": "加载中…",
     "contentLoadFailed": "内容加载失败：{msg}。请通过 HTTP 服务器访问（例如：python -m http.server）。"
   },
@@ -26,8 +26,8 @@
   "about": {
     "title": "简介",
     "paragraphs": [
-      "而且创意｜可视化编程是纯前端工具，基于localStorage存储，无需后端。",
-      "首页随机加载运行脚本，编写p5.js脚本点击“提交脚本”自动添加到左侧栏“我的脚本”列表中，再点击“预览”即可运行该脚本，或打开边侧栏点击选择脚本名即可直接运行该脚本，再次点击其它导航项会回到随机状态。",
+      "randomArt可视化创意编程是纯前端工具，基于localStorage存储，无需后端。",
+      "首页随机加载运行脚本，编写p5.js脚本点击“提交脚本”自动添加到左侧栏“我的脚本”列表中，再点击“预览”即可运行该脚本，或打开边侧栏点击选择脚本运行脚本，再次点击其它导航项会回到随机状态。",
       "AI助手支持ChatGPT / Gemini / DeepSeek流式输出，每个模型可单独设置API Key与系统提示词，并可导出对话内容为Markdown格式。",
       "使用CodeMirror实现代码高亮，支持亮色/暗色主题。",
       "所有编写的脚本均可导出为ZIP包，也可单独下载为HTML。"
@@ -53,7 +53,7 @@
     "zipName": "p5_works.zip"
   },
   "runner": {
-    "iframeTitle": "p5 运行"
+    "iframeTitle": "p5运行"
   },
   "ai": {
     "clearBtnTitle": "清除当前模型的对话内容",
@@ -65,16 +65,16 @@
     "thinking": "正在思考…",
     "emptyReply": "(空回复)",
     "modelPromptTitle": "设置系统提示词",
-    "modelKeyTitle": "设置 / 更新 API Key",
+    "modelKeyTitle": "设置/更新API Key",
     "modelDownloadTitle": "下载该模型的对话 (Markdown)",
-    "promptKeyTitle": "设置 {model} API Key",
-    "promptSystemTitle": "设置 {model} 系统提示词",
-    "promptSystemHint": "这段提示词会作为 system 消息在每次对话时发送给模型，用于设定角色、语气或规则。留空则不发送。Ctrl+Enter 可快速保存。",
+    "promptKeyTitle": "设置{model}API Key",
+    "promptSystemTitle": "设置{model}系统提示词",
+    "promptSystemHint": "这段提示词会作为system消息在每次对话时发送给模型，用于设定角色、语气或规则。留空则不发送。Ctrl+回车 可快速保存。",
     "promptSystemPlaceholder": "例如：你是一位擅长p5.js生成艺术的助手，回答简洁专业，代码附注释。",
     "downloadHeader": "# {model} 对话记录",
-    "downloadSysSection": "## 🎭 系统提示词",
-    "downloadUserSection": "## 🧑 我",
-    "downloadAssistantSection": "## 🤖 {model}",
+    "downloadSysSection": "## 系统提示词",
+    "downloadUserSection": "## 我",
+    "downloadAssistantSection": "## {model}",
     "filePrefix": "ai_chat_"
   },
   "modal": {
@@ -85,7 +85,7 @@
     "clearPrompt": "清除提示词"
   },
   "unknown": {
-    "titlePrefix": "页面 ",
+    "titlePrefix": "页面",
     "desc": "内容未定义。"
   },
   "alerts": {
@@ -105,18 +105,18 @@
     "cannotExportDesc": "当前没有可导出的作品。",
     "exportFailedTitle": "导出失败",
     "deleteTitle": "删除作品",
-    "deleteConfirm": "确定要删除「{title}」吗？此操作不可恢复。",
+    "deleteConfirm": "确定要删除{title}吗？此操作不可恢复。",
     "renameTitle": "重命名作品",
     "needModelTitle": "请先选择模型",
-    "needModelDesc": "点击左下角的 + 按钮选择一个模型并设置Key。",
+    "needModelDesc": "点击左下角的 + 按钮选择模型并设置Key。",
     "requestFailedTitle": "请求失败",
     "requestFailedDesc": "网络错误，请检查 API Key 或稍后重试。",
     "noNeedClearTitle": "无需清除",
-    "noNeedClearModelDesc": "还没有选择模型，请点击左下角的 + 选择一个模型。",
-    "noNeedClearChatDesc": "「{model}」当前没有对话内容。",
+    "noNeedClearModelDesc": "还没有选择模型，请点击左下角的 + 选择模型。",
+    "noNeedClearChatDesc": "{model}当前没有对话内容。",
     "clearChatTitle": "清除对话",
-    "clearChatConfirm": "确定要清除与「{model}」的全部对话内容吗？",
+    "clearChatConfirm": "确定要清除与{model}的全部对话内容吗？",
     "cannotDownloadTitle": "无法下载",
-    "cannotDownloadDesc": "「{model}」还没有对话内容。"
+    "cannotDownloadDesc": "{model}还没有对话内容。"
   }
 }
