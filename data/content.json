@@ -60,7 +60,7 @@
     "modelBtnTitle": "选择模型",
     "inputPlaceholder": "输入消息回车发送，Shift+回车换行",
     "sendBtnTitle": "发送",
-    "emptyNoModel": "还没有选择模型\n\n点击左下角的 + 选择一个模型\n并输入API Key后开始对话",
+    "emptyNoModel": "还没有选择模型\n\n点击左下角的 + 选择模型并输入Key开始对话",
     "emptyStart": "开始与 {model} 对话吧",
     "thinking": "正在思考…",
     "emptyReply": "(空回复)",
