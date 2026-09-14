@@ -39,7 +39,7 @@
     },
   ];
 
-  /* 内容（由 json 填充） */
+  /* 内容调用json */
   var C = {};
 
   function t(key) {
@@ -69,7 +69,7 @@
     });
   }
 
-  /* 将 data-i18n / data-i18n-placeholder / data-i18n-title / data-i18n-aria-label 填充 */
+  /*将data-i18n/data-i18n-placeholder/data-i18n-title/data-i18n-aria-label填充*/
   function applyI18n(root) {
     var r = root || document;
     $$("[data-i18n]", r).forEach(function (el) {
@@ -90,7 +90,7 @@
     });
   }
 
-  /*  通用工具   */
+  /* 通用工具 */
   function $(sel, root) {
     return (root || document).querySelector(sel);
   }
@@ -251,7 +251,7 @@
     });
   }
 
-  /* 多行文本输入弹窗（系统提示词） */
+  /* 多行文本输入弹窗-系统提示词 */
   function showPromptArea(opts) {
     openModal(function (box) {
       var h = document.createElement("h3");
@@ -403,7 +403,7 @@
       });
   }
 
-  /* AI 状态 */
+  /* AI状态 */
   var aiState = {
     currentModel: null,
     keys: {},
@@ -477,7 +477,7 @@
     aiState.currentModel = null;
   }
 
-  /* 全局 DOM 引用 */
+  /* 全局DOM引用 */
   var sidebarPagesEl, sidebarEl, overlayEl, hamburgerBtn;
   var sidebarSearchEl;
   var sidebarSearchKeyword = "";
@@ -591,7 +591,7 @@
     sidebarPagesEl.replaceChildren(frag);
   }
 
-  /* iframe 事件代理 */
+  /* iframe事件代理 */
   function bindIframeProxy(iframe) {
     var iwin, idoc;
     try {
@@ -1107,7 +1107,7 @@
     });
   }
 
-  /* AI 助手 — 页面渲染 */
+  /* AI助手—页面渲染 */
   function renderAIAssistant() {
     var wrap = document.createElement("div");
     wrap.className = "ai-page";
@@ -1268,7 +1268,7 @@
     return last.querySelector(".bubble");
   }
 
-  /* AI 助手 — 流式请求 */
+  /* AI助手 — 流式请求 */
   function streamAI(model, key, messages, systemPrompt, onDelta) {
     var conf = aiModelConf(model);
     var url, options;
@@ -1930,7 +1930,7 @@
     render();
   }
 
-  /* 启动：先加载json */
+  /* 启动先加载json */
   loadContent()
     .then(function (data) {
       C = data || {};
