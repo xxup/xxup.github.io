@@ -8,8 +8,7 @@
   var MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
   var MAX_SESSION_IMAGES = 10;
   var P5_DIR = "p5/";
-  var P5_CDN =
-    "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
+  var P5_CDN = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js";
   var P5_FILES = ["sketch1.js", "sketch2.js", "sketch3.js"];
   var AI_KEY_STORAGE = "p5_ai_keys";
   var AI_CHAT_STORAGE = "p5_ai_chats";
@@ -27,7 +26,6 @@
   var NEAR_BOTTOM_PX = 80;
   var SEARCH_DEBOUNCE_MS = 150;
   var STORAGE_KB_MULTIPLIER = 2;
-
   var TOOL_SPECS = [
     {
       name: "insert_code",
@@ -125,7 +123,6 @@
       params: { type: "object", properties: {} },
     },
   ];
-
   function _toGeminiType(t) {
     return String(t || "").toUpperCase();
   }
@@ -168,7 +165,6 @@
       },
     ];
   }
-
   var AI_MODELS = [];
   var I18N = {};
   var LANG = "zh";
@@ -401,7 +397,6 @@
       if (!Array.isArray(aiState.chats[m.id])) aiState.chats[m.id] = [];
       if (typeof aiState.prompts[m.id] !== "string") aiState.prompts[m.id] = "";
     });
-    /* 【新增】A1: 恢复上次模型 */
     var saved = loadCurrentModel();
     aiState.currentModel = saved && aiModelConf(saved) ? saved : null;
   }
@@ -615,8 +610,7 @@
       box.appendChild(a);
     });
   }
-  
-function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
+  function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
   openModal(function (box) {
     box.appendChild(el("h3", null, title));
     if (hint) box.appendChild(el("div", "modal-hint", hint));
@@ -626,7 +620,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     input.autocomplete = "off";
     input.spellcheck = false;
     var a = el("div", "modal-actions");
-    /* 【新增】F1+: 可选左侧清除按钮 */
     var leftWrap = document.createElement("div");
     if (opts && opts.onClear) {
       var clearBtn = el(
@@ -664,41 +657,7 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     box.appendChild(input);
     box.appendChild(a);
   });
-}
-  /*
-  function showPrompt(title, defaultValue, onOk, inputType) {
-    openModal(function (box) {
-      box.appendChild(el("h3", null, title));
-      var input = document.createElement("input");
-      input.type = inputType || "text";
-      input.value = defaultValue || "";
-      input.autocomplete = "off";
-      input.spellcheck = false;
-      var a = el("div", "modal-actions");
-      var rg = rightGroup();
-      var cancel = el("button", "cancel", T("common.cancel"));
-      cancel.addEventListener("click", closeModal);
-      var ok = el("button", null, T("common.save"));
-      ok.addEventListener("click", function () {
-        var v = input.value.trim();
-        if (!v) {
-          input.focus();
-          return;
-        }
-        closeModal();
-        onOk(v);
-      });
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") ok.click();
-      });
-      rg.appendChild(cancel);
-      rg.appendChild(ok);
-      a.appendChild(rg);
-      box.appendChild(input);
-      box.appendChild(a);
-    });
   }
-  */
   function showPromptArea(opts) {
     openModal(function (box) {
       box.appendChild(el("h3", null, opts.title));
@@ -921,121 +880,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
         );
       });
   }
-  /* J10 页面生成与导出 /
-  function generatePageHtml(title, script, imageDataUrl, hasImage) {
-    var safeTitle = escapeHtml(
-      (title || T("generator.untitledPage")).slice(0, MAX_TITLE_LEN),
-    );
-    var imgVar;
-    if (imageDataUrl) {
-      imgVar = 'var imageUrl = "' + imageDataUrl + '";';
-    } else if (hasImage) {
-      imgVar =
-        "/* 原作品含用户上传的图片，因存储优化未嵌入此文件。\n" +
-        "   预览时可在本工具中查看图片效果；\n" +
-        "   若要在下载的文件里使用图片，请在工具中重新上传后再导出。 /\n" +
-        "    var imageUrl = null;";
-    } else {
-      imgVar = "var imageUrl = null;";
-    }
-    var safeImgVar = escapeScriptClose(imgVar);
-    var safeScript = escapeScriptClose(script);
-
-    return (
-      "<!DOCTYPE html>\n" +
-      '<html lang="zh-CN">\n' +
-      "<head>\n" +
-      '  <meta charset="UTF-8">\n' +
-      '  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">\n' +
-      "  <title>" +
-      safeTitle +
-      "</title>\n" +
-      "  <style>\n" +
-      "    html, body { margin: 0; padding: 0; touch-action: none; }\n" +
-      "    canvas { display: block; touch-action: none; }\n" +
-      "  </style>\n" +
-      '  \x3Cscript src="' +
-      P5_CDN +
-      '">\x3C/script>\n' +
-      "</head>\n" +
-      "<body>\n" +
-      "  \x3Cscript>\n" +
-      "    " +
-      safeImgVar +
-      "\n" +
-      "    " +
-      safeScript +
-      "\n" +
-      "  \x3C/script>\n" +
-      "</body>\n" +
-      "</html>"
-    );
-  }
-  function injectSessionImage(html, dataUrl) {
-    if (!html || !dataUrl) return html;
-    var escaped = String(dataUrl)
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
-    return html.replace(
-      /var imageUrl = (?:null|"[^"]*");/,
-      'var imageUrl = "' + escaped + '";',
-    );
-  }
-  function downloadSingleHtml(filename, html) {
-    try {
-      var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(function () {
-        URL.revokeObjectURL(url);
-      }, 1000);
-    } catch (err) {
-      showAlert(
-        T("page.downloadFailTitle"),
-        String((err && err.message) || err),
-        true,
-      );
-    }
-  }
-  function exportZip() {
-    var pages = getPages();
-    if (!pages.length) {
-      showAlert(T("page.exportEmptyTitle"), T("page.exportEmptyBody"));
-      return;
-    }
-    var zip = new JSZip();
-    pages.forEach(function (page, idx) {
-      var base = safeFileName(page.title);
-      zip.file("p5_" + base + "_" + (idx + 1) + ".html", page.html);
-    });
-    zip
-      .generateAsync({ type: "blob" })
-      .then(function (blob) {
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.href = url;
-        link.download = "p5_works.zip";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(function () {
-          URL.revokeObjectURL(url);
-        }, 1000);
-      })
-      .catch(function (err) {
-        showAlert(
-          T("page.exportFailTitle"),
-          String((err && err.message) || err),
-          true,
-        );
-      });
-  }
-  */
 
   /* J11 随机p5与srcdoc */
   function pickRandomP5File() {
@@ -1122,7 +966,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     });
     sidebarPagesEl.replaceChildren(frag);
   }
-
 
   /* J13 iframe代理 */
   function bindIframeProxy(iframe) {
@@ -1452,7 +1295,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     } catch (e) {}
   }
 
-
   /* J17 路由与静态页 */
   function getRoute() {
     var hash = location.hash;
@@ -1753,7 +1595,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
           ($("#title") ? $("#title").value.trim() : "") ||
           T("generator.untitled");
         var h2 = generatePageHtml(t3, s2, uploadedImageDataUrl || "");
-        /* 【改】A4 */
         runner.mode = "temp";
         runner.tempHtml = h2;
         runner.pageId = null;
@@ -2332,7 +2173,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
         e.stopPropagation();
         closeGenMenu();
         aiState.currentModel = item.dataset.model;
-        /* 【新增】A1 */
         saveCurrentModel(aiState.currentModel);
         refreshGenModelBtn();
         refreshAIModelUI();
@@ -2362,7 +2202,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     }
     refreshGenModelBtn();
   }
-
 
   /* J22 生成器主体 */
   function bindGenerator() {
@@ -2834,7 +2673,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
   function buildEmptyNode(text) {
     return el("div", "ai-empty", text);
   }
-
 
   /* J27 AI消息渲染 */
   function renderAIMessages() {
@@ -3357,7 +3195,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
         showAlert(T("test.failTitle"), msg, true);
       });
   }
-  
   function promptAPIKey(model, onSaved) {
   var hasKey = !!aiState.keys[model];
   showPrompt(
@@ -3381,21 +3218,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
       : null,
       );
   }
-  
-  /*
-  function promptAPIKey(model, onSaved) {
-    showPrompt(
-      T("ai.setKeyTitle", { model: aiModelName(model) }),
-      aiState.keys[model] || "",
-      function (v) {
-        aiState.keys[model] = v;
-        saveAIKeys();
-        if (onSaved) onSaved();
-      },
-      "password",
-    );
-  }
-  */
   function promptSystemPrompt(model) {
     var existing = aiState.prompts[model] || "";
     showPromptArea({
@@ -3432,7 +3254,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     if (!aiState.keys[model]) {
       promptAPIKey(model, function () {
         aiState.currentModel = model;
-        /* 【新增】A1 */
         saveCurrentModel(model);
         refreshAIModelUI();
         renderAIMessages();
@@ -3441,7 +3262,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
       return;
     }
     aiState.currentModel = model;
-    /* 【新增】A1 */
     saveCurrentModel(model);
     refreshAIModelUI();
     renderAIMessages();
@@ -3449,23 +3269,7 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
   }
 
   /* J30 对话导入导出 */
-  /*
   function triggerDownload(content, mime, filename) {
-    var blob = new Blob([content], { type: mime });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () {
-      URL.revokeObjectURL(url);
-    }, 1000);
-  }
-  */
-  function triggerDownload(content, mime, filename) {
-  /* iOS Safari 中 blob URL 只预览不下载，改用 data URL */
   try {
     var encoded = btoa(unescape(encodeURIComponent(content)));
     var url = "data:" + mime + ";base64," + encoded;
@@ -3477,7 +3281,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
     a.click();
     document.body.removeChild(a);
   } catch (e) {
-    /* 极端情况（超大内容 / btoa 失败）回退到 blob */
     var blob = new Blob([content], { type: mime });
     var burl = URL.createObjectURL(blob);
     var b = document.createElement("a");
@@ -3491,8 +3294,7 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
       URL.revokeObjectURL(burl);
     }, 1000);
   }
-}
-
+  }
   function downloadAIChatMd(model) {
     var chat = aiState.chats[model] || [];
     if (!chat.length) {
@@ -3745,7 +3547,6 @@ function showPrompt(title, defaultValue, onOk, inputType, hint, opts) {
       true,
     );
   }
-
 
   /* J32 AI助手绑定  */
   function bindAIAssistant() {
