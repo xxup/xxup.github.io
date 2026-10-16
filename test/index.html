@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Day 1</title>
+        <link rel="stylesheet" href="https://dailycssdesign.com/libs/v1/styles.min.css?v=4" />
+        <style>
+            body {
+                background-color: #330b56;
+            }
+
+            .frame {
+                background-color: #0e117d;
+                background-image: repeating-linear-gradient(
+                    45deg,
+                    #0e117d,
+                    #410948 50px,
+                    #ef52c2 50px,
+                    #f376a8 100px
+                );
+            }
+
+            .fill-width {
+                z-index: 1;
+            }
+
+            .shape {
+                width: 500px;
+                height: 500px;
+
+                width: 50vmin;
+                height: 50vmin;
+
+                position: relative;
+                overflow: hidden;
+            }
+
+            .shape-fill {
+                background-image: linear-gradient(to right, #9c0bf8, #f05dba);
+                background-image: linear-gradient(to right, #9c0bf8, #46e5ff);
+
+                animation: rotate 50s linear reverse infinite;
+            }
+
+            .rotate {
+                transform-style: preserve-3d;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) rotate(0);
+                animation: rotateTranslate 100s linear infinite;
+            }
+
+            @keyframes rotate {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes rotateTranslate {
+                to {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
+            }
+
+            .rect {
+                position: absolute;
+                width: 200px;
+                height: 30px;
+                background-color: #fff;
+                transform: translateZ(10px);
+                z-index: 1;
+            }
+
+            .rect--1 {
+                left: 10%;
+                top: 37%;
+            }
+
+            .rect--2 {
+                right: 15%;
+                bottom: 50%;
+                transform: translateZ(20px);
+                width: 100px;
+                height: 10px;
+                box-shadow: 0 6px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            h1 {
+                padding: 5px 40px;
+                white-space: nowrap;
+                pointer-events: none;
+                background-color: rgba(120, 80, 255, 0.3);
+                z-index: 2;
+            }
+
+            @supports (mix-blend-mode: screen) {
+                h1 {
+                    mix-blend-mode: screen;
+                    background-color: #005dff;
+                }
+            }
+
+            .stripe {
+                width: 10%;
+                height: 4px;
+                background-color: #fff;
+                transform: translateZ(-100px);
+                position: absolute;
+                z-index: 1;
+            }
+
+            .stripe--1 {
+                bottom: 20%;
+                left: 28%;
+            }
+
+            .stripe--2 {
+                top: 30%;
+                right: 36%;
+                width: 5%;
+            }
+
+            .square {
+                position: absolute;
+                width: 5%;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                z-index: 2;
+            }
+
+            .square:after {
+                content: '';
+                display: block;
+                padding-bottom: 100%;
+            }
+
+            .square__shape {
+                background-image: linear-gradient(
+                    to bottom right,
+                    #f05eb8,
+                    #9100ff
+                );
+            }
+
+            .square__shadow {
+                box-shadow: 0 0 100px #9100ff;
+                opacity: 0.15;
+            }
+
+            .square--1 {
+                left: 12%;
+                top: 15%;
+            }
+
+            .square--2 {
+                right: 12%;
+                bottom: 15%;
+                width: 12%;
+                transform: rotate(180deg);
+                box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.3);
+            }
+
+            @media (-moz-touch-enabled: 0), (pointer: fine) {
+                .square {
+                    transition: transform 2s;
+                }
+
+                .square__shadow {
+                    transition: opacity 2s;
+                }
+
+                .square:hover {
+                    transform: scale(1.1) rotate(20deg);
+                }
+
+                .square:hover .square__shadow {
+                    opacity: 1;
+                }
+            }
+
+            @media (max-width: 900px) {
+                h1 {
+                    font-size: 50px;
+                }
+            }
+
+            @media (max-width: 600px) {
+                .frame {
+                    top: 20px;
+                    right: 20px;
+                    bottom: 20px;
+                    left: 20px;
+                }
+
+                h1 {
+                    white-space: normal;
+                    width: 100%;
+                    text-align: center;
+                    line-height: 1;
+                }
+
+                .shape {
+                    width: 80vmin;
+                    height: 80vmin;
+                }
+
+                .rect--1 {
+                    left: -5%;
+                    top: 22%;
+                    height: 14px;
+                    width: 30%;
+                }
+
+                .rect--2 {
+                    bottom: 11%;
+                }
+
+                .square--1 {
+                    left: auto;
+                    right: 16%;
+                    top: 17%;
+                    width: 14%;
+                }
+
+                .square--2 {
+                    right: auto;
+                    left: 12%;
+                    bottom: 15%;
+                    width: 20%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="frame"></div>
+        <div class="fill-width">
+            <div class="rotate">
+                <div class="shape">
+                    <div class="fill shape-fill"></div>
+                </div>
+            </div>
+            <div class="rect rect--1"></div>
+            <div class="rect rect--2"></div>
+            <div class="stripe stripe--1"></div>
+            <div class="stripe stripe--2"></div>
+        </div>
+        <div class="square square--1">
+            <div class="fill square__shadow"></div>
+            <div class="fill square__shape"></div>
+        </div>
+        <div class="square square--2">
+            <div class="fill square__shadow"></div>
+            <div class="fill square__shape"></div>
+        </div>
+        <h1 class="center">Challenge accepted</h1>
+        <script src="https://dailycssdesign.com/libs/v1/jquery.min.js?v=2" charset="utf-8"></script>
+        <script src="https://dailycssdesign.com/libs/v1/tilt.jquery.min.js?v=2" charset="utf-8"></script>
+        <script type="text/javascript">
+            jQuery(function ($) {
+                $('.fill-width').tilt({
+                    reset: false,
+                    max: 35,
+                    perspective: 1000,
+                    scale: 1,
+                });
+            });
+        </script>
+    </body>
+</html>
