@@ -1,14 +1,13 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <!--  H1 头部资源  -->
     <meta charset="UTF-8" />
     <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
-  />
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
 
-    <title>randomArt可视化创意编程</title>
+    <title>而且创意(深圳)让科技+艺术感知生命</title>
 
     <link
       rel="stylesheet"
@@ -26,16 +25,13 @@
       disabled
     />
     <link rel="stylesheet" href="css/style.css" />
-
-    <!--
+    
     <link rel="manifest" href="manifest.json" />
-    -->
-
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   </head>
   <body>
-    
-    <!--  H2 汉堡按钮  -->
     <button
       class="hamburger-btn"
       id="hamburgerBtn"
@@ -46,7 +42,6 @@
       ☰
     </button>
 
-    <!--  H3 侧边栏导航  -->
     <nav class="sidebar" id="sidebar" aria-label="主导航">
       <div class="sidebar-search">
         <input
@@ -112,10 +107,10 @@
             id="exportZipSidebar"
             role="button"
             tabindex="0"
-            data-i18n="nav.exportZip"
+            data-i18n="nav.settings"
           >
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-            <span>导出ZIP</span>
+            <span>设置</span>
           </div>
           <div class="footer-vdivider"></div>
           <div
@@ -132,7 +127,6 @@
       </div>
     </nav>
 
-    <!--  H4 主容器与模态框  -->
     <div class="overlay" id="overlay"></div>
 
     <main id="app" data-i18n="site.loading">加载中…</main>
@@ -146,13 +140,11 @@
       <div class="modal" id="modalBox"></div>
     </div>
 
-    <!--  H5 脚本引入  -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 
     <script src="js/script.js"></script>
 
-    <!--  SW注册 
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
@@ -163,7 +155,7 @@
             });
         });
       }
-    </script> 
-    -->
+    </script>
+
   </body>
 </html>
