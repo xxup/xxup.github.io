@@ -1,11 +1,19 @@
-var CACHE_VERSION = "v-1.00";
-var CACHE_NAME = "randomArt" + CACHE_VERSION;
+var CACHE_VERSION = "1.00";
+var CACHE_NAME = "randomArt-v" + CACHE_VERSION;
 var PRECACHE_URLS = [
   "./",
   "./index.html",
   "./css/style.css",
-  "./js/script.js",
   "./data/content.json",
+  "./js/core.js",
+  "./js/storage.js",
+  "./js/ai.js",
+  "./js/tools.js",
+  "./js/home.js",
+  "./js/generator.js",
+  "./js/ai-chat.js",
+  "./js/settings.js",
+  "./js/app.js",
   "./manifest.json",
   "./img/icon-192.png",
   "./img/icon-512.png",
