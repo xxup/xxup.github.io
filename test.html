@@ -2,73 +2,140 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- [iOS-A] 关键：viewport 全套，虽 iOS 忽略 user-scalable 但其他浏览器会遵守 -->
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, minimum-scale=1.0,
+               user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
 <title>网站探针 · Web Probe</title>
 <style>
-  /* [区块 A] 布局与主题 */
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
+  /* ============ [iOS-B] 根布局锁定 ============ */
+  :root { --app-h: 100dvh; }
+
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;   /* 老 iOS fallback */
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;   /* 禁止旋转时字号自动调整 */
+    text-size-adjust: 100%;
+  }
+
   body {
-    height: 100dvh;                       /* 移动端动态视口，避免键盘遮挡 */
+    width: 100%;
+    height: 100%;
+    height: -webkit-fill-available;
+    height: 100dvh;                    /* 现代 iOS 15.4+ */
+    height: var(--app-h);              /* JS 动态覆盖，含键盘态 */
+    overflow: hidden;
     display: flex; flex-direction: column;
     background: #0a0a0a; color: #0f0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px; line-height: 1.55;
-    -webkit-text-size-adjust: 100%;
+    /* iOS 防缩放核心 1：禁止双击缩放 */
+    touch-action: manipulation;
+    /* iOS 防橡皮筋 */
+    overscroll-behavior: none;
+    /* iOS 防长按选中 */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
-  /* [区块 B] 上段：探针输出区 */
+  /* ============ 上段：探针输出区 ============ */
   #panel {
-    flex: 1; min-height: 0;               /* min-height:0 让 flex 子项可滚动 */
+    flex: 1; min-height: 0;
     display: flex; flex-direction: column;
     border-bottom: 1px solid #222;
   }
+
   #toolbar {
     flex: none;
     display: flex; align-items: center; gap: 8px;
     padding: 8px 12px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-left: calc(12px + env(safe-area-inset-left));
+    padding-right: calc(12px + env(safe-area-inset-right));
     background: #111; border-bottom: 1px solid #1e1e1e;
     font-size: 12px; color: #888;
   }
   #toolbar .title { flex: 1; color: #0f0; font-weight: bold; }
   #toolbar button {
-    padding: 4px 10px; border: 1px solid #333; border-radius: 6px;
-    background: #000; color: #999; font: inherit; cursor: pointer;
+    padding: 6px 12px;
+    border: 1px solid #333; border-radius: 8px;
+    background: #000; color: #999;
+    font: inherit; font-size: 12px; cursor: pointer;
+    touch-action: manipulation;
   }
   #toolbar button:active { background: #1a1a1a; }
+  #toolbar button:disabled { opacity: .4; }
 
   #output {
-    flex: 1; min-height: 0; overflow-y: auto;
+    flex: 1; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
     padding: 10px 12px;
+    padding-left: calc(12px + env(safe-area-inset-left));
+    padding-right: calc(12px + env(safe-area-inset-right));
     white-space: pre-wrap; word-break: break-all;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch;   /* iOS 惯性滚动 */
+    /* 允许单指纵向滚动，禁止双指缩放 */
+    touch-action: pan-y;
+    /* 滚动到底不触发 body 回弹 */
+    overscroll-behavior: contain;
+    -webkit-user-select: text; user-select: text;   /* 输出区允许复制 */
   }
   #output .row { display: block; padding: 1px 0; }
   #output .ts { color: #555; }
   #output .head { font-weight: bold; }
 
-  /* [区块 C] 下段：输入区 */
+  /* ============ 下段：输入区 ============ */
   #footer {
     flex: none;
     display: flex; gap: 8px; align-items: stretch;
     padding: 10px 12px;
+    padding-left: calc(12px + env(safe-area-inset-left));
+    padding-right: calc(12px + env(safe-area-inset-right));
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
     background: #111; border-top: 1px solid #222;
   }
+
   #urlInput {
     flex: 1; min-width: 0;
     padding: 12px 14px;
     background: #000; color: #0f0;
     border: 1px solid #2a2a2a; border-radius: 10px;
-    font: inherit; outline: none;
+    font: inherit;
+    /* ★ iOS 硬性阈值：≥16px 否则聚焦自动放大页面 */
+    font-size: 16px;
+    outline: none;
+    touch-action: manipulation;
+    -webkit-user-select: text; user-select: text;
+    -webkit-appearance: none; appearance: none;
   }
-  #urlInput:focus { border-color: #0a0; box-shadow: 0 0 0 2px rgba(0,170,0,.15); }
+  #urlInput:focus {
+    border-color: #0a0;
+    box-shadow: 0 0 0 2px rgba(0,170,0,.15);
+  }
   #urlInput::placeholder { color: #444; }
+
   #btnProbe {
     flex: none; padding: 12px 18px;
     border: 0; border-radius: 10px;
     background: #0a0; color: #fff;
-    font: inherit; font-weight: bold; cursor: pointer;
+    font: inherit; font-size: 15px; font-weight: bold;
+    cursor: pointer; min-width: 96px;
+    touch-action: manipulation;
     transition: background .15s;
   }
   #btnProbe:active { background: #080; }
@@ -77,36 +144,91 @@
 </head>
 <body>
 
-<!-- [区块 B] 上段 -->
 <section id="panel">
   <div id="toolbar">
     <span class="title">● 探针输出</span>
+    <button id="btnExport" type="button" disabled>导出</button>
     <button id="btnClear" type="button">清空</button>
   </div>
   <div id="output" role="log" aria-live="polite"></div>
 </section>
 
-<!-- [区块 C] 下段 -->
 <footer id="footer">
-  <input id="urlInput" type="text" inputmode="url" autocomplete="off"
-         autocapitalize="off" spellcheck="false"
+  <input id="urlInput" type="text"
+         inputmode="url" autocomplete="off"
+         autocorrect="off" autocapitalize="off" spellcheck="false"
+         enterkeyhint="go"
          placeholder="输入网址，如 example.com">
   <button id="btnProbe" type="button">开始探测</button>
 </footer>
 
 <script>
-(function () {
+/* =============================================================
+   [iOS-C] 视口锁定 + 防缩放
+   ============================================================= */
+(function lockViewportAndZoom() {
+  const root = document.documentElement;
+
+  // 1) 动态计算可用高度（处理键盘弹起 / 地址栏收缩 / 旋转）
+  let rafId = 0;
+  function syncHeight() {
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const vv = window.visualViewport;
+      const h = vv ? vv.height : window.innerHeight;
+      root.style.setProperty("--app-h", h + "px");
+    });
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncHeight);
+    window.visualViewport.addEventListener("scroll", syncHeight);
+  }
+  window.addEventListener("resize", syncHeight);
+  window.addEventListener("orientationchange", () => setTimeout(syncHeight, 120));
+  syncHeight();
+
+  // 2) 禁止双指缩放：iOS 专属 gesture 事件
+  ["gesturestart", "gesturechange", "gestureend"].forEach((evt) => {
+    document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
+  });
+
+  // 3) 禁止多指 touchmove（兜底，某些 iOS 版本 gesture 事件不稳定）
+  document.addEventListener("touchmove", (e) => {
+    if (e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
+
+  // 4) 禁止双击缩放（touch-action 已覆盖，这里补 Ctrl+滚轮 用于桌面调试）
+  document.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+
+  // 5) 兜底：双击 touchend 同位置快速两次 → 阻止默认
+  let lastEnd = 0;
+  document.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastEnd <= 300) e.preventDefault();
+    lastEnd = now;
+  }, { passive: false });
+})();
+
+/* =============================================================
+   探针主逻辑
+   ============================================================= */
+(function probeApp() {
   "use strict";
 
-  /* ========== [区块 D] 基础设施 ========== */
   const out    = document.getElementById("output");
   const input  = document.getElementById("urlInput");
   const btn    = document.getElementById("btnProbe");
   const btnClr = document.getElementById("btnClear");
+  const btnExp = document.getElementById("btnExport");
 
   const COLOR = { info:"#0ff", ok:"#0f0", warn:"#fa0", err:"#f66", head:"#fff", dim:"#777" };
   let t0 = performance.now();
   let running = false;
+  let lastResources = [];
+  let lastTarget = "";
 
   const now = () => (performance.now() - t0) | 0;
   const pad = (n) => String(n).padStart(5, " ");
@@ -115,18 +237,13 @@
     level = level || "info";
     const row = document.createElement("div");
     row.className = "row" + (level === "head" ? " head" : "");
-
     const ts = document.createElement("span");
     ts.className = "ts";
     ts.textContent = "[" + pad(now()) + "ms] ";
-
     const txt = document.createElement("span");
     txt.style.color = COLOR[level] || COLOR.info;
     txt.textContent = msg;
-
     row.appendChild(ts); row.appendChild(txt);
-
-    // 仅在用户位于底部附近时才自动滚动，避免打断向上翻看
     const nearBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 80;
     out.appendChild(row);
     if (nearBottom) out.scrollTop = out.scrollHeight;
@@ -134,7 +251,7 @@
 
   function clearOut() { out.innerHTML = ""; t0 = performance.now(); }
 
-  /* ========== [区块 E] 并发池 ========== */
+  /* ---------- 并发池 ---------- */
   async function pool(tasks, limit) {
     const results = new Array(tasks.length);
     let next = 0;
@@ -145,14 +262,11 @@
         catch (e) { results[i] = { ok:false, ms:0, err:(e && e.message) || String(e) }; }
       }
     }
-    await Promise.all(
-      Array.from({ length: Math.min(limit, tasks.length) }, worker)
-    );
+    await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
     return results;
   }
 
-  /* ========== [区块 F] 单资源探测 ========== */
-  // 脚本 / 样式：用 no-cors fetch，只能测网络层可达与耗时
+  /* ---------- 单资源探测 ---------- */
   async function probeFetch(url, timeout) {
     timeout = timeout || 8000;
     const s = performance.now();
@@ -161,20 +275,17 @@
     try {
       await fetch(url, {
         mode: "no-cors", cache: "no-store",
-        referrerPolicy: "no-referrer",
-        signal: ctrl.signal
+        referrerPolicy: "no-referrer", signal: ctrl.signal
       });
       return { ok: true, ms: (performance.now() - s) | 0 };
     } catch (e) {
       return {
-        ok: false,
-        ms: (performance.now() - s) | 0,
+        ok: false, ms: (performance.now() - s) | 0,
         err: e.name === "AbortError" ? "超时" : (e.message || String(e))
       };
     } finally { clearTimeout(timer); }
   }
 
-  // 图片：用 Image 对象，能精确区分成功/失败（no-cors fetch 做不到）
   function probeImage(url, timeout) {
     timeout = timeout || 8000;
     return new Promise((resolve) => {
@@ -194,7 +305,7 @@
     });
   }
 
-  /* ========== [区块 G] 阶段 1：网络可达性 ========== */
+  /* ---------- 阶段 1：可达性 ---------- */
   async function stageReach(url) {
     const s = performance.now();
     try {
@@ -202,17 +313,17 @@
         mode: "no-cors", cache: "no-store", redirect: "follow",
         referrerPolicy: "no-referrer"
       });
-      log("no-cors 请求完成（opaque 响应），耗时 " + ((performance.now()-s)|0) + " ms", "ok");
-      log("说明：opaque 响应读不到状态码/响应头，仅证明网络层可达", "dim");
+      log("no-cors 请求完成（opaque），耗时 " + ((performance.now()-s)|0) + " ms", "ok");
+      log("说明：opaque 响应读不到状态码，仅证明网络层可达", "dim");
       return true;
     } catch (e) {
       log("no-cors 请求失败，耗时 " + ((performance.now()-s)|0) + " ms：" + (e.message || e), "err");
-      log("可能原因：DNS 失败 / 网络中断 / 服务端拒绝 / 浏览器策略拦截", "warn");
+      log("可能原因：DNS 失败 / 网络中断 / 服务端拒绝 / 策略拦截", "warn");
       return false;
     }
   }
 
-  /* ========== [区块 H] 阶段 2：内容抓取 ========== */
+  /* ---------- 阶段 2：内容抓取 ---------- */
   async function stageContent(url) {
     const s = performance.now();
     try {
@@ -225,10 +336,8 @@
       log("CORS 请求成功：HTTP " + r.status + " " + (r.statusText || ""), r.ok ? "ok" : "warn");
       log("Content-Type: " + ct + " | 耗时 " + ms + " ms", "info");
       if (r.url && r.url !== url) log("最终 URL（含重定向）: " + r.url, "info");
-
       const text = await r.text();
       log("响应体长度: " + text.length + " 字符", "ok");
-
       if (/text\/html|xhtml/i.test(ct) || /<html[\s>]/i.test(text.slice(0, 2000))) {
         log("判定为 HTML 文档，进入解析阶段", "ok");
         return text;
@@ -239,16 +348,48 @@
       const ms = (performance.now() - s) | 0;
       log("CORS 请求失败（" + ms + " ms）：" + (e.message || e), "warn");
       log("这是同源策略的正常限制：目标站未开启 Access-Control-Allow-Origin", "dim");
-      log("结果：无法读取 HTML 源码，资源级探测将自动跳过", "dim");
       return null;
     }
   }
 
-  /* ========== [区块 I] 阶段 3：解析 + 资源探测 ========== */
+  /* ---------- CSS 内 url() 提取 ---------- */
+  async function extractCssUrls(cssUrl) {
+    try {
+      const r = await fetch(cssUrl, {
+        mode: "cors", cache: "no-store", referrerPolicy: "no-referrer"
+      });
+      if (!r.ok) return [];
+      const text = await r.text();
+      const found = [];
+      const re = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
+      let m;
+      while ((m = re.exec(text))) {
+        const u = m[2].trim();
+        if (/^(data:|blob:|about:|#)/i.test(u)) continue;
+        try { found.push({ url: new URL(u, cssUrl).href, from: cssUrl }); } catch (_) {}
+      }
+      return found;
+    } catch (_) { return []; }
+  }
+
+  function parseSrcset(v) {
+    if (!v) return [];
+    return v.split(",").map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
+  }
+
+  /* ---------- 阶段 3：清单 + 探测 ---------- */
   async function stageResources(baseUrl, html) {
     const doc = new DOMParser().parseFromString(html, "text/html");
 
-    // --- 元信息 ---
+    const baseEl = doc.querySelector("base[href]");
+    let base = baseUrl;
+    if (baseEl) {
+      try { base = new URL(baseEl.getAttribute("href"), baseUrl).href; } catch (_) {}
+      log("发现 <base href>: " + base, "info");
+    }
+    const abs   = (u) => { try { return new URL(u, base).href; } catch (_) { return null; } };
+    const valid = (u) => u && !/^(data:|blob:|javascript:|about:|#)/i.test(u);
+
     const title = (doc.title || "").trim();
     const lang  = doc.documentElement.getAttribute("lang") || "";
     const cs    = doc.querySelector("meta[charset]");
@@ -259,55 +400,86 @@
     if (lang) log("lang: " + lang, "info"); else log("缺少 lang 属性", "warn");
     if (cs)   log("charset: " + cs.getAttribute("charset"), "info");
     if (vp)   log("viewport: " + vp.getAttribute("content"), "info");
-    else      log("缺少 viewport meta，移动端可能缩放异常", "warn");
+    else      log("缺少 viewport meta", "warn");
     if (desc) log("description: " + desc.getAttribute("content").slice(0, 120), "info");
 
-    // --- 结构统计 ---
-    const st = {
-      script:  doc.querySelectorAll("script").length,
-      ext:     doc.querySelectorAll("script[src]").length,
-      style:   doc.querySelectorAll('link[rel~="stylesheet"]').length,
-      img:     doc.querySelectorAll("img").length,
-      iframe:  doc.querySelectorAll("iframe").length,
-      a:       doc.querySelectorAll("a[href]").length
+    const inventory = [];
+    const seen = new Set();
+    const add = (kind, raw) => {
+      const u = abs(raw);
+      if (!valid(u) || seen.has(u)) return;
+      seen.add(u);
+      inventory.push({ kind, url: u });
     };
-    log("结构: script " + st.script + "（外链 " + st.ext + "）, 样式 " + st.style +
-        ", img " + st.img + ", iframe " + st.iframe + ", 链接 " + st.a, "info");
 
-    // --- 收集资源（用 URL 解析成绝对地址，DOMParser 不会自动补 base） ---
-    const abs = (u) => { try { return new URL(u, baseUrl).href; } catch (_) { return u; } };
-    const valid = (u) => u && !/^(data:|blob:|javascript:|about:|#)/i.test(u);
+    doc.querySelectorAll("script[src]").forEach(e => add("script", e.getAttribute("src")));
+    doc.querySelectorAll("link[href]").forEach(e => {
+      const rel = (e.getAttribute("rel") || "").toLowerCase();
+      const kind = rel.includes("stylesheet") ? "style"
+                 : rel.includes("icon")        ? "icon"
+                 : rel.includes("manifest")    ? "manifest"
+                 : rel.includes("preload")     ? "preload"
+                 : "link";
+      add(kind, e.getAttribute("href"));
+    });
+    doc.querySelectorAll("img").forEach(e => {
+      const s = e.getAttribute("src"); if (s) add("img", s);
+      parseSrcset(e.getAttribute("srcset")).forEach(u => add("img", u));
+    });
+    doc.querySelectorAll("source").forEach(e => {
+      const s = e.getAttribute("src"); if (s) add("media", s);
+      parseSrcset(e.getAttribute("srcset")).forEach(u => add("media", u));
+    });
+    doc.querySelectorAll("video,audio").forEach(e => {
+      const s = e.getAttribute("src"); if (s) add("media", s);
+      const p = e.getAttribute("poster"); if (p) add("img", p);
+    });
+    doc.querySelectorAll("iframe[src]").forEach(e => add("iframe", e.getAttribute("src")));
 
-    const scripts = [...doc.querySelectorAll("script[src]")]
-      .map(e => abs(e.getAttribute("src"))).filter(valid);
-    const styles  = [...doc.querySelectorAll('link[rel~="stylesheet"][href]')]
-      .map(e => abs(e.getAttribute("href"))).filter(valid);
-    const imgs    = [...doc.querySelectorAll("img[src]")]
-      .map(e => abs(e.getAttribute("src"))).filter(valid);
+    log("HTML 静态资源清单: " + inventory.length + " 条（去重后）", "ok");
 
-    const tasks = [];
-    scripts.forEach(u => tasks.push(() => probeFetch(u).then(r => ({ kind:"script", url:u, ...r }))));
-    styles .forEach(u => tasks.push(() => probeFetch(u).then(r => ({ kind:"style ", url:u, ...r }))));
-    imgs   .forEach(u => tasks.push(() => probeImage(u).then(r => ({ kind:"img   ", url:u, ...r }))));
+    const cssUrls = inventory.filter(x => x.kind === "style").map(x => x.url);
+    if (cssUrls.length) {
+      log("尝试解析 " + cssUrls.length + " 个 CSS 内的 url()（受 CORS 限制）…", "info");
+      let cssHit = 0;
+      for (const cssUrl of cssUrls) {
+        const found = await extractCssUrls(cssUrl);
+        if (!found.length) continue;
+        cssHit += found.length;
+        found.forEach(f => add("asset", f.url));
+      }
+      log("CSS 内资源: " + cssHit + " 条" + (cssHit ? "" : "（可能全部被 CORS 拦截）"),
+          cssHit ? "ok" : "warn");
+    }
 
+    log("──── 完整地址清单（共 " + inventory.length + " 条）────", "head");
+    inventory.forEach(x => log("  " + x.kind.padEnd(9) + " " + x.url, "dim"));
+
+    const toProbe = inventory.filter(x =>
+      /^https?:/i.test(x.url) && x.kind !== "icon" && x.kind !== "preload"
+    );
     const LIMIT = 60;
-    const list = tasks.slice(0, LIMIT);
-    if (tasks.length > LIMIT)
-      log("资源共 " + tasks.length + " 个，超上限仅探测前 " + LIMIT + " 个", "warn");
-    if (!list.length) { log("未发现可探测的外部资源", "info"); return []; }
+    const list = toProbe.slice(0, LIMIT);
+    if (toProbe.length > LIMIT)
+      log("探测上限 " + LIMIT + "，剩余 " + (toProbe.length - LIMIT) + " 个仅列清单不探测", "warn");
+    if (!list.length) { log("无可探测资源", "info"); return { inventory, results: [] }; }
 
-    log("开始探测 " + list.length + " 个资源（并发 6，单次超时 8s）…", "info");
-    const results = await pool(list, 6);
-
+    log("开始探测 " + list.length + " 个资源（并发 6，超时 8s）…", "info");
+    const tasks = list.map(it => () =>
+      (it.kind === "img" ? probeImage(it.url) : probeFetch(it.url))
+        .then(r => ({ kind: it.kind, url: it.url, ...r }))
+    );
+    const results = await pool(tasks, 6);
     results.forEach(r => {
-      log("[" + (r.ok ? "OK " : "ERR") + "] " + r.kind + " " + r.url +
+      log("[" + (r.ok ? "OK " : "ERR") + "] " + r.kind.padEnd(9) + " " + r.url +
           "  (" + (r.ms|0) + "ms)" + (r.ok ? "" : "  ← " + r.err),
           r.ok ? "ok" : "err");
     });
-    return results;
+
+    return { inventory, results };
   }
 
-  /* ========== [区块 J] 阶段 4：iframe 渲染探测 ========== */
+  /* ---------- 阶段 4：iframe 渲染探测 ---------- */
   function stageIframe(url) {
     return new Promise((resolve) => {
       const iframe = document.createElement("iframe");
@@ -315,26 +487,21 @@
       iframe.setAttribute("referrerpolicy", "no-referrer");
       iframe.style.cssText =
         "position:absolute;left:-9999px;top:0;width:375px;height:667px;border:0;visibility:hidden;";
-
       let done = false;
       const s = performance.now();
       const timer = setTimeout(() => fin(false, "超时 15s"), 15000);
-
       function fin(ok, note) {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
+        if (done) return; done = true; clearTimeout(timer);
         const ms = (performance.now() - s) | 0;
         if (ok) {
           log("[IFRAME] 加载完成，耗时 " + ms + " ms", "ok");
-          log("注意：load 事件不代表真实渲染成功。若站点设 X-Frame-Options 或 CSP frame-ancestors，浏览器会显示拒绝页但通常仍触发 load；且沙箱环境与真实访问行为有差异", "dim");
+          log("注意：load 事件不代表真实渲染成功。若站点设 X-Frame-Options 或 CSP frame-ancestors，浏览器显示拒绝页但通常仍触发 load", "dim");
         } else {
           log("[IFRAME] 加载失败，耗时 " + ms + " ms：" + note, "err");
         }
         iframe.remove();
         resolve(ok);
       }
-
       iframe.onload  = () => fin(true);
       iframe.onerror = () => fin(false, "onerror 触发");
       document.body.appendChild(iframe);
@@ -342,7 +509,7 @@
     });
   }
 
-  /* ========== [区块 K] 主流程 ========== */
+  /* ---------- 主流程 ---------- */
   async function run(raw) {
     if (running) return;
     running = true;
@@ -350,9 +517,11 @@
     btn.textContent = "探测中…";
     out.innerHTML = "";
     t0 = performance.now();
+    lastResources = [];
+    lastTarget = "";
+    btnExp.disabled = true;
 
     try {
-      // --- 规范化 URL ---
       let v = (raw || "").trim();
       if (!v) { log("请输入网址", "err"); return; }
       if (!/^[a-z][a-z0-9+.\-]*:\/\//i.test(v)) v = "https://" + v;
@@ -366,45 +535,45 @@
         return;
       }
 
-      // --- 头部信息 ---
       log("探测目标: " + target.href, "head");
       log("探针环境: " + navigator.userAgent, "dim");
-      if (location.protocol === "https:" && target.protocol === "http:")
-        log("警告：当前页为 HTTPS，探测 HTTP 目标可能被混合内容策略拦截", "warn");
+      log("视口: " + window.innerWidth + "×" + window.innerHeight +
+          " · DPR " + (window.devicePixelRatio || 1), "dim");
 
-      // --- 阶段 1 ---
       log("──── 阶段 1 / 4：网络可达性 ────", "head");
       const reachable = await stageReach(target.href);
 
-      // --- 阶段 2 ---
       log("──── 阶段 2 / 4：内容抓取与解析 ────", "head");
       const html = await stageContent(target.href);
 
-      // --- 阶段 3（有条件） ---
-      let resources = [];
+      let inventory = [], results = [];
       if (html) {
-        log("──── 阶段 3 / 4：资源探测 ────", "head");
-        resources = await stageResources(target.href, html);
+        log("──── 阶段 3 / 4：资源清单 + 探测 ────", "head");
+        const r = await stageResources(target.href, html);
+        inventory = r.inventory;
+        results   = r.results;
+        lastResources = inventory;
+        lastTarget = target.href;
+        btnExp.disabled = !inventory.length;
       } else {
         log("──── 阶段 3 / 4：资源探测（已跳过） ────", "head");
         log("未获取 HTML 源码，无法枚举资源", "warn");
       }
 
-      // --- 阶段 4 ---
       log("──── 阶段 4 / 4：页面渲染（iframe） ────", "head");
       await stageIframe(target.href);
 
-      // --- 汇总 ---
       log("════════ 探测结束 ════════", "head");
       log("总耗时: " + now() + " ms", "ok");
       log("网络可达性: " + (reachable ? "通" : "不通"), reachable ? "ok" : "err");
       log("HTML 源码: " + (html ? "已获取（" + html.length + " 字符）" : "未获取（CORS 限制）"),
           html ? "ok" : "warn");
-      if (resources.length) {
-        const okN = resources.filter(r => r.ok).length;
-        log("资源探测: 共 " + resources.length + "，可达 " + okN +
-            "，失败 " + (resources.length - okN),
-            okN === resources.length ? "ok" : "warn");
+      log("资源清单: " + inventory.length + " 条完整地址", inventory.length ? "ok" : "warn");
+      if (results.length) {
+        const okN = results.filter(r => r.ok).length;
+        log("可达性探测: 共 " + results.length + "，可达 " + okN +
+            "，失败 " + (results.length - okN),
+            okN === results.length ? "ok" : "warn");
       }
     } catch (e) {
       log("探针内部异常: " + ((e && e.message) || e), "err");
@@ -416,14 +585,35 @@
     }
   }
 
-  /* ========== [区块 L] 事件绑定 ========== */
+  /* ---------- 事件 ---------- */
   btn.addEventListener("click", () => run(input.value));
   input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); run(input.value); }
+    if (e.key === "Enter") { e.preventDefault(); input.blur(); run(input.value); }
   });
   btnClr.addEventListener("click", clearOut);
 
-  /* ========== [区块 M] 启动自检 ========== */
+  btnExp.addEventListener("click", () => {
+    if (!lastResources.length) return;
+    const payload = {
+      target: lastTarget,
+      probedAt: new Date().toISOString(),
+      total: lastResources.length,
+      resources: lastResources
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)],
+                          { type: "application/json;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "probe-" + (new URL(lastTarget).hostname) + "-" +
+                 Date.now() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    log("已导出 " + lastResources.length + " 条完整地址 → " + a.download, "ok");
+  });
+
+  /* ---------- 启动自检 ---------- */
   t0 = performance.now();
   log("网站探针已就绪 · " + new Date().toLocaleString(), "head");
   log("视口 " + window.innerWidth + "×" + window.innerHeight +
