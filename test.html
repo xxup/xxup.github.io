@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a0a">
-<title>网站探针 · Web Probe (B 模式)</title>
+<title>网站探针 · Web Probe (A/B + 源码上下文)</title>
 <style>
   :root { --app-h: 100dvh; --app-top: 0px; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -44,32 +44,33 @@
   }
   #toolbar .badge.b { background: #052; color: #0f0; border-color: #0a0; }
   #toolbar .badge.a { background: #210; color: #fa0; border-color: #fa0; }
+  #toolbar .badge.px { background: #310; color: #fa0; border-color: #fa0; }
   #toolbar button {
     padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
     background: #000; color: #999; font: inherit; font-size: 12px;
     cursor: pointer; touch-action: manipulation;
     transition: background .12s, border-color .12s, transform .08s, color .12s;
-    -webkit-user-select: none; user-select: none;
+    -webkit-user-select: none-color; user-select: none;
     transform-origin: center center;
     font-variant-numeric: tabular-nums;
   }
-  #toolbar button:active, #toolbar button.is-pressed {
+  #toolbar button:active, #:toolbar button.is-pressed {
     background: #2a2a2a; border-color: #0a0; color: #0f0; transform: scale(0.96);
   }
-  #toolbar button:disabled { opacity: .4; }
-  #toolbar button:disabled:active, #toolbar button:disabled.is-pressed {
+  # #toolbar button:disabled { opacity: .4; }
+  #toolbar button:disabled:active, #toolbar button:disabled.is-p0ressed {
     background: #000; border-color: #333; color: #999; transform: none;
   }
-  @keyframes btnFlash {
-    0% { background: #0a0; border-color: #0f0; color: #fff; transform: scale(0.94); }
-    100% { background: #000; border-color: #333; color: #999; transform: scale(1); }
+  @keyaframes btnFlash {
+    0% { background: #0a0; border0-color: #0f0; color: #fff; transform: scale(0.94); }
+    100% {; background: #000; border-color: #333 box; color: #999; transform: scale(1); }
   }
-  #toolbar button.is-flash { animation: btnFlash .35s ease; }
+  #toolbar button.is-flash {-shadow animation: btnFlash .35s ease; }
   #output {
-    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    flex: 1; min-height:: 0; overflow-y: auto; overflow-x: hidden;
     padding: 10px 12px;
-    padding-left: calc(12px + env(safe-area-inset-left));
-    padding-right: calc(12px + env(safe-area-inset-right));
+    padding-left : calc(12px + env(safe-area-inset-left));
+    padding-right: calc(12px + env(safe-area-inset0-right));
     white-space: pre-wrap; word-break: break-all;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y; overscroll-behavior: contain;
@@ -95,8 +96,17 @@
     -webkit-user-select: text; user-select: text;
     -webkit-appearance: none; appearance: none;
   }
-  #urlInput:focus { border-color: #0a0; box-shadow: 0 0 0 2px rgba(0,170,0,.15); }
+  #urlInput:focus { border 0 0 2px rgba(0,170,0,.15); }
   #urlInput::placeholder { color: #444; }
+  #btnProxy {
+    flex: none; padding: 12px 12px; border: 1px solid #333; border-radius: 10px;
+    background: #000; color: #555; font: inherit; font-size: 16px;
+    cursor: pointer; touch-action: manipulation;
+    transition: background .15s, border-color .15s, color .15s, transform .08s;
+    -webkit-user-select: none; user-select: none;
+  }
+  #btnProxy.on { background: #052; color: #0f0; border-color: #0a0; }
+  #btnProxy:active { transform: scale(0.96); }
   #btnProbe {
     flex: none; padding: 12px 18px; border: 0; border-radius: 10px;
     background: #0a0; color: #fff;
@@ -129,7 +139,8 @@
          inputmode="url" autocomplete="off"
          autocorrect="off" autocapitalize="off" spellcheck="false"
          enterkeyhint="go"
-         placeholder="输入网址，如 /index.html 或 https://同源域名/path">
+         placeholder="输入网址，如 example.com">
+  <button id="btnProxy" type="button" title="CORS 失败时通过公共代理读取 HTML">🛡</button>
   <button id="btnProbe" type="button">开始探测</button>
 </footer>
 
@@ -167,17 +178,13 @@
   window.addEventListener("orientationchange", () => setTimeout(syncHeight, 200));
   document.addEventListener("focusin", (e) => {
     if (e.target && e.target.tagName === "INPUT") {
-      syncHeight();
-      setTimeout(syncHeight, 100);
-      setTimeout(syncHeight, 250);
-      setTimeout(syncHeight, 400);
+      syncHeight(); setTimeout(syncHeight, 100);
+      setTimeout(syncHeight, 250); setTimeout(syncHeight, 400);
     }
   }, true);
   document.addEventListener("focusout", (e) => {
     if (e.target && e.target.tagName === "INPUT") {
-      syncHeight();
-      setTimeout(syncHeight, 100);
-      setTimeout(syncHeight, 250);
+      syncHeight(); setTimeout(syncHeight, 100); setTimeout(syncHeight, 250);
     }
   }, true);
   syncHeight();
@@ -241,46 +248,32 @@
 })();
 
 /* =============================================================
-   [INJECTED] 注入到目标页 iframe 内的采集脚本（自包含）
+   [INJECTED] 目标页内注入的采集脚本
    ============================================================= */
 function injectedProbe(config) {
   var ID = config.id;
   var start = performance.now();
   var MAX_PER_TYPE = 200;
   var counts = {};
-
   function send(type, data) {
     if ((counts[type] = (counts[type] || 0) + 1) > MAX_PER_TYPE) return;
     try {
-      window.parent.postMessage({
-        __probe: true, id: ID, type: type,
-        t: Math.round(performance.now() - start),
-        data: data
-      }, "*");
+      window.parent.postMessage({ __probe: true, id: ID, type: type,
+        t: Math.round(performance.now() - start), data: data }, "*");
     } catch (e) {}
   }
-
-  // ============ L8: 应用错误 ============
   window.addEventListener("error", function (e) {
     if (e.target && e.target !== window) return;
     var err = e.error;
-    send("js-error", {
-      message: e.message || "(unknown)",
-      filename: e.filename || "?",
-      lineno: e.lineno || 0,
-      colno: e.colno || 0,
-      stack: err && err.stack ? String(err.stack).slice(0, 1500) : ""
-    });
+    send("js-error", { message: e.message || "(unknown)",
+      filename: e.filename || "?", lineno: e.lineno || 0, colno: e.colno || 0,
+      stack: err && err.stack ? String(err.stack).slice(0, 1500) : "" });
   });
-
   window.addEventListener("unhandledrejection", function (e) {
     var r = e.reason;
-    send("promise-rejection", {
-      message: (r && r.message) || String(r),
-      stack: r && r.stack ? String(r.stack).slice(0, 1500) : ""
-    });
+    send("promise-rejection", { message: (r && r.message) || String(r),
+      stack: r && r.stack ? String(r.stack).slice(0, 1500) : "" });
   });
-
   window.addEventListener("error", function (e) {
     var t = e.target;
     if (!t || t === window) return;
@@ -288,31 +281,20 @@ function injectedProbe(config) {
     if (["SCRIPT","LINK","IMG","VIDEO","AUDIO","SOURCE"].indexOf(tag) < 0) return;
     send("res-error", { tag: tag, url: t.src || t.href || "" });
   }, true);
-
-  // ============ L7: 运行时网络（PerformanceObserver，不劫持 fetch） ============
   try {
     var seen = {};
     function pushResource(e) {
       if (seen[e.name]) return;
       seen[e.name] = 1;
-      send("resource", {
-        name: e.name,
-        initiatorType: e.initiatorType || "?",
-        duration: Math.round(e.duration),
-        transferSize: e.transferSize || 0,
-        decodedBodySize: e.decodedBodySize || 0,
-        startTime: Math.round(e.startTime)
-      });
+      send("resource", { name: e.name, initiatorType: e.initiatorType || "?",
+        duration: Math.round(e.duration), transferSize: e.transferSize || 0,
+        decodedBodySize: e.decodedBodySize || 0, startTime: Math.round(e.startTime) });
     }
-    // 先补捞已发生的
     performance.getEntriesByType("resource").forEach(pushResource);
-    // 再实时观察
     new PerformanceObserver(function (list) {
       list.getEntries().forEach(pushResource);
     }).observe({ type: "resource", buffered: true });
   } catch (e) {}
-
-  // ============ L9: 性能全量 ============
   try {
     var nav = performance.getEntriesByType("navigation")[0];
     if (nav) {
@@ -326,26 +308,20 @@ function injectedProbe(config) {
         domContentLoaded: Math.round(nav.domContentLoadedEventEnd),
         load: Math.round(nav.loadEventEnd),
         transferSize: nav.transferSize || 0,
-        decodedBodySize: nav.decodedBodySize || 0
-      });
+        decodedBodySize: nav.decodedBodySize || 0 });
     }
   } catch (e) {}
-
   try {
     var lastLCP = 0;
     new PerformanceObserver(function (list) {
-      var es = list.getEntries();
-      var last = es[es.length - 1];
+      var es = list.getEntries(); var last = es[es.length - 1];
       if (last && last.startTime > lastLCP) {
         lastLCP = last.startTime;
-        send("lcp", {
-          value: Math.round(lastLCP),
-          element: last.element && last.element.tagName ? last.element.tagName : ""
-        });
+        send("lcp", { value: Math.round(lastLCP),
+          element: last.element && last.element.tagName ? last.element.tagName : "" });
       }
     }).observe({ type: "largest-contentful-paint", buffered: true });
   } catch (e) {}
-
   try {
     var clsVal = 0, lastCLS = -1;
     new PerformanceObserver(function (list) {
@@ -354,33 +330,24 @@ function injectedProbe(config) {
       if (v !== lastCLS) { lastCLS = v; send("cls", { value: v }); }
     }).observe({ type: "layout-shift", buffered: true });
   } catch (e) {}
-
   try {
     new PerformanceObserver(function (list) {
       list.getEntries().forEach(function (e) {
-        if (e.duration > 50) send("longtask", {
-          duration: Math.round(e.duration), start: Math.round(e.startTime)
-        });
+        if (e.duration > 50) send("longtask", { duration: Math.round(e.duration), start: Math.round(e.startTime) });
       });
     }).observe({ type: "longtask", buffered: true });
   } catch (e) {}
-
   try {
     new PerformanceObserver(function (list) {
       list.getEntries().forEach(function (e) {
-        if (e.duration > 100) send("inp", {
-          name: e.name, duration: Math.round(e.duration)
-        });
+        if (e.duration > 100) send("inp", { name: e.name, duration: Math.round(e.duration) });
       });
     }).observe({ type: "event", buffered: true, durationThreshold: 104 });
   } catch (e) {}
-
-  // ============ L10: 真实 DOM 摘要 ============
   function domSummary() {
     try {
       send("dom-summary", {
-        title: document.title || "(空)",
-        url: location.href,
+        title: document.title || "(空)", url: location.href,
         readyState: document.readyState,
         scripts: document.querySelectorAll("script").length,
         stylesheets: document.styleSheets.length,
@@ -390,55 +357,44 @@ function injectedProbe(config) {
         inputs: document.querySelectorAll("input,textarea,select").length,
         iframes: document.querySelectorAll("iframe").length,
         bodyHeight: document.body ? document.body.scrollHeight : 0,
-        bodyWidth: document.body ? document.body.scrollWidth : 0
-      });
+        bodyWidth: document.body ? document.body.scrollWidth : 0 });
     } catch (e) {}
   }
   if (document.readyState === "complete") setTimeout(domSummary, 100);
   else window.addEventListener("load", function () { setTimeout(domSummary, 100); });
-
-  // ============ 存储摘要 ============
   try {
     var ls = { count: localStorage.length, bytes: 0, keys: [] };
     for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      var v = localStorage.getItem(k) || "";
+      var k = localStorage.key(i); var v = localStorage.getItem(k) || "";
       ls.bytes += k.length + v.length;
       if (ls.keys.length < 20) ls.keys.push(k);
     }
     var ss = { count: sessionStorage.length, bytes: 0 };
     for (var j = 0; j < sessionStorage.length; j++) {
-      var k2 = sessionStorage.key(j);
-      var v2 = sessionStorage.getItem(k2) || "";
+      var k2 = sessionStorage.key(j); var v2 = sessionStorage.getItem(k2) || "";
       ss.bytes += k2.length + v2.length;
     }
     send("storage", { local: ls, session: ss });
   } catch (e) {}
-
-  // ============ 通知父页面：就绪 ============
   send("ready", { url: location.href, ua: navigator.userAgent });
 }
 
 /* =============================================================
-   [F12-HOOK] 父页面自身的 F12 诊断（探针自身也会报错时用）
+   [F12-HOOK] 父页面自身诊断
    ============================================================= */
 function installDevToolsLike(log, onNetPush) {
   window.addEventListener("error", (e) => {
     if (e.target && e.target !== window) return;
     const err = e.error;
     const stack = err && err.stack ? String(err.stack).slice(0, 800) : "";
-    try {
-      log("[PARENT-JS-ERR] " + (e.message || "?") +
-          "\n  at " + (e.filename || "?") + ":" + (e.lineno || "?") +
-          (stack ? "\n" + stack : ""), "#f66");
-    } catch (_) {}
+    try { log("[PARENT-JS-ERR] " + (e.message || "?") +
+      "\n  at " + (e.filename || "?") + ":" + (e.lineno || "?") +
+      (stack ? "\n" + stack : ""), "#f66"); } catch (_) {}
   });
   window.addEventListener("unhandledrejection", (e) => {
     const r = e.reason;
-    try {
-      log("[PARENT-PROMISE] " + ((r && r.message) || r) +
-          (r && r.stack ? "\n" + String(r.stack).slice(0, 800) : ""), "#f66");
-    } catch (_) {}
+    try { log("[PARENT-PROMISE] " + ((r && r.message) || r) +
+      (r && r.stack ? "\n" + String(r.stack).slice(0, 800) : ""), "#f66"); } catch (_) {}
   });
   const netLog = [];
   const NET_CAP = 200;
@@ -457,11 +413,11 @@ function installDevToolsLike(log, onNetPush) {
       try {
         const res = await origFetch.apply(this, args);
         pushNet({ kind: "fetch", method, url, status: res.status, ok: res.ok,
-                  ms: (performance.now() - s) | 0, internal });
+          ms: (performance.now() - s) | 0, internal });
         return res;
       } catch (e) {
         pushNet({ kind: "fetch", method, url, status: 0, ok: false,
-                  ms: (performance.now() - s) | 0, err: e && e.message || String(e), internal });
+          ms: (performance.now() - s) | 0, err: e && e.message || String(e), internal });
         throw e;
       }
     };
@@ -479,9 +435,9 @@ function installDevToolsLike(log, onNetPush) {
       const s = performance.now();
       this.addEventListener("loadend", () => {
         pushNet({ kind: "xhr", method: req.method, url: req.url,
-                  status: this.status, ok: this.status >= 200 && this.status < 300,
-                  ms: (performance.now() - s) | 0,
-                  internal: (window.__probeInternalCount || 0) > 0 });
+          status: this.status, ok: this.status >= 200 && this.status < 300,
+          ms: (performance.now() - s) | 0,
+          internal: (window.__probeInternalCount || 0) > 0 });
       });
       return oSend.apply(this, args);
     };
@@ -495,13 +451,14 @@ function installDevToolsLike(log, onNetPush) {
 (function probeApp() {
   "use strict";
 
-  const out    = document.getElementById("output");
-  const input  = document.getElementById("urlInput");
-  const btn    = document.getElementById("btnProbe");
+  const out = document.getElementById("output");
+  const input = document.getElementById("urlInput");
+  const btn = document.getElementById("btnProbe");
   const btnClr = document.getElementById("btnClear");
   const btnExp = document.getElementById("btnExport");
   const btnNet = document.getElementById("btnNetwork");
   const btnSto = document.getElementById("btnStorage");
+  const btnPx  = document.getElementById("btnProxy");
   const modeBadge = document.getElementById("modeBadge");
 
   const COLOR = { info:"#0ff", ok:"#0f0", warn:"#fa0", err:"#f66", head:"#fff", dim:"#777" };
@@ -510,6 +467,7 @@ function installDevToolsLike(log, onNetPush) {
   let lastResources = [];
   let lastTarget = "";
   let lastMode = "";
+  let usePublicProxy = false;
 
   const now = () => (performance.now() - t0) | 0;
   const pad = (n) => String(n).padStart(5, " ");
@@ -541,8 +499,7 @@ function installDevToolsLike(log, onNetPush) {
 
   const flash = (el) => {
     if (!el || el.disabled) return;
-    el.classList.remove("is-flash");
-    void el.offsetWidth;
+    el.classList.remove("is-flash"); void el.offsetWidth;
     el.classList.add("is-flash");
     setTimeout(() => el.classList.remove("is-flash"), 380);
   };
@@ -558,19 +515,72 @@ function installDevToolsLike(log, onNetPush) {
     el.addEventListener("touchend", up, { passive: true });
     el.addEventListener("touchcancel", up, { passive: true });
   };
-  [btnNet, btnSto, btnExp, btnClr].forEach(bindPress);
+  [btnNet, btnSto, btnExp, btnClr, btnPx].forEach(bindPress);
 
   function setMode(mode) {
     lastMode = mode;
-    if (mode === "B") {
-      modeBadge.textContent = "B · 注入式";
-      modeBadge.className = "badge b";
-    } else if (mode === "A") {
-      modeBadge.textContent = "A · 静态分析";
-      modeBadge.className = "badge a";
-    } else {
-      modeBadge.textContent = "待探测";
-      modeBadge.className = "badge";
+    if (mode === "B") { modeBadge.textContent = "B · 注入式"; modeBadge.className = "badge b"; }
+    else if (mode === "A") { modeBadge.textContent = "A · 静态分析"; modeBadge.className = "badge a"; }
+    else if (mode === "P") { modeBadge.textContent = "A + 代理"; modeBadge.className = "badge px"; }
+    else { modeBadge.textContent = "待探测"; modeBadge.className = "badge"; }
+  }
+
+  /* ---------- [新增] 源码上下文：同源 JS 按行截取 ---------- */
+  const sourceCache = new Map();
+
+  async function getSourceLines(url) {
+    if (sourceCache.has(url)) return sourceCache.get(url);
+    const p = (async () => {
+      window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
+      try {
+        const r = await fetch(url, { cache: "force-cache",
+                                     referrerPolicy: "no-referrer" });
+        if (!r.ok) return null;
+        return (await r.text()).split(/\r?\n/);
+      } catch (_) {
+        return null;
+      } finally {
+        window.__probeInternalCount =
+          Math.max(0, (window.__probeInternalCount || 0) - 1);
+      }
+    })();
+    sourceCache.set(url, p);
+    return p;
+  }
+
+  async function showErrorContext(filename, lineno, colno) {
+    if (!filename || !lineno) return;
+    const lines = await getSourceLines(filename);
+    if (!lines) {
+      log("── 无法读取源码（跨域脚本或网络失败）: " + filename + " ──", "dim");
+      return;
+    }
+    log("──── 出错位置源码 " + filename + ":" + lineno + ":" + colno + " ────", "head");
+
+    const start = Math.max(1, lineno - 2);
+    const end   = Math.min(lines.length, lineno + 2);
+    const maxLen = 240;
+    const rawErrLine = lines[lineno - 1] || "";
+
+    for (let i = start; i <= end; i++) {
+      const raw = lines[i - 1] || "";
+      let text = raw;
+      if (text.length > maxLen) {
+        const half = Math.floor(maxLen / 2);
+        text = text.slice(0, half) + " … " + text.slice(-half);
+      }
+      const isErr = (i === lineno);
+      log((isErr ? ">> " : "   ") + String(i).padStart(4) + " | " + text,
+          isErr ? "err" : "dim");
+      if (isErr && colno > 0 && raw.length <= maxLen) {
+        log("       | " + " ".repeat(Math.min(colno - 1, maxLen)) + "^", "warn");
+      }
+    }
+    if (lines.length < 10 && rawErrLine.length > 1000) {
+      log("（该文件疑似压缩混淆，以上为压缩后代码；原始源码需 sourcemap）", "dim");
+    }
+    if (lines.some(l => /\/\/#\s*sourceMappingURL=/.test(l))) {
+      log("（该文件含 sourceMappingURL，原始源码需在 DevTools 中查看）", "dim");
     }
   }
 
@@ -589,7 +599,13 @@ function installDevToolsLike(log, onNetPush) {
     return results;
   }
 
-  /* ---------- 单资源探测 ---------- */
+  const PROXIES = [
+    { name: "corsproxy.io",
+      build: (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u) },
+    { name: "allorigins.win",
+      build: (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) }
+  ];
+
   async function probeFetch(url, timeout) {
     timeout = timeout || 8000;
     const s = performance.now();
@@ -598,11 +614,11 @@ function installDevToolsLike(log, onNetPush) {
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       await fetch(url, { mode: "no-cors", cache: "no-store",
-                         referrerPolicy: "no-referrer", signal: ctrl.signal });
+        referrerPolicy: "no-referrer", signal: ctrl.signal });
       return { ok: true, ms: (performance.now() - s) | 0 };
     } catch (e) {
       return { ok: false, ms: (performance.now() - s) | 0,
-               err: e.name === "AbortError" ? "超时" : (e.message || String(e)) };
+        err: e.name === "AbortError" ? "超时" : (e.message || String(e)) };
     } finally {
       window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
       clearTimeout(timer);
@@ -627,15 +643,12 @@ function installDevToolsLike(log, onNetPush) {
     });
   }
 
-  /* ============================================================
-     A 模式：静态分析
-     ============================================================ */
   async function stageReach(url) {
     const s = performance.now();
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       await fetch(url, { mode: "no-cors", cache: "no-store", redirect: "follow",
-                         referrerPolicy: "no-referrer" });
+        referrerPolicy: "no-referrer" });
       log("no-cors 请求完成，耗时 " + ((performance.now()-s)|0) + " ms", "ok");
       return true;
     } catch (e) {
@@ -645,54 +658,119 @@ function installDevToolsLike(log, onNetPush) {
       window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
     }
   }
+
   async function stageContent(url) {
     const s = performance.now();
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       const r = await fetch(url, { mode: "cors", cache: "no-store", redirect: "follow",
-                                   referrerPolicy: "no-referrer" });
+        referrerPolicy: "no-referrer" });
       const ms = (performance.now() - s) | 0;
       const ct = r.headers.get("content-type") || "(未暴露)";
-      log("CORS 请求成功：HTTP " + r.status + " | " + ct + " | " + ms + "ms",
+      log("直连 CORS 成功：HTTP " + r.status + " | " + ct + " | " + ms + "ms",
           r.ok ? "ok" : "warn");
       const text = await r.text();
       log("响应体 " + text.length + " 字符", "ok");
-      if (/text\/html|xhtml/i.test(ct) || /<html[\s>]/i.test(text.slice(0, 2000))) return text;
-      return null;
+      if (/text\/html|xhtml/i.test(ct) || /<html[\s>]/i.test(text.slice(0, 2000))) {
+        return { html: text, via: "direct" };
+      }
+      log("响应体非 HTML", "warn");
+      return { html: null, via: "direct" };
     } catch (e) {
-      log("CORS 请求失败：" + (e.message || e), "warn");
-      log("目标站未放行 CORS，无法读取 HTML", "dim");
-      return null;
+      const ms = (performance.now() - s) | 0;
+      log("直连 CORS 失败（" + ms + " ms）：" + (e.message || e), "warn");
+      log("诊断：阶段 1 no-cors 已成功 → 网络通，失败原因确定为 CORS 拒绝", "dim");
     } finally {
       window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
     }
-  }
-  async function extractCssUrls(cssUrl) {
-    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
-    try {
-      const r = await fetch(cssUrl, { mode: "cors", cache: "no-store",
-                                      referrerPolicy: "no-referrer" });
-      if (!r.ok) return [];
-      const text = await r.text();
-      const found = [];
-      const re = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
-      let m;
-      while ((m = re.exec(text))) {
-        const u = m[2].trim();
-        if (/^(data:|blob:|about:|#)/i.test(u)) continue;
-        try { found.push({ url: new URL(u, cssUrl).href, from: cssUrl }); } catch (_) {}
-      }
-      return found;
-    } catch (_) { return []; }
-    finally {
-      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
+
+    if (!usePublicProxy) {
+      log("公共代理未开启，无法读取跨域 HTML", "dim");
+      log("提示：点击输入框右侧 🛡 按钮，可通过第三方代理读取", "dim");
+      return { html: null, via: "none" };
     }
+
+    for (const p of PROXIES) {
+      const ps = performance.now();
+      log("尝试公共代理：" + p.name + " …", "info");
+      window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
+      try {
+        const r = await fetch(p.build(url), { cache: "no-store",
+          referrerPolicy: "no-referrer" });
+        const ms = (performance.now() - ps) | 0;
+        if (!r.ok) {
+          log(p.name + " 返回 HTTP " + r.status + "（" + ms + "ms）", "warn");
+          continue;
+        }
+        const text = await r.text();
+        log(p.name + " 成功：返回 " + text.length + " 字符（" + ms + "ms）", "ok");
+        log("⚠ 数据已经过第三方服务器，请勿用于含敏感信息的站点", "warn");
+        if (/<html[\s>]/i.test(text.slice(0, 2000))) {
+          setMode("P");
+          return { html: text, via: p.name };
+        }
+        log(p.name + " 返回内容非 HTML", "warn");
+      } catch (e) {
+        log(p.name + " 失败：" + (e.message || e), "warn");
+      } finally {
+        window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
+      }
+    }
+
+    log("所有公共代理均失败", "err");
+    log("── 自建 Cloudflare Worker 代理（免费 10 万/天）──", "head");
+    log("export default {", "dim");
+    log("  async fetch(req) {", "dim");
+    log("    const u = new URL(req.url).searchParams.get('url');", "dim");
+    log("    if (!u) return new Response('missing url', { status: 400 });", "dim");
+    log("    const r = await fetch(u, { redirect: 'follow' });", "dim");
+    log("    return new Response(r.body, {", "dim");
+    log("      status: r.status,", "dim");
+    log("      headers: {", "dim");
+    log("        'content-type': r.headers.get('content-type') || 'text/html;charset=utf-8',", "dim");
+    log("        'access-control-allow-origin': '*'", "dim");
+    log("      }", "dim");
+    log("    });", "dim");
+    log("  }", "dim");
+    log("};", "dim");
+    return { html: null, via: "none" };
   }
+
+  async function extractCssUrls(cssUrl, useProxy) {
+    const targets = useProxy
+      ? PROXIES.map(p => ({ build: p.build, name: p.name, original: cssUrl }))
+      : [{ build: (u) => u, name: "direct", original: cssUrl }];
+
+    for (const t of targets) {
+      window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
+      try {
+        const r = await fetch(t.build(t.original), { cache: "no-store",
+          referrerPolicy: "no-referrer" });
+        if (!r.ok) continue;
+        const text = await r.text();
+        const found = [];
+        const re = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
+        let m;
+        while ((m = re.exec(text))) {
+          const u = m[2].trim();
+          if (/^(data:|blob:|about:|#)/i.test(u)) continue;
+          try { found.push({ url: new URL(u, t.original).href }); } catch (_) {}
+        }
+        return found;
+      } catch (_) {}
+      finally {
+        window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
+      }
+    }
+    return [];
+  }
+
   function parseSrcset(v) {
     if (!v) return [];
     return v.split(",").map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
   }
-  async function stageResources(baseUrl, html) {
+
+  async function stageResources(baseUrl, html, proxyMode) {
     const doc = new DOMParser().parseFromString(html, "text/html");
     const baseEl = doc.querySelector("base[href]");
     let base = baseUrl;
@@ -739,11 +817,12 @@ function installDevToolsLike(log, onNetPush) {
     if (cssUrls.length) {
       let cssHit = 0;
       for (const cssUrl of cssUrls) {
-        const found = await extractCssUrls(cssUrl);
+        const found = await extractCssUrls(cssUrl, proxyMode);
         cssHit += found.length;
         found.forEach(f => add("asset", f.url));
       }
-      log("CSS 内资源: " + cssHit + " 条", cssHit ? "ok" : "warn");
+      log("CSS 内资源: " + cssHit + " 条" + (cssHit ? "" : "（CORS/代理均不可读）"),
+          cssHit ? "ok" : "warn");
     }
     log("──── 完整地址清单（" + inventory.length + " 条）────", "head");
     inventory.forEach(x => log("  " + x.kind.padEnd(9) + " " + x.url, "dim"));
@@ -765,16 +844,11 @@ function installDevToolsLike(log, onNetPush) {
     return { inventory, results };
   }
 
-  /* ============================================================
-     B 模式：iframe 注入 + 运行时采集
-     ============================================================ */
   function runB(target) {
     return new Promise((resolve) => {
       const id = "probe-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
       const iframe = document.createElement("iframe");
       iframe.id = id;
-      // 关键：不加 sandbox，允许父页面访问 contentDocument 以注入探针
-      // 若加 sandbox 需 allow-same-origin，且会弹出安全告警
       iframe.style.cssText =
         "position:fixed;left:-9999px;top:0;width:390px;height:844px;" +
         "border:0;visibility:hidden;pointer-events:none;";
@@ -790,216 +864,166 @@ function installDevToolsLike(log, onNetPush) {
 
       function onMessage(e) {
         if (!e.data || !e.data.__probe || e.data.id !== id) return;
-        const type = e.data.type;
-        const data = e.data.data;
-        const t = e.data.t;
+        const type = e.data.type, data = e.data.data, t = e.data.t;
         const ts = "[" + String(t).padStart(5, " ") + "ms] ";
         switch (type) {
           case "ready":
             stats.ready = true;
-            log(ts + "[INJ] 探针已注入并启动: " + data.url, "ok");
-            break;
+            log(ts + "[INJ] 探针已注入并启动: " + data.url, "ok"); break;
           case "js-error":
             stats.jsError++;
             log(ts + "[JS-ERR] " + data.message +
-                "\n        at " + data.filename + ":" + data.lineno + ":" + data.colno +
-                (data.stack ? "\n" + data.stack : ""), "#f66");
+              "\n        at " + data.filename + ":" + data.lineno + ":" + data.colno +
+              (data.stack ? "\n" + data.stack : ""), "#f66");
+            showErrorContext(data.filename, data.lineno, data.colno);
             break;
           case "promise-rejection":
             stats.promiseRejection++;
             log(ts + "[PROMISE] " + data.message +
-                (data.stack ? "\n" + data.stack : ""), "#f66");
-            break;
+              (data.stack ? "\n" + data.stack : ""), "#f66"); break;
           case "res-error":
             stats.resError++;
-            log(ts + "[RES-FAIL] " + data.tag + " " + data.url, "#f66");
-            break;
+            log(ts + "[RES-FAIL] " + data.tag + " " + data.url, "#f66"); break;
           case "resource":
             stats.resource++;
             runtimeResources.push(data);
             log(ts + "[RES] " + data.initiatorType.padEnd(10) + " " +
-                data.name + " (" + data.duration + "ms, " +
-                (data.transferSize ? data.transferSize + "B" : "缓存") + ")",
-                data.transferSize === 0 ? "dim" : "info");
-            break;
+              data.name + " (" + data.duration + "ms, " +
+              (data.transferSize ? data.transferSize + "B" : "缓存") + ")",
+              data.transferSize === 0 ? "dim" : "info"); break;
           case "navigation":
             stats.nav = true;
             log(ts + "[NAV] DNS " + data.dns + " / TCP " + data.tcp +
-                " / TLS " + data.tls + " / TTFB " + data.ttfb +
-                " / DL " + data.download + "ms", "info");
+              " / TLS " + data.tls + " / TTFB " + data.ttfb +
+              " / DL " + data.download + "ms", "info");
             log(ts + "[NAV] domInteractive " + data.domInteractive +
-                " / DCL " + data.domContentLoaded +
-                " / load " + data.load + "ms", "info");
+              " / DCL " + data.domContentLoaded +
+              " / load " + data.load + "ms", "info");
             log(ts + "[NAV] 传输 " + data.transferSize + "B / 解码 " + data.decodedBodySize + "B", "dim");
             break;
           case "lcp":
             stats.lcp = data.value;
-            log(ts + "[LCP] " + data.value + "ms" + (data.element ? " (" + data.element + ")" : ""), "#0ff");
-            break;
+            log(ts + "[LCP] " + data.value + "ms" +
+              (data.element ? " (" + data.element + ")" : ""), "#0ff"); break;
           case "cls":
             stats.cls = data.value;
-            log(ts + "[CLS] " + data.value, "#0ff");
-            break;
+            log(ts + "[CLS] " + data.value, "#0ff"); break;
           case "longtask":
             stats.longtask++;
-            log(ts + "[LONG] 长任务 " + data.duration + "ms @" + data.start, "#fa0");
-            break;
+            log(ts + "[LONG] 长任务 " + data.duration + "ms @" + data.start, "#fa0"); break;
           case "inp":
             stats.inp++;
-            log(ts + "[INP] " + data.name + " " + data.duration + "ms", "#fa0");
-            break;
+            log(ts + "[INP] " + data.name + " " + data.duration + "ms", "#fa0"); break;
           case "dom-summary":
             stats.dom = true;
             log(ts + "[DOM] " + data.title, "ok");
             log(ts + "  readyState " + data.readyState +
-                " / scripts " + data.scripts +
-                " / styles " + data.stylesheets +
-                " / imgs " + data.images +
-                " / links " + data.links +
-                " / inputs " + data.inputs +
-                " / body " + data.bodyWidth + "×" + data.bodyHeight, "dim");
-            break;
+              " / scripts " + data.scripts +
+              " / styles " + data.stylesheets +
+              " / imgs " + data.images +
+              " / links " + data.links +
+              " / inputs " + data.inputs +
+              " / body " + data.bodyWidth + "×" + data.bodyHeight, "dim"); break;
           case "storage":
             stats.storage = true;
             log(ts + "[STORE] localStorage " + data.local.count + " 项 (" + data.local.bytes + "B)" +
-                " / sessionStorage " + data.session.count + " 项 (" + data.session.bytes + "B)", "info");
+              " / sessionStorage " + data.session.count + " 项 (" + data.session.bytes + "B)", "info");
             if (data.local.keys.length) log(ts + "  keys: " + data.local.keys.join(", "), "dim");
             break;
         }
       }
-
       window.addEventListener("message", onMessage);
 
-      let loadFired = false;
-      let injectAttempted = false;
-
+      let loadFired = false, injectAttempted = false;
       function tryInject() {
         if (injectAttempted) return;
         injectAttempted = true;
-
         let doc = null;
         try { doc = iframe.contentDocument; } catch (_) {}
-
         if (!doc) {
           log("[INJ] 无法访问 iframe.contentDocument", "err");
           log("原因：目标页跨域，或设了 X-Frame-Options 拒绝嵌入", "warn");
-          log("降级到 A 模式（静态分析）", "warn");
-          cleanup();
-          resolve({ mode: "A", reason: "no-content-document" });
-          return;
+          log("降级到 A 模式", "warn");
+          cleanup(); resolve({ mode: "A", reason: "no-content-document" }); return;
         }
-
-        // 用注入的 <script> 运行采集代码
         try {
           const script = doc.createElement("script");
-          script.textContent =
-            "(" + injectedProbe.toString() + ")(" +
+          script.textContent = "(" + injectedProbe.toString() + ")(" +
             JSON.stringify({ id: id }) + ");";
           (doc.head || doc.documentElement).appendChild(script);
           log("[INJ] 采集脚本已写入目标页", "info");
         } catch (e) {
           log("[INJ] 注入失败: " + e.message, "err");
           log("可能原因：CSP 阻止 inline script", "warn");
-          log("降级到 A 模式", "warn");
-          cleanup();
-          resolve({ mode: "A", reason: "csp-blocked" });
-          return;
+          cleanup(); resolve({ mode: "A", reason: "csp-blocked" }); return;
         }
-
-        // 等待 ready（最多 3s）
         let waited = 0;
         const waitTimer = setInterval(() => {
-          if (stats.ready) {
-            clearInterval(waitTimer);
-            stats.injected = true;
-          } else if ((waited += 100) > 3000) {
+          if (stats.ready) { clearInterval(waitTimer); stats.injected = true; }
+          else if ((waited += 100) > 3000) {
             clearInterval(waitTimer);
             log("[INJ] 3s 内未收到 ready，采集脚本可能被拦截", "warn");
           }
         }, 100);
       }
-
       iframe.addEventListener("load", () => {
         if (loadFired) return;
         loadFired = true;
-        // 微延迟，等 CSP/渲染稳定
         setTimeout(tryInject, 50);
       });
       iframe.addEventListener("error", () => {
         if (injectAttempted) return;
         injectAttempted = true;
         log("[INJ] iframe 加载失败", "err");
-        cleanup();
-        resolve({ mode: "A", reason: "iframe-load-error" });
+        cleanup(); resolve({ mode: "A", reason: "iframe-load-error" });
       });
-
-      // 兜底：15s 还没加载完，判定失败
       const timeout = setTimeout(() => {
         if (!loadFired && !injectAttempted) {
           log("[INJ] iframe 加载超时 15s", "err");
-          log("可能：目标页禁止嵌入（X-Frame-Options / CSP frame-ancestors）", "warn");
-          cleanup();
-          resolve({ mode: "A", reason: "timeout" });
+          log("可能：目标页禁止嵌入", "warn");
+          cleanup(); resolve({ mode: "A", reason: "timeout" });
         }
       }, 15000);
-
       function cleanup() {
         clearTimeout(timeout);
         window.removeEventListener("message", onMessage);
-        // 采集完成后卸载 iframe，避免持续占用资源
         setTimeout(() => { try { iframe.remove(); } catch (_) {} }, 5000);
       }
-
-      // 挂载并开始加载
       document.body.appendChild(iframe);
       iframe.src = target.href;
       log("[INJ] iframe 开始加载: " + target.href, "info");
-
-      // 等待采集窗口（注入后 4 秒）
       const startWait = Date.now();
       const pollTimer = setInterval(() => {
         const elapsed = Date.now() - startWait;
-        if (stats.injected && elapsed > 4000) {
-          clearInterval(pollTimer);
-          finishB();
-        } else if (elapsed > 12000) {
+        if (stats.injected && elapsed > 4000) { clearInterval(pollTimer); finishB(); }
+        else if (elapsed > 12000) {
           clearInterval(pollTimer);
           log("[INJ] 采集窗口超时，强制结束", "warn");
           finishB();
         }
       }, 200);
-
       function finishB() {
         log("════════ B 模式采集汇总 ════════", "head");
         log("JS 错误: " + stats.jsError +
-            " / Promise 拒绝: " + stats.promiseRejection +
-            " / 资源失败: " + stats.resError,
-            stats.jsError || stats.promiseRejection || stats.resError ? "err" : "ok");
+          " / Promise 拒绝: " + stats.promiseRejection +
+          " / 资源失败: " + stats.resError,
+          stats.jsError || stats.promiseRejection || stats.resError ? "err" : "ok");
         log("运行时请求: " + stats.resource + " 条", "info");
         log("Navigation Timing: " + (stats.nav ? "已获取" : "未获取"), stats.nav ? "ok" : "warn");
         log("LCP: " + stats.lcp + "ms / CLS: " + stats.cls +
-            " / 长任务: " + stats.longtask + " / INP事件: " + stats.inp, "info");
+          " / 长任务: " + stats.longtask + " / INP事件: " + stats.inp, "info");
         log("DOM 摘要: " + (stats.dom ? "已获取" : "未获取") +
-            " / 存储: " + (stats.storage ? "已获取" : "未获取"), "info");
-
-        // 缓存运行时资源供导出
-        lastResources = runtimeResources.map(r => ({
+          " / 存储: " + (stats.storage ? "已获取" : "未获取"), "info");
+        lastResources = runtime────Resources.map(r => ({
           kind: r.initiatorType || "resource",
-          url: r.name,
-          ms: r.duration,
-          bytes: r.transferSize
+          url: r.name, ms: r.duration, bytes: r.transferSize
         }));
         btnExp.disabled = !lastResources.length;
-
-        cleanup();
-        resolve({ mode: "B", stats });
+        cleanup(); resolve({ mode: "B", stats });
       }
     });
   }
 
-  /* ============================================================
-     主流程：自动判断 A / B
-     ============================================================ */
   async function run(raw) {
     if (running) return;
     running = true;
@@ -1014,7 +1038,6 @@ function installDevToolsLike(log, onNetPush) {
     try {
       let v = (raw || "").trim();
       if (!v) { log("请输入网址", "err"); return; }
-      // 支持相对路径：以当前页为基准
       let target;
       try { target = new URL(v, location.href); }
       catch (_) { log("URL 格式非法: " + raw, "err"); return; }
@@ -1030,10 +1053,11 @@ function installDevToolsLike(log, onNetPush) {
       log("目标页源: " + target.origin + (sameOrigin ? " ✓ 同源" : " ✗ 跨域"),
           sameOrigin ? "ok" : "warn");
       log("探针环境: " + navigator.userAgent, "dim");
+      log("代理开关: " + (usePublicProxy ? "开（🛡 绿）" : "关（🛡 灰）"), "dim");
 
       if (sameOrigin) {
         setMode("B");
-        log("──── 尝试 B 模式（注入式全站采集） ────", "head");
+        log(" 尝试 B 模式（注入式全站采集） ────", "head");
         const result = await runB(target);
         if (result.mode === "B") {
           log("════════ 探测结束（B 模式）════════", "head");
@@ -1041,37 +1065,40 @@ function installDevToolsLike(log, onNetPush) {
           lastTarget = target.href;
           return;
         }
-        log("B 模式失败（" + result.reason + "），自动降级 A 模式", "warn");
+        log("B 模式失败（" + result.reason + "），降级 A 模式", "warn");
         setMode("A");
       } else {
         setMode("A");
-        log("──── 跨域目标，走 A 模式（静态分析）────", "head");
+        log("──── 跨域目标，走 A 模式 ────", "head");
       }
 
-      // ============ A 模式 ============
       log("──── 阶段 1 / 3：网络可达性 ────", "head");
       const reachable = await stageReach(target.href);
 
       log("──── 阶段 2 / 3：内容抓取 ────", "head");
-      const html = await stageContent(target.href);
+      const contentRes = await stageContent(target.href);
+      const html = contentRes.html;
 
       let inventory = [], results = [];
       if (html) {
         log("──── 阶段 3 / 3：资源清单 + 探测 ────", "head");
-        const r = await stageResources(target.href, html);
+        const proxyMode = contentRes.via !== "direct";
+        const r = await stageResources(target.href, html, proxyMode);
         inventory = r.inventory;
         results = r.results;
         lastResources = inventory;
         lastTarget = target.href;
         btnExp.disabled = !inventory.length;
+        if (proxyMode) setMode("P");
       } else {
         log("──── 阶段 3 / 3：已跳过（无 HTML）────", "head");
       }
 
-      log("════════ 探测结束（A 模式）════════", "head");
+      log("════════ 探测结束 ════════", "head");
       log("总耗时: " + now() + " ms", "ok");
       log("网络可达: " + (reachable ? "通" : "不通"), reachable ? "ok" : "err");
-      log("HTML: " + (html ? html.length + " 字符" : "未获取"), html ? "ok" : "warn");
+      log("HTML: " + (html ? html.length + " 字符（via " + contentRes.via + "）" : "未获取"),
+          html ? "ok" : "warn");
       log("资源清单: " + inventory.length + " 条", inventory.length ? "ok" : "warn");
     } catch (e) {
       log("探针内部异常: " + ((e && e.message) || e), "err");
@@ -1083,17 +1110,17 @@ function installDevToolsLike(log, onNetPush) {
     }
   }
 
-  /* ---------- 网络缓冲区 / 存储 ---------- */
   function printNetwork() {
     const list = devtools.netLog;
     log("──── 父页面网络缓冲区（" + list.length + " 条）────", "head");
-    if (!list.length) { log("暂无记录（B 模式的运行时请求已实时显示在上面）", "dim"); return; }
+    if (!list.length) { log("暂无记录", "dim"); return; }
     list.forEach((r, i) => {
       log("#" + String(i + 1).padStart(3, " ") + " " +
-          r.kind.padEnd(5) + " " + r.method.padEnd(4) +
-          " " + (r.status || (r.err ? "ERR" : "-")) + " " +
-          r.url + " (" + r.ms + "ms)" +
-          (r.err ? " ← " + r.err : ""), r.ok ? "dim" : "err");
+        r.kind.padEnd(5) + " " + r.method.padEnd(4) +
+        " " + (r.status || (r.err ? "ERR" : "-")) + " " +
+        r.url + " (" + r.ms + "ms)" +
+        (r.err ? " ← " + r.err : "") + (r.internal ? " [探针]" : ""),
+        r.ok ? "dim" : "err");
     });
   }
   function printStorage() {
@@ -1105,8 +1132,7 @@ function installDevToolsLike(log, onNetPush) {
       const items = [];
       for (let i = 0; i < total; i++) {
         try {
-          const k = store.key(i);
-          const v = store.getItem(k) || "";
+          const k = store.key(i); const v = store.getItem(k) || "";
           bytes += k.length + v.length;
           items.push({ k, b: k.length + v.length });
         } catch (_) {}
@@ -1117,14 +1143,27 @@ function installDevToolsLike(log, onNetPush) {
     });
   }
 
-  /* ---------- 事件 ---------- */
   btn.addEventListener("click", () => run(input.value));
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); input.blur(); run(input.value); }
   });
+
+  btnPx.addEventListener("click", () => {
+    usePublicProxy = !usePublicProxy;
+    btnPx.classList.toggle("on", usePublicProxy);
+    btnPx.title = usePublicProxy
+      ? "公共代理已开启：CORS 失败时会尝试 corsproxy.io / allorigins.win"
+      : "公共代理已关闭：仅直连";
+    log(usePublicProxy
+      ? "🛡 公共代理已开启：跨域 CORS 失败时将尝试第三方代理"
+      : "🛡 公共代理已关闭：仅直连",
+      usePublicProxy ? "warn" : "info");
+  });
+
   btnClr.addEventListener("click", () => {
     clearOut();
     devtools.netLog.length = 0;
+    sourceCache.clear();
     btnNet.textContent = "网络";
     setMode("");
     flash(btnClr);
@@ -1143,7 +1182,7 @@ function installDevToolsLike(log, onNetPush) {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "probe-" + lastMode + "-" +
-                 (new URL(lastTarget).hostname || "site") + "-" + Date.now() + ".json";
+      (new URL(lastTarget).hostname || "site") + "-" + Date.now() + ".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     log("已导出 " + lastResources.length + " 条 → " + a.download, "ok");
@@ -1152,10 +1191,10 @@ function installDevToolsLike(log, onNetPush) {
   });
 
   t0 = performance.now();
-  log("网站探针已就绪 · B 模式（注入式）· " + new Date().toLocaleString(), "head");
-  log("同源目标 → 自动 B 模式（L1~L10 全量）；跨域 → 自动 A 模式（L1~L6）", "dim");
-  log("提示：B 模式要求目标页与当前探针页同源，且未设 X-Frame-Options", "info");
-  log("输入同源网址（如 /index.html 或 https://同域/path）后点击「开始探测」", "info");
+  log("网站探针已就绪 · " + new Date().toLocaleString(), "head");
+  log("B 模式同源：错误消息 + 行号 + stack + 出错行源码上下文", "dim");
+  log("跨域 CDN 脚本：仅 Script error.，行号与源码均不可得", "warn");
+  log("输入网址点击「开始探测」", "info");
 })();
 </script>
 </body>
