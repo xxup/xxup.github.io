@@ -2,11 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- [iOS-A] 关键：viewport 全套，虽 iOS 忽略 user-scalable 但其他浏览器会遵守 -->
+<!-- [iOS-A] viewport 全套 + interactive-widget 让键盘弹起时 layout viewport 同步缩小 -->
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0,
                maximum-scale=1.0, minimum-scale=1.0,
-               user-scalable=no, viewport-fit=cover">
+               user-scalable=no, viewport-fit=cover,
+               interactive-widget=resizes-content">
 <meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,7 +16,7 @@
 <title>网站探针 · Web Probe</title>
 <style>
   /* ============ [iOS-B] 根布局锁定 ============ */
-  :root { --app-h: 100dvh; }
+  :root { --app-h: 100dvh; --app-top: 0px; }
 
   * {
     box-sizing: border-box;
@@ -26,28 +27,25 @@
   html {
     width: 100%;
     height: 100%;
-    height: -webkit-fill-available;   /* 老 iOS fallback */
+    height: -webkit-fill-available;
     overflow: hidden;
-    -webkit-text-size-adjust: 100%;   /* 禁止旋转时字号自动调整 */
+    -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
   body {
+    position: fixed;
+    top: 0; left: 0; right: 0;
     width: 100%;
-    height: 100%;
-    height: -webkit-fill-available;
-    height: 100dvh;                    /* 现代 iOS 15.4+ */
-    height: var(--app-h);              /* JS 动态覆盖，含键盘态 */
+    height: var(--app-h, 100dvh);
+    transform: translateY(var(--app-top, 0px));
     overflow: hidden;
     display: flex; flex-direction: column;
     background: #0a0a0a; color: #0f0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px; line-height: 1.55;
-    /* iOS 防缩放核心 1：禁止双击缩放 */
     touch-action: manipulation;
-    /* iOS 防橡皮筋 */
     overscroll-behavior: none;
-    /* iOS 防长按选中 */
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -88,12 +86,10 @@
     padding-left: calc(12px + env(safe-area-inset-left));
     padding-right: calc(12px + env(safe-area-inset-right));
     white-space: pre-wrap; word-break: break-all;
-    -webkit-overflow-scrolling: touch;   /* iOS 惯性滚动 */
-    /* 允许单指纵向滚动，禁止双指缩放 */
+    -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-    /* 滚动到底不触发 body 回弹 */
     overscroll-behavior: contain;
-    -webkit-user-select: text; user-select: text;   /* 输出区允许复制 */
+    -webkit-user-select: text; user-select: text;
   }
   #output .row { display: block; padding: 1px 0; }
   #output .ts { color: #555; }
@@ -164,19 +160,30 @@
 
 <script>
 /* =============================================================
-   [iOS-C] 视口锁定 + 防缩放
+   [iOS-C] 视口锁定 + 防缩放 + 键盘紧贴
    ============================================================= */
 (function lockViewportAndZoom() {
   const root = document.documentElement;
 
-  // 1) 动态计算可用高度（处理键盘弹起 / 地址栏收缩 / 旋转）
   let rafId = 0;
   function syncHeight() {
     cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(() => {
       const vv = window.visualViewport;
-      const h = vv ? vv.height : window.innerHeight;
-      root.style.setProperty("--app-h", h + "px");
+      if (!vv) {
+        root.style.setProperty("--app-h", window.innerHeight + "px");
+        root.style.setProperty("--app-top", "0px");
+        return;
+      }
+      // 判定模式：interactive-widget 生效时 innerHeight 随键盘缩小且 offsetTop=0
+      const diff = Math.abs(window.innerHeight - vv.height - vv.offsetTop);
+      if (diff < 2) {
+        root.style.setProperty("--app-h", "100dvh");
+        root.style.setProperty("--app-top", "0px");
+      } else {
+        root.style.setProperty("--app-h", vv.height + "px");
+        root.style.setProperty("--app-top", vv.offsetTop + "px");
+      }
     });
   }
 
@@ -185,25 +192,43 @@
     window.visualViewport.addEventListener("scroll", syncHeight);
   }
   window.addEventListener("resize", syncHeight);
-  window.addEventListener("orientationchange", () => setTimeout(syncHeight, 120));
+  window.addEventListener("orientationchange", () => {
+    setTimeout(syncHeight, 200);
+  });
+
+  // 键盘动画期间多时间点采样，确保读到稳定值
+  document.addEventListener("focusin", (e) => {
+    if (e.target && e.target.tagName === "INPUT") {
+      syncHeight();
+      setTimeout(syncHeight, 100);
+      setTimeout(syncHeight, 250);
+      setTimeout(syncHeight, 400);
+    }
+  }, true);
+  document.addEventListener("focusout", (e) => {
+    if (e.target && e.target.tagName === "INPUT") {
+      syncHeight();
+      setTimeout(syncHeight, 100);
+      setTimeout(syncHeight, 250);
+    }
+  }, true);
+
   syncHeight();
 
-  // 2) 禁止双指缩放：iOS 专属 gesture 事件
+  // 禁止双指缩放
   ["gesturestart", "gesturechange", "gestureend"].forEach((evt) => {
     document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
   });
 
-  // 3) 禁止多指 touchmove（兜底，某些 iOS 版本 gesture 事件不稳定）
   document.addEventListener("touchmove", (e) => {
     if (e.touches.length > 1) e.preventDefault();
   }, { passive: false });
 
-  // 4) 禁止双击缩放（touch-action 已覆盖，这里补 Ctrl+滚轮 用于桌面调试）
   document.addEventListener("wheel", (e) => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
 
-  // 5) 兜底：双击 touchend 同位置快速两次 → 阻止默认
+  // 双击兜底
   let lastEnd = 0;
   document.addEventListener("touchend", (e) => {
     const now = Date.now();
@@ -348,6 +373,7 @@
       const ms = (performance.now() - s) | 0;
       log("CORS 请求失败（" + ms + " ms）：" + (e.message || e), "warn");
       log("这是同源策略的正常限制：目标站未开启 Access-Control-Allow-Origin", "dim");
+      log("结果：无法读取 HTML 源码，资源清单无法枚举", "dim");
       return null;
     }
   }
@@ -400,7 +426,7 @@
     if (lang) log("lang: " + lang, "info"); else log("缺少 lang 属性", "warn");
     if (cs)   log("charset: " + cs.getAttribute("charset"), "info");
     if (vp)   log("viewport: " + vp.getAttribute("content"), "info");
-    else      log("缺少 viewport meta", "warn");
+    else      log("缺少 viewport meta，移动端可能缩放异常", "warn");
     if (desc) log("description: " + desc.getAttribute("content").slice(0, 120), "info");
 
     const inventory = [];
@@ -495,7 +521,7 @@
         const ms = (performance.now() - s) | 0;
         if (ok) {
           log("[IFRAME] 加载完成，耗时 " + ms + " ms", "ok");
-          log("注意：load 事件不代表真实渲染成功。若站点设 X-Frame-Options 或 CSP frame-ancestors，浏览器显示拒绝页但通常仍触发 load", "dim");
+          log("注意：load 事件不代表真实渲染成功。X-Frame-Options / CSP frame-ancestors 拒绝时仍会触发 load", "dim");
         } else {
           log("[IFRAME] 加载失败，耗时 " + ms + " ms：" + note, "err");
         }
