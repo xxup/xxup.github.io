@@ -47,9 +47,29 @@
     padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
     background: #000; color: #999; font: inherit; font-size: 12px;
     cursor: pointer; touch-action: manipulation;
+    transition: background .12s, border-color .12s,
+                transform .08s, color .12s;
+    -webkit-user-select: none; user-select: none;
+    transform-origin: center center;
+    font-variant-numeric: tabular-nums;
   }
-  #toolbar button:active { background: #1a1a1a; }
+  #toolbar button:active,
+  #toolbar button.is-pressed {
+    background: #2a2a2a; border-color: #0a0; color: #0f0;
+    transform: scale(0.96);
+  }
   #toolbar button:disabled { opacity: .4; }
+  #toolbar button:disabled:active,
+  #toolbar button:disabled.is-pressed {
+    background: #000; border-color: #333; color: #999; transform: none;
+  }
+  @keyframes btnFlash {
+    0%   { background: #0a0; border-color: #0f0; color: #fff; transform: scale(0.94); }
+    100% { background: #000; border-color: #333; color: #999; transform: scale(1); }
+  }
+  #toolbar button.is-flash {
+    animation: btnFlash .35s ease;
+  }
   #output {
     flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
     padding: 10px 12px;
@@ -87,10 +107,12 @@
     background: #0a0; color: #fff;
     font: inherit; font-size: 15px; font-weight: bold;
     cursor: pointer; min-width: 96px;
-    touch-action: manipulation; transition: background .15s;
+    touch-action: manipulation;
+    transition: background .15s, transform .08s;
+    -webkit-user-select: none; user-select: none;
   }
-  #btnProbe:active { background: #080; }
-  #btnProbe:disabled { background: #263; color: #888; cursor: not-allowed; }
+  #btnProbe:active { background: #080; transform: scale(0.97); }
+  #btnProbe:disabled { background: #263; color: #888; cursor: not-allowed; transform: none; }
 </style>
 </head>
 <body>
@@ -186,7 +208,7 @@
 })();
 
 /* =============================================================
-   [iOS-D] 点击空白收起键盘（修复版：Pointer Events）
+   [iOS-D] 点击空白收起键盘（Pointer Events 版）
    ============================================================= */
 (function tapToDismissKeyboard() {
   const INTERACTIVE = [
@@ -227,7 +249,6 @@
 
     document.addEventListener("pointercancel", () => { tracking = false; }, { passive: true });
 
-    // 桌面兜底（pointerType === "mouse" 的 click 由 pointerup 已处理）
     document.addEventListener("click", (e) => {
       if (e.pointerType === undefined && !isInteractive(e.target)) dismiss();
     }, { passive: true });
@@ -249,15 +270,12 @@
 
 /* =============================================================
    [F12-HOOK] F12 类诊断安装器
-   - 由 probeApp 调用，传入 log 函数
-   - 输出到同一面板，前缀区分：[JS-ERR] [PROMISE] [RES-FAIL]
-     [CONSOLE.x] [PERF-*]；网络进缓冲区由 [网络] 按钮查看
    ============================================================= */
-function installDevToolsLike(log) {
+function installDevToolsLike(log, onNetPush) {
 
-  // ---------- 1) JS 运行时错误（冒泡） ----------
+  // 1) JS 运行时错误
   window.addEventListener("error", (e) => {
-    if (e.target && e.target !== window) return;   // 资源错误由捕获阶段处理
+    if (e.target && e.target !== window) return;
     const err = e.error;
     const stack = err && err.stack ? String(err.stack).slice(0, 800) : "";
     const line = "[JS-ERR] " + (e.message || "(unknown)") +
@@ -266,7 +284,7 @@ function installDevToolsLike(log) {
     try { log(line, "#f66"); } catch (_) {}
   });
 
-  // ---------- 2) Promise 拒绝 ----------
+  // 2) Promise 拒绝
   window.addEventListener("unhandledrejection", (e) => {
     const r = e.reason;
     const msg = (r && r.message) || String(r);
@@ -274,7 +292,7 @@ function installDevToolsLike(log) {
     try { log("[PROMISE] " + msg + (stack ? "\n" + stack : ""), "#f66"); } catch (_) {}
   });
 
-  // ---------- 3) 资源加载失败（捕获阶段） ----------
+  // 3) 资源加载失败
   window.addEventListener("error", (e) => {
     const t = e.target;
     if (!t || t === window) return;
@@ -285,7 +303,7 @@ function installDevToolsLike(log) {
     try { log("[RES-FAIL] " + tag + " 加载失败: " + url, "#f66"); } catch (_) {}
   }, true);
 
-  // ---------- 4) console 拦截 ----------
+  // 4) console 拦截
   (function hookConsole() {
     const map = { log:"#0ff", info:"#0ff", debug:"#777", warn:"#fa0", error:"#f66" };
     Object.keys(map).forEach((level) => {
@@ -308,13 +326,14 @@ function installDevToolsLike(log) {
     });
   })();
 
-  // ---------- 5) 网络缓冲区（fetch + XHR） ----------
+  // 5) 网络缓冲区
   const netLog = [];
   const NET_CAP = 200;
 
   function pushNet(rec) {
     netLog.push(rec);
     if (netLog.length > NET_CAP) netLog.shift();
+    if (onNetPush) { try { onNetPush(netLog.length); } catch (_) {} }
   }
 
   (function hookFetch() {
@@ -372,9 +391,8 @@ function installDevToolsLike(log) {
     };
   })();
 
-  // ---------- 6) PerformanceObserver ----------
+  // 6) PerformanceObserver
   if ("PerformanceObserver" in window) {
-    // LCP
     try {
       let lastLCP = 0;
       new PerformanceObserver((list) => {
@@ -387,7 +405,6 @@ function installDevToolsLike(log) {
       }).observe({ type: "largest-contentful-paint", buffered: true });
     } catch (_) {}
 
-    // CLS（累积值，值变化时才打印）
     try {
       let cls = 0, lastLogged = -1;
       new PerformanceObserver((list) => {
@@ -402,7 +419,6 @@ function installDevToolsLike(log) {
       }).observe({ type: "layout-shift", buffered: true });
     } catch (_) {}
 
-    // 长任务
     try {
       new PerformanceObserver((list) => {
         for (const e of list.getEntries()) {
@@ -414,7 +430,6 @@ function installDevToolsLike(log) {
     } catch (_) {}
   }
 
-  // 暴露给 probeApp 使用
   return { netLog, NET_CAP };
 }
 
@@ -466,13 +481,39 @@ function installDevToolsLike(log) {
   }
 
   // 初始化 F12 类诊断
-  const devtools = installDevToolsLike(log);
+  const devtools = installDevToolsLike(log, (n) => {
+    btnNet.textContent = n ? ("网络·" + n) : "网络";
+  });
 
   // 暴露调试句柄
   window.__probe = {
     log, box: out, clear: clearOut,
     netLog: devtools.netLog
   };
+
+  /* ---------- 按钮交互反馈 ---------- */
+  const flash = (el) => {
+    if (!el || el.disabled) return;
+    el.classList.remove("is-flash");
+    void el.offsetWidth;
+    el.classList.add("is-flash");
+    setTimeout(() => el.classList.remove("is-flash"), 380);
+  };
+
+  const bindPress = (el) => {
+    if (!el) return;
+    const down = () => el.classList.add("is-pressed");
+    const up   = () => el.classList.remove("is-pressed");
+    el.addEventListener("pointerdown", down, { passive: true });
+    el.addEventListener("pointerup",   up,   { passive: true });
+    el.addEventListener("pointercancel", up, { passive: true });
+    el.addEventListener("pointerleave",  up, { passive: true });
+    el.addEventListener("touchstart",  down, { passive: true });
+    el.addEventListener("touchend",    up,   { passive: true });
+    el.addEventListener("touchcancel", up,   { passive: true });
+  };
+
+  [btnNet, btnSto, btnExp, btnClr].forEach(bindPress);
 
   /* ---------- 并发池 ---------- */
   async function pool(tasks, limit) {
@@ -532,7 +573,6 @@ function installDevToolsLike(log) {
     });
   }
 
-  /* ---------- 阶段 1：可达性 ---------- */
   async function stageReach(url) {
     const s = performance.now();
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
@@ -553,7 +593,6 @@ function installDevToolsLike(log) {
     }
   }
 
-  /* ---------- 阶段 2：内容抓取 ---------- */
   async function stageContent(url) {
     const s = performance.now();
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
@@ -586,7 +625,6 @@ function installDevToolsLike(log) {
     }
   }
 
-  /* ---------- CSS 内 url() 提取 ---------- */
   async function extractCssUrls(cssUrl) {
     window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
@@ -615,7 +653,6 @@ function installDevToolsLike(log) {
     return v.split(",").map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
   }
 
-  /* ---------- 阶段 3：清单 + 探测 ---------- */
   async function stageResources(baseUrl, html) {
     const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -717,7 +754,6 @@ function installDevToolsLike(log) {
     return { inventory, results };
   }
 
-  /* ---------- 阶段 4：iframe 渲染探测 ---------- */
   function stageIframe(url) {
     return new Promise((resolve) => {
       const iframe = document.createElement("iframe");
@@ -747,7 +783,6 @@ function installDevToolsLike(log) {
     });
   }
 
-  /* ---------- 网络缓冲区打印 ---------- */
   function printNetwork() {
     const list = devtools.netLog;
     log("──── 网络缓冲区（共 " + list.length + " 条，上限 " + devtools.NET_CAP + "）────", "head");
@@ -765,7 +800,6 @@ function installDevToolsLike(log) {
     });
   }
 
-  /* ---------- 存储摘要 ---------- */
   function printStorage() {
     log("──── 存储摘要 ────", "head");
     [["localStorage", localStorage], ["sessionStorage", sessionStorage]].forEach(([name, store]) => {
@@ -788,7 +822,6 @@ function installDevToolsLike(log) {
     });
   }
 
-  /* ---------- 主流程 ---------- */
   async function run(raw) {
     if (running) return;
     running = true;
@@ -864,17 +897,29 @@ function installDevToolsLike(log) {
     }
   }
 
-  /* ---------- 事件 ---------- */
   btn.addEventListener("click", () => run(input.value));
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); input.blur(); run(input.value); }
   });
+
   btnClr.addEventListener("click", () => {
     clearOut();
     devtools.netLog.length = 0;
+    btnNet.textContent = "网络";
+    flash(btnClr);
   });
-  btnNet.addEventListener("click", printNetwork);
-  btnSto.addEventListener("click", printStorage);
+
+  btnNet.addEventListener("click", () => {
+    printNetwork();
+    out.scrollTop = out.scrollHeight;
+    flash(btnNet);
+  });
+
+  btnSto.addEventListener("click", () => {
+    printStorage();
+    out.scrollTop = out.scrollHeight;
+    flash(btnSto);
+  });
 
   btnExp.addEventListener("click", () => {
     if (!lastResources.length) return;
@@ -895,9 +940,10 @@ function installDevToolsLike(log) {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     log("已导出 " + lastResources.length + " 条完整地址 → " + a.download, "ok");
+    out.scrollTop = out.scrollHeight;
+    flash(btnExp);
   });
 
-  /* ---------- 启动自检 ---------- */
   t0 = performance.now();
   log("网站探针已就绪 · " + new Date().toLocaleString(), "head");
   log("视口 " + window.innerWidth + "×" + window.innerHeight +
