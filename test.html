@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- [iOS-A] viewport 全套 + interactive-widget 让键盘弹起时 layout viewport 同步缩小 -->
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0,
                maximum-scale=1.0, minimum-scale=1.0,
@@ -15,124 +14,80 @@
 <meta name="theme-color" content="#0a0a0a">
 <title>网站探针 · Web Probe</title>
 <style>
-  /* ============ [iOS-B] 根布局锁定 ============ */
   :root { --app-h: 100dvh; --app-top: 0px; }
-
-  * {
-    box-sizing: border-box;
-    margin: 0; padding: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html {
-    width: 100%;
-    height: 100%;
-    height: -webkit-fill-available;
+    width: 100%; height: 100%; height: -webkit-fill-available;
     overflow: hidden;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
   }
-
   body {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    width: 100%;
+    position: fixed; top: 0; left: 0; right: 0; width: 100%;
     height: var(--app-h, 100dvh);
     transform: translateY(var(--app-top, 0px));
-    overflow: hidden;
-    display: flex; flex-direction: column;
+    overflow: hidden; display: flex; flex-direction: column;
     background: #0a0a0a; color: #0f0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px; line-height: 1.55;
-    touch-action: manipulation;
-    overscroll-behavior: none;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+    touch-action: manipulation; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
-
-  /* ============ 上段：探针输出区 ============ */
-  #panel {
-    flex: 1; min-height: 0;
-    display: flex; flex-direction: column;
-    border-bottom: 1px solid #222;
-  }
-
+  #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-bottom: 1px solid #222; }
   #toolbar {
-    flex: none;
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px;
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px;
     padding-top: calc(8px + env(safe-area-inset-top));
-    padding-left: calc(12px + env(safe-area-inset-left));
-    padding-right: calc(12px + env(safe-area-inset-right));
-    background: #111; border-bottom: 1px solid #1e1e1e;
-    font-size: 12px; color: #888;
+    padding-left: calc(10px + env(safe-area-inset-left));
+    padding-right: calc(10px + env(safe-area-inset-right));
+    background: #111; border-bottom: 1px solid #1e1e1e; font-size: 12px; color: #888;
+    flex-wrap: wrap;
   }
-  #toolbar .title { flex: 1; color: #0f0; font-weight: bold; }
+  #toolbar .title { flex: 1; color: #0f0; font-weight: bold; min-width: 80px; }
   #toolbar button {
-    padding: 6px 12px;
-    border: 1px solid #333; border-radius: 8px;
-    background: #000; color: #999;
-    font: inherit; font-size: 12px; cursor: pointer;
-    touch-action: manipulation;
+    padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
+    background: #000; color: #999; font: inherit; font-size: 12px;
+    cursor: pointer; touch-action: manipulation;
   }
   #toolbar button:active { background: #1a1a1a; }
   #toolbar button:disabled { opacity: .4; }
-
   #output {
-    flex: 1; min-height: 0;
-    overflow-y: auto; overflow-x: hidden;
+    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
     padding: 10px 12px;
     padding-left: calc(12px + env(safe-area-inset-left));
     padding-right: calc(12px + env(safe-area-inset-right));
     white-space: pre-wrap; word-break: break-all;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-    overscroll-behavior: contain;
+    touch-action: pan-y; overscroll-behavior: contain;
     -webkit-user-select: text; user-select: text;
   }
   #output .row { display: block; padding: 1px 0; }
   #output .ts { color: #555; }
   #output .head { font-weight: bold; }
-
-  /* ============ 下段：输入区 ============ */
   #footer {
-    flex: none;
-    display: flex; gap: 8px; align-items: stretch;
+    flex: none; display: flex; gap: 8px; align-items: stretch;
     padding: 10px 12px;
     padding-left: calc(12px + env(safe-area-inset-left));
     padding-right: calc(12px + env(safe-area-inset-right));
     padding-bottom: calc(10px + env(safe-area-inset-bottom));
     background: #111; border-top: 1px solid #222;
   }
-
   #urlInput {
-    flex: 1; min-width: 0;
-    padding: 12px 14px;
+    flex: 1; min-width: 0; padding: 12px 14px;
     background: #000; color: #0f0;
     border: 1px solid #2a2a2a; border-radius: 10px;
-    font: inherit;
-    /* ★ iOS 硬性阈值：≥16px 否则聚焦自动放大页面 */
-    font-size: 16px;
-    outline: none;
+    font: inherit; font-size: 16px; outline: none;
     touch-action: manipulation;
     -webkit-user-select: text; user-select: text;
     -webkit-appearance: none; appearance: none;
   }
-  #urlInput:focus {
-    border-color: #0a0;
-    box-shadow: 0 0 0 2px rgba(0,170,0,.15);
-  }
+  #urlInput:focus { border-color: #0a0; box-shadow: 0 0 0 2px rgba(0,170,0,.15); }
   #urlInput::placeholder { color: #444; }
-
   #btnProbe {
-    flex: none; padding: 12px 18px;
-    border: 0; border-radius: 10px;
+    flex: none; padding: 12px 18px; border: 0; border-radius: 10px;
     background: #0a0; color: #fff;
     font: inherit; font-size: 15px; font-weight: bold;
     cursor: pointer; min-width: 96px;
-    touch-action: manipulation;
-    transition: background .15s;
+    touch-action: manipulation; transition: background .15s;
   }
   #btnProbe:active { background: #080; }
   #btnProbe:disabled { background: #263; color: #888; cursor: not-allowed; }
@@ -143,6 +98,8 @@
 <section id="panel">
   <div id="toolbar">
     <span class="title">● 探针输出</span>
+    <button id="btnNetwork" type="button">网络</button>
+    <button id="btnStorage" type="button">存储</button>
     <button id="btnExport" type="button" disabled>导出</button>
     <button id="btnClear" type="button">清空</button>
   </div>
@@ -175,7 +132,6 @@
         root.style.setProperty("--app-top", "0px");
         return;
       }
-      // 判定模式：interactive-widget 生效时 innerHeight 随键盘缩小且 offsetTop=0
       const diff = Math.abs(window.innerHeight - vv.height - vv.offsetTop);
       if (diff < 2) {
         root.style.setProperty("--app-h", "100dvh");
@@ -192,11 +148,8 @@
     window.visualViewport.addEventListener("scroll", syncHeight);
   }
   window.addEventListener("resize", syncHeight);
-  window.addEventListener("orientationchange", () => {
-    setTimeout(syncHeight, 200);
-  });
+  window.addEventListener("orientationchange", () => setTimeout(syncHeight, 200));
 
-  // 键盘动画期间多时间点采样，确保读到稳定值
   document.addEventListener("focusin", (e) => {
     if (e.target && e.target.tagName === "INPUT") {
       syncHeight();
@@ -215,20 +168,15 @@
 
   syncHeight();
 
-  // 禁止双指缩放
   ["gesturestart", "gesturechange", "gestureend"].forEach((evt) => {
     document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
   });
-
   document.addEventListener("touchmove", (e) => {
     if (e.touches.length > 1) e.preventDefault();
   }, { passive: false });
-
   document.addEventListener("wheel", (e) => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
-
-  // 双击兜底
   let lastEnd = 0;
   document.addEventListener("touchend", (e) => {
     const now = Date.now();
@@ -236,6 +184,239 @@
     lastEnd = now;
   }, { passive: false });
 })();
+
+/* =============================================================
+   [iOS-D] 点击空白收起键盘（修复版：Pointer Events）
+   ============================================================= */
+(function tapToDismissKeyboard() {
+  const INTERACTIVE = [
+    "input", "textarea", "select", "button",
+    "a[href]", "[role='button']",
+    "[contenteditable='']", "[contenteditable='true']"
+  ].join(",");
+
+  const isInteractive = (el) =>
+    !!(el && el.closest && el.closest(INTERACTIVE));
+
+  const dismiss = () => {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) {
+      ae.blur();
+    }
+  };
+
+  let startX = 0, startY = 0, tracking = false;
+
+  const handleEnd = (target, x, y) => {
+    if (!tracking) return;
+    tracking = false;
+    if (Math.abs(x - startX) > 8 || Math.abs(y - startY) > 8) return;
+    if (isInteractive(target)) return;
+    dismiss();
+  };
+
+  if (window.PointerEvent) {
+    document.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      startX = e.clientX; startY = e.clientY; tracking = true;
+    }, { passive: true });
+
+    document.addEventListener("pointerup", (e) => {
+      handleEnd(e.target, e.clientX, e.clientY);
+    }, { passive: true });
+
+    document.addEventListener("pointercancel", () => { tracking = false; }, { passive: true });
+
+    // 桌面兜底（pointerType === "mouse" 的 click 由 pointerup 已处理）
+    document.addEventListener("click", (e) => {
+      if (e.pointerType === undefined && !isInteractive(e.target)) dismiss();
+    }, { passive: true });
+  } else {
+    document.addEventListener("touchstart", (e) => {
+      const t = e.touches[0] || e.changedTouches[0];
+      if (t) { startX = t.clientX; startY = t.clientY; tracking = true; }
+    }, { passive: true });
+    document.addEventListener("touchend", (e) => {
+      const t = e.changedTouches[0];
+      if (t) handleEnd(e.target, t.clientX, t.clientY);
+    }, { passive: true });
+    document.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
+    document.addEventListener("click", (e) => {
+      if (!isInteractive(e.target)) dismiss();
+    }, { passive: true });
+  }
+})();
+
+/* =============================================================
+   [F12-HOOK] F12 类诊断安装器
+   - 由 probeApp 调用，传入 log 函数
+   - 输出到同一面板，前缀区分：[JS-ERR] [PROMISE] [RES-FAIL]
+     [CONSOLE.x] [PERF-*]；网络进缓冲区由 [网络] 按钮查看
+   ============================================================= */
+function installDevToolsLike(log) {
+
+  // ---------- 1) JS 运行时错误（冒泡） ----------
+  window.addEventListener("error", (e) => {
+    if (e.target && e.target !== window) return;   // 资源错误由捕获阶段处理
+    const err = e.error;
+    const stack = err && err.stack ? String(err.stack).slice(0, 800) : "";
+    const line = "[JS-ERR] " + (e.message || "(unknown)") +
+                 "\n  at " + (e.filename || "?") + ":" + (e.lineno || "?") + ":" + (e.colno || "?") +
+                 (stack ? "\n" + stack : "");
+    try { log(line, "#f66"); } catch (_) {}
+  });
+
+  // ---------- 2) Promise 拒绝 ----------
+  window.addEventListener("unhandledrejection", (e) => {
+    const r = e.reason;
+    const msg = (r && r.message) || String(r);
+    const stack = r && r.stack ? String(r.stack).slice(0, 800) : "";
+    try { log("[PROMISE] " + msg + (stack ? "\n" + stack : ""), "#f66"); } catch (_) {}
+  });
+
+  // ---------- 3) 资源加载失败（捕获阶段） ----------
+  window.addEventListener("error", (e) => {
+    const t = e.target;
+    if (!t || t === window) return;
+    const tag = t.tagName;
+    if (tag !== "SCRIPT" && tag !== "LINK" && tag !== "IMG" &&
+        tag !== "VIDEO" && tag !== "AUDIO" && tag !== "SOURCE") return;
+    const url = t.src || t.href || "(unknown)";
+    try { log("[RES-FAIL] " + tag + " 加载失败: " + url, "#f66"); } catch (_) {}
+  }, true);
+
+  // ---------- 4) console 拦截 ----------
+  (function hookConsole() {
+    const map = { log:"#0ff", info:"#0ff", debug:"#777", warn:"#fa0", error:"#f66" };
+    Object.keys(map).forEach((level) => {
+      const orig = console[level];
+      console[level] = function () {
+        try { orig.apply(console, arguments); } catch (_) {}
+        try {
+          const parts = Array.prototype.map.call(arguments, (a) => {
+            if (a === null) return "null";
+            if (a === undefined) return "undefined";
+            if (typeof a === "object") {
+              try { return JSON.stringify(a).slice(0, 300); }
+              catch (_) { return "[object]"; }
+            }
+            return String(a);
+          });
+          log("[CONSOLE." + level + "] " + parts.join(" "), map[level]);
+        } catch (_) {}
+      };
+    });
+  })();
+
+  // ---------- 5) 网络缓冲区（fetch + XHR） ----------
+  const netLog = [];
+  const NET_CAP = 200;
+
+  function pushNet(rec) {
+    netLog.push(rec);
+    if (netLog.length > NET_CAP) netLog.shift();
+  }
+
+  (function hookFetch() {
+    const origFetch = window.fetch;
+    window.fetch = async function (...args) {
+      const url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "?";
+      const method = ((args[1] && args[1].method) || "GET").toUpperCase();
+      const internal = (window.__probeInternalCount || 0) > 0;
+      const s = performance.now();
+      try {
+        const res = await origFetch.apply(this, args);
+        pushNet({
+          kind: "fetch", method, url,
+          status: res.status, ok: res.ok,
+          ms: (performance.now() - s) | 0,
+          internal
+        });
+        return res;
+      } catch (e) {
+        pushNet({
+          kind: "fetch", method, url,
+          status: 0, ok: false,
+          ms: (performance.now() - s) | 0,
+          err: e && e.message || String(e),
+          internal
+        });
+        throw e;
+      }
+    };
+  })();
+
+  (function hookXHR() {
+    const oOpen = XMLHttpRequest.prototype.open;
+    const oSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+      this.__probeReq = {
+        method: String(method || "GET").toUpperCase(),
+        url: String(url || "")
+      };
+      return oOpen.call(this, method, url, ...rest);
+    };
+    XMLHttpRequest.prototype.send = function (...args) {
+      const req = this.__probeReq;
+      if (!req) return oSend.apply(this, args);
+      const s = performance.now();
+      this.addEventListener("loadend", () => {
+        pushNet({
+          kind: "xhr", method: req.method, url: req.url,
+          status: this.status, ok: this.status >= 200 && this.status < 300,
+          ms: (performance.now() - s) | 0,
+          internal: (window.__probeInternalCount || 0) > 0
+        });
+      });
+      return oSend.apply(this, args);
+    };
+  })();
+
+  // ---------- 6) PerformanceObserver ----------
+  if ("PerformanceObserver" in window) {
+    // LCP
+    try {
+      let lastLCP = 0;
+      new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const last = entries[entries.length - 1];
+        if (last && last.startTime > lastLCP) {
+          lastLCP = last.startTime;
+          try { log("[PERF-LCP] " + lastLCP.toFixed(0) + "ms", "#0ff"); } catch (_) {}
+        }
+      }).observe({ type: "largest-contentful-paint", buffered: true });
+    } catch (_) {}
+
+    // CLS（累积值，值变化时才打印）
+    try {
+      let cls = 0, lastLogged = -1;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) {
+          if (!e.hadRecentInput) cls += e.value;
+        }
+        const v = Math.round(cls * 1000) / 1000;
+        if (v !== lastLogged) {
+          lastLogged = v;
+          try { log("[PERF-CLS] 累积布局偏移 " + v, "#0ff"); } catch (_) {}
+        }
+      }).observe({ type: "layout-shift", buffered: true });
+    } catch (_) {}
+
+    // 长任务
+    try {
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries()) {
+          if (e.duration > 50) {
+            try { log("[PERF-LONG] 长任务 " + e.duration.toFixed(0) + "ms", "#fa0"); } catch (_) {}
+          }
+        }
+      }).observe({ type: "longtask", buffered: true });
+    } catch (_) {}
+  }
+
+  // 暴露给 probeApp 使用
+  return { netLog, NET_CAP };
+}
 
 /* =============================================================
    探针主逻辑
@@ -248,6 +429,8 @@
   const btn    = document.getElementById("btnProbe");
   const btnClr = document.getElementById("btnClear");
   const btnExp = document.getElementById("btnExport");
+  const btnNet = document.getElementById("btnNetwork");
+  const btnSto = document.getElementById("btnStorage");
 
   const COLOR = { info:"#0ff", ok:"#0f0", warn:"#fa0", err:"#f66", head:"#fff", dim:"#777" };
   let t0 = performance.now();
@@ -258,23 +441,38 @@
   const now = () => (performance.now() - t0) | 0;
   const pad = (n) => String(n).padStart(5, " ");
 
-  function log(msg, level) {
-    level = level || "info";
-    const row = document.createElement("div");
-    row.className = "row" + (level === "head" ? " head" : "");
-    const ts = document.createElement("span");
-    ts.className = "ts";
-    ts.textContent = "[" + pad(now()) + "ms] ";
-    const txt = document.createElement("span");
-    txt.style.color = COLOR[level] || COLOR.info;
-    txt.textContent = msg;
-    row.appendChild(ts); row.appendChild(txt);
-    const nearBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 80;
-    out.appendChild(row);
-    if (nearBottom) out.scrollTop = out.scrollHeight;
+  function log(msg, levelOrColor) {
+    try {
+      const level = levelOrColor && levelOrColor.charAt(0) === "#" ? null : levelOrColor;
+      const color = level ? (COLOR[level] || COLOR.info) : (levelOrColor || COLOR.info);
+      const row = document.createElement("div");
+      row.className = "row" + (level === "head" ? " head" : "");
+      const ts = document.createElement("span");
+      ts.className = "ts";
+      ts.textContent = "[" + pad(now()) + "ms] ";
+      const txt = document.createElement("span");
+      txt.style.color = color;
+      txt.textContent = msg;
+      row.appendChild(ts); row.appendChild(txt);
+      const nearBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 80;
+      out.appendChild(row);
+      if (nearBottom) out.scrollTop = out.scrollHeight;
+    } catch (_) {}
   }
 
-  function clearOut() { out.innerHTML = ""; t0 = performance.now(); }
+  function clearOut() {
+    out.innerHTML = "";
+    t0 = performance.now();
+  }
+
+  // 初始化 F12 类诊断
+  const devtools = installDevToolsLike(log);
+
+  // 暴露调试句柄
+  window.__probe = {
+    log, box: out, clear: clearOut,
+    netLog: devtools.netLog
+  };
 
   /* ---------- 并发池 ---------- */
   async function pool(tasks, limit) {
@@ -297,6 +495,7 @@
     const s = performance.now();
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
+    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       await fetch(url, {
         mode: "no-cors", cache: "no-store",
@@ -308,7 +507,10 @@
         ok: false, ms: (performance.now() - s) | 0,
         err: e.name === "AbortError" ? "超时" : (e.message || String(e))
       };
-    } finally { clearTimeout(timer); }
+    } finally {
+      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
+      clearTimeout(timer);
+    }
   }
 
   function probeImage(url, timeout) {
@@ -333,6 +535,7 @@
   /* ---------- 阶段 1：可达性 ---------- */
   async function stageReach(url) {
     const s = performance.now();
+    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       await fetch(url, {
         mode: "no-cors", cache: "no-store", redirect: "follow",
@@ -345,12 +548,15 @@
       log("no-cors 请求失败，耗时 " + ((performance.now()-s)|0) + " ms：" + (e.message || e), "err");
       log("可能原因：DNS 失败 / 网络中断 / 服务端拒绝 / 策略拦截", "warn");
       return false;
+    } finally {
+      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
     }
   }
 
   /* ---------- 阶段 2：内容抓取 ---------- */
   async function stageContent(url) {
     const s = performance.now();
+    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       const r = await fetch(url, {
         mode: "cors", cache: "no-store", redirect: "follow",
@@ -375,11 +581,14 @@
       log("这是同源策略的正常限制：目标站未开启 Access-Control-Allow-Origin", "dim");
       log("结果：无法读取 HTML 源码，资源清单无法枚举", "dim");
       return null;
+    } finally {
+      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
     }
   }
 
   /* ---------- CSS 内 url() 提取 ---------- */
   async function extractCssUrls(cssUrl) {
+    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
     try {
       const r = await fetch(cssUrl, {
         mode: "cors", cache: "no-store", referrerPolicy: "no-referrer"
@@ -396,6 +605,9 @@
       }
       return found;
     } catch (_) { return []; }
+    finally {
+      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
+    }
   }
 
   function parseSrcset(v) {
@@ -535,6 +747,47 @@
     });
   }
 
+  /* ---------- 网络缓冲区打印 ---------- */
+  function printNetwork() {
+    const list = devtools.netLog;
+    log("──── 网络缓冲区（共 " + list.length + " 条，上限 " + devtools.NET_CAP + "）────", "head");
+    if (!list.length) { log("暂无网络记录", "dim"); return; }
+    list.forEach((r, i) => {
+      const tag = r.internal ? " [探针]" : "";
+      const status = r.status ? " " + r.status : (r.err ? " ERR" : " -");
+      log(
+        "#" + String(i + 1).padStart(3, " ") + " " +
+        r.kind.padEnd(5) + " " + r.method.padEnd(4) + status + " " +
+        r.url + " (" + r.ms + "ms)" +
+        (r.err ? " ← " + r.err : "") + tag,
+        r.ok ? "dim" : "err"
+      );
+    });
+  }
+
+  /* ---------- 存储摘要 ---------- */
+  function printStorage() {
+    log("──── 存储摘要 ────", "head");
+    [["localStorage", localStorage], ["sessionStorage", sessionStorage]].forEach(([name, store]) => {
+      let total = 0;
+      try { total = store.length; } catch (_) { log(name + ": 不可访问", "err"); return; }
+      let bytes = 0;
+      const items = [];
+      for (let i = 0; i < total; i++) {
+        try {
+          const k = store.key(i);
+          const v = store.getItem(k) || "";
+          const b = k.length + v.length;
+          bytes += b;
+          items.push({ k, b });
+        } catch (_) {}
+      }
+      log(name + ": " + total + " 项，约 " + (bytes / 1024).toFixed(1) + " KB", "info");
+      items.slice(0, 20).forEach(it => log("  · " + it.k + " (" + it.b + " B)", "dim"));
+      if (items.length > 20) log("  · …剩余 " + (items.length - 20) + " 项省略", "dim");
+    });
+  }
+
   /* ---------- 主流程 ---------- */
   async function run(raw) {
     if (running) return;
@@ -616,7 +869,12 @@
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); input.blur(); run(input.value); }
   });
-  btnClr.addEventListener("click", clearOut);
+  btnClr.addEventListener("click", () => {
+    clearOut();
+    devtools.netLog.length = 0;
+  });
+  btnNet.addEventListener("click", printNetwork);
+  btnSto.addEventListener("click", printStorage);
 
   btnExp.addEventListener("click", () => {
     if (!lastResources.length) return;
@@ -647,7 +905,8 @@
       " · 语言 " + navigator.language, "dim");
   if (navigator.connection && navigator.connection.effectiveType)
     log("网络类型: " + navigator.connection.effectiveType, "dim");
-  log("输入网址后点击「开始探测」", "info");
+  log("F12 诊断已安装：JS 错误 / Promise / 资源失败 / console / fetch+XHR / 性能", "info");
+  log("输入网址后点击「开始探测」，点「网络」查看缓冲区，点「存储」查看存储摘要", "info");
 })();
 </script>
 </body>
