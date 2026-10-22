@@ -27,3 +27,5 @@
 - The AI Assistant supports streaming chat with ChatGPT, Gemini, and DeepSeek, plus custom OpenAI-compatible models. Each model has its own API key and system prompt, with a "Test Connection" option. Conversations are stored per model and kept independently.
 - The AI Assistant's conversations can be exported as Markdown or JSON (with structured metadata such as finish_reason, usage, and tool_calls), and imported back from JSON to continue (with append or replace options).
 - The "Settings" entry lets you adjust parameters, switch between Chinese and English, and manage local storage. The UI supports light/dark themes, and as a PWA it can be added to the home screen for offline use.
+
+---
