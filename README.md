@@ -18,6 +18,9 @@
 ---
 
 #### randomArt Visual Creative Coding is a pure frontend tool. All data is stored locally in the browser — no backend required, works offline.
+
+---
+
 - The home page randomly loads and runs a p5.js sketch with mouse and touch interaction. The sidebar lets you view, search, rename, or delete saved works; click a title to run it.
 - The Script Editor provides a CodeMirror editor with syntax highlighting, line numbers, and auto-saved drafts. You can upload an image for scripts to reference via imageUrl, and vision-capable models can "see" it to generate processing code such as pixelation, palette extraction, and color grading. Supports switching between p5.js and three.js engines; in three.js mode, THREE is auto-injected as a global variable. After submitting, you can preview it or download it as a single HTML file, and save the preview as a PNG.
 - The Script Editor includes a built-in AI generation panel: pick a function-calling model, describe the effect in natural language, and the AI writes the code into the editor via tool calls. If the editor already has content, choose Overwrite or let the AI modify the existing code. Different engines use different system prompts.
