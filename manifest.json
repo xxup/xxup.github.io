@@ -1,0 +1,29 @@
+{
+  "name": "randomArt可视化创意编程",
+  "short_name": "randomArt",
+  "id": "/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "categories": ["art", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
