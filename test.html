@@ -33,33 +33,7 @@
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
   #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-bottom: 1px solid #222; }
-  #toolbar {
-    flex: none; display: flex; align-items: center; gap: 6px;
-    padding: 8px 10px;
-    padding-top: calc(8px + env(safe-area-inset-top));
-    padding-left: calc(10px + env(safe-area-inset-left));
-    padding-right: calc(10px + env(safe-area-inset-right));
-    background: #111; border-bottom: 1px solid #1e1e1e; font-size: 12px; color: #888;
-    flex-wrap: wrap;
-  }
-  #toolbar .title { flex: 1; color: #0f0; font-weight: bold; min-width: 80px; }
-  #toolbar button {
-    padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
-    background: #000; color: #999; font: inherit; font-size: 12px;
-    cursor: pointer; touch-action: manipulation;
-    transition: background .12s, border-color .12s,
-                transform .08s, color .12s;
-    -webkit-user-select: none; user-select: none;
-    transform-origin: center center;
-    font-variant-numeric: tabular-nums;
-  }
-  #toolbar button:active,
-  #toolbar button.is-pressed {
-    background: #2a2a2a; border-color: #0a0; color: #0f0;
-    transform: scale(0.96);
-  }
-  #toolbar button:disabled { opacity: .4; }
-  
+
   #toolbar {
   flex: none; display: flex; align-items: center; gap: 4px;
   padding: 6px 8px;
@@ -93,7 +67,12 @@
   font-variant-numeric: tabular-nums;
   flex-shrink: 0; /* 防止按钮被挤压变形 */
 }
-
+  #toolbar button:active,
+  #toolbar button.is-pressed {
+    background: #2a2a2a; border-color: #0a0; color: #0f0;
+    transform: scale(0.96);
+  }
+  #toolbar button:disabled { opacity: .4; }
   #toolbar button:disabled:active,
   #toolbar button:disabled.is-pressed {
     background: #000; border-color: #333; color: #999; transform: none;
