@@ -1,5 +1,18 @@
 ## randomArt可视化创意编程
 
+#### randomArt Visual Creative Coding is a pure frontend tool. All data is stored locally in the browser — no backend required, works offline.
+
+---
+
+- The home page randomly loads and runs a p5.js sketch with mouse and touch interaction. The sidebar lets you view, search, rename, or delete saved works; click a title to run it.
+- The Script Editor provides a CodeMirror editor with syntax highlighting, line numbers, and auto-saved drafts. You can upload an image for scripts to reference via imageUrl, and vision-capable models can "see" it to generate processing code such as pixelation, palette extraction, and color grading. Supports switching between p5.js and three.js engines; in three.js mode, THREE is auto-injected as a global variable. After submitting, you can preview it or download it as a single HTML file, and save the preview as a PNG.
+- The Script Editor includes a built-in AI generation panel: pick a function-calling model, describe the effect in natural language, and the AI writes the code into the editor via tool calls. If the editor already has content, choose Overwrite or let the AI modify the existing code. Different engines use different system prompts.
+- The AI Assistant supports streaming chat with ChatGPT, Gemini, and DeepSeek, plus custom OpenAI-compatible models. Each model has its own API key and system prompt, with a "Test Connection" option. Conversations are stored per model and kept independently.
+- The AI Assistant's conversations can be exported as Markdown or JSON (with structured metadata such as finish_reason, usage, and tool_calls), and imported back from JSON to continue (with append or replace options).
+- The "Settings" entry lets you adjust parameters, switch between Chinese and English, and manage local storage. The UI supports light/dark themes, and as a PWA it can be added to the home screen for offline use.
+
+---
+
 ##### randomArt可视化创意编程是一款纯前端工具，所有数据存于本地浏览器，无需后端打开即可离线运行。
 
 ---
@@ -52,18 +65,5 @@
 | 图形 | p5.js 1.9.0 / three.js 0.186.0 | 运行时 CDN |
 | 部署 | GitHub Pages | 纯静态，无构建 |
 
-
----
-
-#### randomArt Visual Creative Coding is a pure frontend tool. All data is stored locally in the browser — no backend required, works offline.
-
----
-
-- The home page randomly loads and runs a p5.js sketch with mouse and touch interaction. The sidebar lets you view, search, rename, or delete saved works; click a title to run it.
-- The Script Editor provides a CodeMirror editor with syntax highlighting, line numbers, and auto-saved drafts. You can upload an image for scripts to reference via imageUrl, and vision-capable models can "see" it to generate processing code such as pixelation, palette extraction, and color grading. Supports switching between p5.js and three.js engines; in three.js mode, THREE is auto-injected as a global variable. After submitting, you can preview it or download it as a single HTML file, and save the preview as a PNG.
-- The Script Editor includes a built-in AI generation panel: pick a function-calling model, describe the effect in natural language, and the AI writes the code into the editor via tool calls. If the editor already has content, choose Overwrite or let the AI modify the existing code. Different engines use different system prompts.
-- The AI Assistant supports streaming chat with ChatGPT, Gemini, and DeepSeek, plus custom OpenAI-compatible models. Each model has its own API key and system prompt, with a "Test Connection" option. Conversations are stored per model and kept independently.
-- The AI Assistant's conversations can be exported as Markdown or JSON (with structured metadata such as finish_reason, usage, and tool_calls), and imported back from JSON to continue (with append or replace options).
-- The "Settings" entry lets you adjust parameters, switch between Chinese and English, and manage local storage. The UI supports light/dark themes, and as a PWA it can be added to the home screen for offline use.
 
 ---
