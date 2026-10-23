@@ -7,8 +7,8 @@
     "font-family:monospace;font-size:12px;line-height:1.4;" +
     "padding:8px;max-height:70vh;overflow:auto;" +
     "white-space:pre-wrap;word-break:break-all;";
-  box.textContent = "[BOOT] main.js 开始\n";
-  document.body.appendChild(box);
+  box.textContent = "[BOOT] 诊断开始\n";
+  (document.body || document.documentElement).appendChild(box);
 
   function log(msg, color) {
     const line = document.createElement("div");
@@ -19,26 +19,40 @@
   }
 
   window.addEventListener("error", (e) => {
+    if (e.target && e.target !== window) {
+      log("[RES] 加载失败: " + (e.target.src || e.target.href), "#f66");
+      return;
+    }
     log(
-      "[ERROR] " + e.message + "\n  " + (e.filename || "") + ":" + (e.lineno || ""),
-      "#f66",
+      "[ERROR] " + (e.message || "Script error.(跨域脱敏)") +
+      "\n  " + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || ""),
+      "#f66"
     );
-  });
+  }, true);
+
   window.addEventListener("unhandledrejection", (e) => {
-    log("[REJECT] " + ((e.reason && e.reason.message) || e.reason), "#f66");
+    const r = e.reason;
+    log("[REJECT] " + ((r && r.message) || (typeof r === "string" ? r : JSON.stringify(r))), "#f66");
   });
 
-  const mods =  "/js/script.js";
+  const mods = ["/js/script.js?t=" + Date.now()];
 
-  (async () => {
+  async function run() {
     for (const path of mods) {
+      const t0 = performance.now();
       try {
         await import(path);
-        log("OK   " + path);
+        log("OK   " + path + "  (" + Math.round(performance.now() - t0) + "ms)");
       } catch (e) {
-        log("FAIL " + path + "\n     " + ((e && e.message) || e), "#f66");
+        log("FAIL " + path + "\n     " + (e && (e.stack || e.message) || e), "#f66");
       }
     }
-    log("=== 加载完毕 ===");
-  })();
+    log("=== 诊断完毕 ===");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
 })();
