@@ -49,15 +49,17 @@
 
   #toolbar .title { flex: 1; color: #0f0; font-weight: bold; min-width: 80px; }
   #toolbar button {
-    padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
-    background: #000; color: #999; font: inherit; font-size: 12px;
-    cursor: pointer; touch-action: manipulation;
-    transition: background .12s, border-color .12s,
-                transform .08s, color .12s;
-    -webkit-user-select: none; user-select: none;
-    transform-origin: center center;
-    font-variant-numeric: tabular-nums;
-  }
+  padding: 4px 6px; /* 缩小上下左右内边距，让文本与边框更紧凑 */
+  border-radius: 6px; /* 稍微收紧圆角以配合小尺寸 */
+  background: #000; color: #999; font: inherit; font-size: 12px;
+  border: 1px solid #333;
+  cursor: pointer; touch-action: manipulation;
+  transition: background .12s, border-color .12s, transform .08s, color .12s;
+  -webkit-user-select: none; user-select: none;
+  transform-origin: center center;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0; /* 防止按钮被挤压变形 */
+}
   #toolbar button:active,
   #toolbar button.is-pressed {
     background: #2a2a2a; border-color: #0a0; color: #0f0;
