@@ -33,40 +33,26 @@
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
   #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-bottom: 1px solid #222; }
-
   #toolbar {
-  flex: none; display: flex; align-items: center; gap: 4px;
-  padding: 6px 8px;
-  padding-top: calc(6px + env(safe-area-inset-top));
-  padding-left: calc(8px + env(safe-area-inset-left));
-  padding-right: calc(8px + env(safe-area-inset-right));
-  background: #111; border-bottom: 1px solid #1e1e1e; font-size: 12px; color: #888;
-  flex-wrap: nowrap; /* 强制不换行 */
-  overflow-x: auto;  /* 极窄屏幕下允许横向滚动 */
-  scrollbar-width: none; /* 隐藏滚动条(Firefox) */
-}
-/* 隐藏滚动条(WebKit) */
-#toolbar::-webkit-scrollbar { display: none; }
-
-#toolbar .title {
-  flex: none; /* 取消原有的 flex: 1 撑满，缩小占据的宽度 */
-  min-width: auto;
-  white-space: nowrap;
-  padding-right: 2px;
-}
-
-#toolbar button {
-  padding: 4px 6px; /* 缩小上下左右内边距，让文本与边框更紧凑 */
-  border-radius: 6px; /* 稍微收紧圆角以配合小尺寸 */
-  background: #000; color: #999; font: inherit; font-size: 12px;
-  border: 1px solid #333;
-  cursor: pointer; touch-action: manipulation;
-  transition: background .12s, border-color .12s, transform .08s, color .12s;
-  -webkit-user-select: none; user-select: none;
-  transform-origin: center center;
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0; /* 防止按钮被挤压变形 */
-}
+    flex: none; display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px;
+    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-left: calc(10px + env(safe-area-inset-left));
+    padding-right: calc(10px + env(safe-area-inset-right));
+    background: #111; border-bottom: 1px solid #1e1e1e; font-size: 12px; color: #888;
+    flex-wrap: wrap;
+  }
+  #toolbar .title { flex: 1; color: #0f0; font-weight: bold; min-width: 80px; }
+  #toolbar button {
+    padding: 6px 10px; border: 1px solid #333; border-radius: 8px;
+    background: #000; color: #999; font: inherit; font-size: 12px;
+    cursor: pointer; touch-action: manipulation;
+    transition: background .12s, border-color .12s,
+                transform .08s, color .12s;
+    -webkit-user-select: none; user-select: none;
+    transform-origin: center center;
+    font-variant-numeric: tabular-nums;
+  }
   #toolbar button:active,
   #toolbar button.is-pressed {
     background: #2a2a2a; border-color: #0a0; color: #0f0;
