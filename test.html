@@ -2,1788 +2,229 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-               maximum-scale=1.0, minimum-scale=1.0,
-               user-scalable=no, viewport-fit=cover,
-               interactive-widget=resizes-content">
-<meta name="format-detection" content="telephone=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0a0a0a">
-<title>网站探针Web Probe</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JS 错误诊断器</title>
 <style>
-  :root { --app-h: 100dvh; --app-top: 0px; }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html {
-    width: 100%; height: 100%; height: -webkit-fill-available;
-    overflow: hidden;
-    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
-  }
-  body {
-    position: fixed; top: 0; left: 0; right: 0; width: 100%;
-    height: var(--app-h, 100dvh);
-    transform: translateY(var(--app-top, 0px));
-    overflow: hidden; display: flex; flex-direction: column;
-    background: #0a0a0a; color: #0f0;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 13px; line-height: 1.55;
-    touch-action: manipulation; overscroll-behavior: none;
-    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-  }
-  #panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-bottom: 1px solid #222; }
-  #toolbar {
-  flex: none; display: flex; align-items: center; gap: 4px;
-  padding: 6px 8px;
-  padding-top: calc(6px + env(safe-area-inset-top));
-  padding-left: calc(8px + env(safe-area-inset-left));
-  padding-right: calc(8px + env(safe-area-inset-right));
-  background: #111; border-bottom: 1px solid #1e1e1e; font-size: 12px; color: #888;
-  flex-wrap: nowrap; /* 强制不换行 */
-  overflow-x: auto;  /* 极窄屏幕下允许横向滚动 */
-  scrollbar-width: none; /* 隐藏滚动条(Firefox) */
-}
-/* 隐藏滚动条(WebKit) */
-  #toolbar::-webkit-scrollbar { display: none; }
-
-  #toolbar .title { flex: none; color: #0f0; font-weight: bold; min-width: auto; white-space: nowrap; padding-right: 2px; }
-  #toolbar button {
-  padding: 4px 6px; /* 缩小上下左右内边距，让文本与边框更紧凑 */
-  border-radius: 6px; /* 稍微收紧圆角以配合小尺寸 */
-  background: #000; color: #999; font: inherit; font-size: 12px;
-  border: 1px solid #333;
-  cursor: pointer; touch-action: manipulation;
-  transition: background .12s, border-color .12s, transform .08s, color .12s;
-  -webkit-user-select: none; user-select: none;
-  transform-origin: center center;
-  font-variant-numeric: tabular-nums;
-  flex-shrink: 0; /* 防止按钮被挤压变形 */
-}
-  #toolbar button:active,
-  #toolbar button.is-pressed {
-    background: #2a2a2a; border-color: #0a0; color: #0f0;
-    transform: scale(0.96);
-  }
-  #toolbar button:disabled { opacity: .4; }
-  #toolbar button:disabled:active,
-  #toolbar button:disabled.is-pressed {
-    background: #000; border-color: #333; color: #999; transform: none;
-  }
-  #btnErrors.has-errors { border-color: #a33; color: #f66; }
-  @keyframes errPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(255,60,60,.5); }
-    50%     { box-shadow: 0 0 0 4px rgba(255,60,60,0); }
-  }
-  #btnErrors.has-errors { animation: errPulse 2s infinite; }
-  @keyframes btnFlash {
-    0%   { background: #0a0; border-color: #0f0; color: #fff; transform: scale(0.94); }
-    100% { background: #000; border-color: #333; color: #999; transform: scale(1); }
-  }
-  #toolbar button.is-flash { animation: btnFlash .35s ease; }
-  #output {
-    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
-    padding: 10px 12px;
-    padding-left: calc(12px + env(safe-area-inset-left));
-    padding-right: calc(12px + env(safe-area-inset-right));
-    white-space: pre-wrap; word-break: break-all;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y; overscroll-behavior: contain;
-    -webkit-user-select: text; user-select: text;
-  }
-  #output .row { display: block; padding: 1px 0; }
-  #output .ts { color: #555; }
-  #output .head { font-weight: bold; }
-  #output .row.is-stack { padding-left: 12px; opacity: .85; }
-  #footer {
-    flex: none; display: flex; gap: 8px; align-items: stretch;
-    padding: 10px 12px;
-    padding-left: calc(12px + env(safe-area-inset-left));
-    padding-right: calc(12px + env(safe-area-inset-right));
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    background: #111; border-top: 1px solid #222;
-  }
-  #urlInput {
-    flex: 1; min-width: 0; padding: 12px 14px;
-    background: #000; color: #0f0;
-    border: 1px solid #2a2a2a; border-radius: 10px;
-    font: inherit; font-size: 16px; outline: none;
-    touch-action: manipulation;
-    -webkit-user-select: text; user-select: text;
-    -webkit-appearance: none; appearance: none;
-  }
-  #urlInput:focus { border-color: #0a0; box-shadow: 0 0 0 2px rgba(0,170,0,.15); }
-  #urlInput::placeholder { color: #444; }
-  #btnProbe {
-    flex: none; padding: 12px 18px; border: 0; border-radius: 10px;
-    background: #0a0; color: #fff;
-    font: inherit; font-size: 15px; font-weight: bold;
-    cursor: pointer; min-width: 96px;
-    touch-action: manipulation;
-    transition: background .15s, transform .08s;
-    -webkit-user-select: none; user-select: none;
-  }
-  #btnProbe:active { background: #080; transform: scale(0.97); }
-  #btnProbe:disabled { background: #263; color: #888; cursor: not-allowed; transform: none; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #111; color: #ddd;
+         font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; }
+  header { padding: 12px 16px; background: #1b1b1b; border-bottom: 1px solid #333;
+           display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  h1 { font-size: 14px; margin: 0 12px 0 0; color: #0f0; font-weight: 600; white-space: nowrap; }
+  input[type=text] { flex: 1 1 320px; min-width: 220px; padding: 6px 10px;
+                     background: #000; border: 1px solid #333; color: #0f0;
+                     font-family: monospace; font-size: 13px; border-radius: 4px; }
+  button { padding: 6px 14px; background: #0f0; color: #000; border: 0;
+           border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 13px; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #status { font-family: monospace; font-size: 12px; color: #888; }
+  #panel { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+           font-size: 12px; line-height: 1.55; padding: 12px 16px;
+           white-space: pre-wrap; word-break: break-word; }
+  .line { padding: 1px 0; }
+  .ok { color: #4c4; }  .warn { color: #fa0; }
+  .err { color: #f66; } .info { color: #8cf; } .dim { color: #777; }
+  .stack { margin: 3px 0 8px 16px; padding-left: 8px; border-left: 2px solid #333; color: #9a9a9a; }
+  .frame-file { color: #8cf; } .frame-line { color: #fa0; font-weight: 600; }
+  .hit { background: #2a1a1a; }
+  .badge { display: inline-block; padding: 0 6px; border-radius: 3px;
+           font-size: 11px; margin-right: 6px; font-weight: 600; }
 </style>
 </head>
 <body>
-
-<section id="panel">
-  <div id="toolbar">
-    <span class="title">● 探针输出</span>
-    <button id="btnErrors" type="button">错误</button>
-    <button id="btnNetwork" type="button">网络</button>
-    <button id="btnStorage" type="button">存储</button>
-    <button id="btnPerf" type="button">性能</button>
-    <button id="btnCopy" type="button">复制</button>
-    <button id="btnExport" type="button" disabled>导出</button>
-    <button id="btnClear" type="button">清空</button>
-  </div>
-  <div id="output" role="log" aria-live="polite"></div>
-</section>
-
-<footer id="footer">
-  <input id="urlInput" type="text" list="urlHistory"
-         inputmode="url" autocomplete="off"
-         autocorrect="off" autocapitalize="off" spellcheck="false"
-         enterkeyhint="go"
-         placeholder="输入网址，如 example.com">
-  <button id="btnProbe" type="button">开始探测</button>
-  <datalist id="urlHistory"></datalist>
-</footer>
+<header>
+  <h1>JS 错误诊断器</h1>
+  <input id="src" type="text" spellcheck="false"
+         placeholder="脚本路径，如 js/script.js 或 /js/script.js">
+  <button id="run">开始诊断</button>
+  <span id="status">就绪</span>
+</header>
+<div id="panel"></div>
 
 <script>
-(function lockViewportAndZoom() {
-  const root = document.documentElement;
-  let rafId = 0;
-  function syncHeight() {
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => {
-      const vv = window.visualViewport;
-      if (!vv) {
-        root.style.setProperty("--app-h", window.innerHeight + "px");
-        root.style.setProperty("--app-top", "0px");
-        return;
-      }
-      const diff = Math.abs(window.innerHeight - vv.height - vv.offsetTop);
-      if (diff < 2) {
-        root.style.setProperty("--app-h", "100dvh");
-        root.style.setProperty("--app-top", "0px");
-      } else {
-        root.style.setProperty("--app-h", vv.height + "px");
-        root.style.setProperty("--app-top", vv.offsetTop + "px");
-      }
-    });
-  }
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", syncHeight);
-    window.visualViewport.addEventListener("scroll", syncHeight);
-  }
-  window.addEventListener("resize", syncHeight);
-  window.addEventListener("orientationchange", () => setTimeout(syncHeight, 200));
-  document.addEventListener("focusin", (e) => {
-    if (e.target && e.target.tagName === "INPUT") {
-      syncHeight();
-      setTimeout(syncHeight, 100);
-      setTimeout(syncHeight, 250);
-      setTimeout(syncHeight, 400);
-    }
-  }, true);
-  document.addEventListener("focusout", (e) => {
-    if (e.target && e.target.tagName === "INPUT") {
-      syncHeight();
-      setTimeout(syncHeight, 100);
-      setTimeout(syncHeight, 250);
-    }
-  }, true);
-  syncHeight();
-  ["gesturestart", "gesturechange", "gestureend"].forEach((evt) => {
-    document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
-  });
-  document.addEventListener("touchmove", (e) => {
-    if (e.touches.length > 1) e.preventDefault();
-  }, { passive: false });
-  document.addEventListener("wheel", (e) => {
-    if (e.ctrlKey) e.preventDefault();
-  }, { passive: false });
-  let lastEnd = 0;
-  document.addEventListener("touchend", (e) => {
-    const now = Date.now();
-    if (now - lastEnd <= 300) e.preventDefault();
-    lastEnd = now;
-  }, { passive: false });
-})();
-
-(function tapToDismissKeyboard() {
-  const INTERACTIVE = [
-    "input", "textarea", "select", "button",
-    "a[href]", "[role='button']",
-    "[contenteditable='']", "[contenteditable='true']"
-  ].join(",");
-  const isInteractive = (el) => !!(el && el.closest && el.closest(INTERACTIVE));
-  const dismiss = () => {
-    const ae = document.activeElement;
-    if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) ae.blur();
-  };
-  let startX = 0, startY = 0, tracking = false;
-  const handleEnd = (target, x, y) => {
-    if (!tracking) return;
-    tracking = false;
-    if (Math.abs(x - startX) > 8 || Math.abs(y - startY) > 8) return;
-    if (isInteractive(target)) return;
-    dismiss();
-  };
-  if (window.PointerEvent) {
-    document.addEventListener("pointerdown", (e) => {
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-      startX = e.clientX; startY = e.clientY; tracking = true;
-    }, { passive: true });
-    document.addEventListener("pointerup", (e) => handleEnd(e.target, e.clientX, e.clientY), { passive: true });
-    document.addEventListener("pointercancel", () => { tracking = false; }, { passive: true });
-    document.addEventListener("click", (e) => {
-      if (e.pointerType === undefined && !isInteractive(e.target)) dismiss();
-    }, { passive: true });
-  } else {
-    document.addEventListener("touchstart", (e) => {
-      const t = e.touches[0] || e.changedTouches[0];
-      if (t) { startX = t.clientX; startY = t.clientY; tracking = true; }
-    }, { passive: true });
-    document.addEventListener("touchend", (e) => {
-      const t = e.changedTouches[0];
-      if (t) handleEnd(e.target, t.clientX, t.clientY);
-    }, { passive: true });
-    document.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
-    document.addEventListener("click", (e) => {
-      if (!isInteractive(e.target)) dismiss();
-    }, { passive: true });
-  }
-})();
-
-function installDevToolsLike(log, onNetPush, onError) {
-  const errors = [];
-  const ERR_CAP = 300;
-
-  function pushError(rec) {
-    const key = [rec.type, rec.errName, rec.message, rec.url, rec.line, rec.col].join("|");
-    for (let i = errors.length - 1; i >= 0; i--) {
-      if (errors[i].key === key) {
-        errors[i].count++;
-        errors[i].lastAt = Date.now();
-        return errors[i];
-      }
-    }
-    const e = Object.assign(
-      { key, count: 1, firstAt: Date.now(), lastAt: Date.now() },
-      rec
-    );
-    errors.push(e);
-    if (errors.length > ERR_CAP) errors.shift();
-    return e;
-  }
-  function guessErrorName(msg) {
-    if (!msg) return "Error";
-    const m = /^(\w*Error)\b/.exec(msg);
-    return m ? m[1] : "Error";
-  }
-
-  window.addEventListener("error", (e) => {
-    if (e.target && e.target !== window) return;
-    const err = e.error;
-    const entry = pushError({
-      type: "JS-ERR",
-      errName: (err && err.name) || guessErrorName(e.message),
-      message: e.message || "(unknown)",
-      url: e.filename || "",
-      line: e.lineno || 0,
-      col: e.colno || 0,
-      stack: err && err.stack ? String(err.stack) : ""
-    });
-    if (onError) { try { onError(entry); } catch (_) {} }
-  });
-
-  window.addEventListener("unhandledrejection", (e) => {
-    const r = e.reason;
-    const isErr = r instanceof Error;
-    const entry = pushError({
-      type: "PROMISE",
-      errName: isErr ? (r.name || "Error") : "PromiseRejection",
-      message: isErr ? r.message : String(r),
-      url: "", line: 0, col: 0,
-      stack: isErr && r.stack ? String(r.stack) : ""
-    });
-    if (onError) { try { onError(entry); } catch (_) {} }
-  });
-
-  document.addEventListener("securitypolicyviolation", (e) => {
-    const entry = pushError({
-      type: "CSP",
-      errName: "CSPViolation",
-      message: (e.violatedDirective || "?") + " 拦截 " + (e.blockedURI || "?"),
-      url: e.sourceFile || "",
-      line: e.lineNumber || 0,
-      col: e.columnNumber || 0,
-      disposition: e.disposition || ""
-    });
-    if (onError) { try { onError(entry); } catch (_) {} }
-  });
-
-  window.addEventListener("error", (e) => {
-    const t = e.target;
-    if (!t || t === window) return;
-    const tag = t.tagName;
-    if (tag !== "SCRIPT" && tag !== "LINK" && tag !== "IMG" &&
-        tag !== "VIDEO" && tag !== "AUDIO" && tag !== "SOURCE") return;
-    const url = t.src || t.href || "(unknown)";
-    const entry = pushError({
-      type: "RES-FAIL", errName: tag,
-      message: "资源加载失败", url, line: 0, col: 0, stack: ""
-    });
-    if (onError) { try { onError(entry); } catch (_) {} }
-  }, true);
-
-  (function hookConsole() {
-    const map = { log:"#0ff", info:"#0ff", debug:"#777", warn:"#fa0", error:"#f66" };
-    Object.keys(map).forEach((level) => {
-      const orig = console[level];
-      console[level] = function () {
-        try { orig.apply(console, arguments); } catch (_) {}
-        try {
-          const parts = Array.prototype.map.call(arguments, (a) => {
-            if (a === null) return "null";
-            if (a === undefined) return "undefined";
-            if (typeof a === "object") {
-              try { return JSON.stringify(a).slice(0, 300); }
-              catch (_) { return "[object]"; }
-            }
-            return String(a);
-          });
-          log("[CONSOLE." + level + "] " + parts.join(" "), map[level]);
-        } catch (_) {}
-      };
-    });
-  })();
-
-  const netLog = [];
-  const NET_CAP = 200;
-  const perfStats = { lcp: 0, cls: 0, longTasks: [], longTaskTotal: 0 };
-
-  function pushNet(rec) {
-    netLog.push(rec);
-    if (netLog.length > NET_CAP) netLog.shift();
-    if (onNetPush) { try { onNetPush(netLog.length); } catch (_) {} }
-  }
-
-  (function hookFetch() {
-    const origFetch = window.fetch;
-    window.fetch = async function (...args) {
-      const url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "?";
-      const method = ((args[1] && args[1].method) || "GET").toUpperCase();
-      const internal = (window.__probeInternalCount || 0) > 0;
-      const s = performance.now();
-      try {
-        const res = await origFetch.apply(this, args);
-        pushNet({ kind: "fetch", method, url, status: res.status, ok: res.ok,
-                  ms: (performance.now() - s) | 0, internal });
-        return res;
-      } catch (e) {
-        pushNet({ kind: "fetch", method, url, status: 0, ok: false,
-                  ms: (performance.now() - s) | 0,
-                  err: e && e.message || String(e), internal });
-        throw e;
-      }
-    };
-  })();
-
-  (function hookXHR() {
-    const oOpen = XMLHttpRequest.prototype.open;
-    const oSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-      this.__probeReq = {
-        method: String(method || "GET").toUpperCase(),
-        url: String(url || ""),
-        internal: (window.__probeInternalCount || 0) > 0
-      };
-      return oOpen.call(this, method, url, ...rest);
-    };
-    XMLHttpRequest.prototype.send = function (...args) {
-      const req = this.__probeReq;
-      if (!req) return oSend.apply(this, args);
-      const s = performance.now();
-      this.addEventListener("loadend", () => {
-        pushNet({ kind: "xhr", method: req.method, url: req.url,
-                  status: this.status, ok: this.status >= 200 && this.status < 300,
-                  ms: (performance.now() - s) | 0, internal: req.internal });
-      });
-      return oSend.apply(this, args);
-    };
-  })();
-
-  if ("PerformanceObserver" in window) {
-    try {
-      let lastLCP = 0;
-      new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const last = entries[entries.length - 1];
-        if (last && last.startTime > lastLCP) {
-          lastLCP = last.startTime;
-          perfStats.lcp = lastLCP;
-          try { log("[PERF-LCP] " + lastLCP.toFixed(0) + "ms", "#0ff"); } catch (_) {}
-        }
-      }).observe({ type: "largest-contentful-paint", buffered: true });
-    } catch (_) {}
-    try {
-      let cls = 0, lastLogged = -1;
-      new PerformanceObserver((list) => {
-        for (const e of list.getEntries()) if (!e.hadRecentInput) cls += e.value;
-        const v = Math.round(cls * 1000) / 1000;
-        if (v !== lastLogged) {
-          lastLogged = v; perfStats.cls = v;
-          try { log("[PERF-CLS] 累积布局偏移 " + v, "#0ff"); } catch (_) {}
-        }
-      }).observe({ type: "layout-shift", buffered: true });
-    } catch (_) {}
-    try {
-      new PerformanceObserver((list) => {
-        for (const e of list.getEntries()) {
-          if (e.duration > 50) {
-            perfStats.longTasks.push(e.duration);
-            perfStats.longTaskTotal += e.duration;
-            if (perfStats.longTasks.length > 100) perfStats.longTasks.shift();
-            try { log("[PERF-LONG] 长任务 " + e.duration.toFixed(0) + "ms", "#fa0"); } catch (_) {}
-          }
-        }
-      }).observe({ type: "longtask", buffered: true });
-    } catch (_) {}
-  }
-
-  return { netLog, NET_CAP, perfStats, errors, pushError };
-}
-
-(function probeApp() {
+(function () {
   "use strict";
 
-  const out    = document.getElementById("output");
-  const input  = document.getElementById("urlInput");
-  const btn    = document.getElementById("btnProbe");
-  const btnClr = document.getElementById("btnClear");
-  const btnExp = document.getElementById("btnExport");
-  const btnNet = document.getElementById("btnNetwork");
-  const btnSto = document.getElementById("btnStorage");
-  const btnPerf = document.getElementById("btnPerf");
-  const btnCopy = document.getElementById("btnCopy");
-  const btnErr  = document.getElementById("btnErrors");
-  const historyList = document.getElementById("urlHistory");
+  var $src = document.getElementById("src");
+  var $run = document.getElementById("run");
+  var $panel = document.getElementById("panel");
+  var $status = document.getElementById("status");
 
-  const COLOR = { info:"#0ff", ok:"#0f0", warn:"#fa0", err:"#f66", head:"#fff", dim:"#777" };
-  let t0 = performance.now();
-  let running = false;
-  let lastResources = [];
-  let lastTarget = "";
-  let lastResults = [];
-  let lastAudit = null;
-  /* ===== [IDB] 保存最近一次同源 iframe 存储探测结果，供「存储」按钮展示与导出 ===== */
-  let lastIframeStorage = null;
-  /* ===== [IDB] ===== */
-  const MAX_ROWS = 3000;
-  let rowCount = 0;
+  $src.value = "js/script.js";
+  var targetFile = "";
+  var done = false;
+  var t0 = 0;
 
-  const now = () => (performance.now() - t0) | 0;
-  const pad = (n) => String(n).padStart(5, " ");
-
-  function log(msg, levelOrColor, opts) {
-    try {
-      const level = levelOrColor && levelOrColor.charAt(0) === "#" ? null : levelOrColor;
-      const color = level ? (COLOR[level] || COLOR.info) : (levelOrColor || COLOR.info);
-      const row = document.createElement("div");
-      row.className = "row" +
-        (level === "head" ? " head" : "") +
-        (opts && opts.cls ? " " + opts.cls : "");
-      const ts = document.createElement("span");
-      ts.className = "ts";
-      ts.textContent = "[" + pad(now()) + "ms] ";
-      const txt = document.createElement("span");
-      txt.style.color = color;
-      txt.textContent = msg;
-      row.appendChild(ts); row.appendChild(txt);
-      const nearBottom = out.scrollHeight - out.scrollTop - out.clientHeight < 80;
-      out.appendChild(row);
-      if (++rowCount > MAX_ROWS) {
-        let overflow = rowCount - MAX_ROWS;
-        while (overflow-- > 0 && out.firstElementChild) out.removeChild(out.firstElementChild);
-        rowCount = out.childElementCount;
-      }
-      if (nearBottom) out.scrollTop = out.scrollHeight;
-    } catch (_) {}
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
   }
-
-  function clearOut() {
-    out.innerHTML = "";
-    rowCount = 0;
-    t0 = performance.now();
+  function add(html, cls) {
+    var div = document.createElement("div");
+    div.className = "line " + (cls || "");
+    div.innerHTML = html;
+    $panel.appendChild(div);
+    $panel.scrollTop = $panel.scrollHeight;
+    return div;
   }
+  function setStatus(s) { $status.textContent = s; }
 
   function parseStack(stack) {
     if (!stack) return [];
-    const frames = [];
-    const lines = String(stack).split("\n");
-    for (const raw of lines) {
-      const line = raw.trim();
-      if (!line) continue;
-      if (!/^at\s/.test(line) && !/^[^@\s]+@/.test(line)) continue;
-      let m = line.match(/^([^@\s]*)@(.+?):(\d+):(\d+)$/);
-      if (m) {
-        frames.push({ fn: m[1] || "(anonymous)", url: m[2], line: +m[3], col: +m[4], raw: line });
-        continue;
-      }
-      m = line.match(/^at\s+(?:(?:async\s+)?(?:new\s+)?([^\s(]+)\s+)?\(?(.+?)(?::(\d+))?(?::(\d+))?\)?$/);
-      if (m && m[2]) {
-        frames.push({ fn: m[1] || "(anonymous)", url: m[2],
-                      line: m[3] ? +m[3] : null, col: m[4] ? +m[4] : null, raw: line });
-      } else {
-        frames.push({ raw: line });
-      }
-    }
+    var frames = [];
+    String(stack).split("\n").forEach(function (raw) {
+      var line = raw.replace(/\r$/, "").trim();
+      if (!line) return;
+      if (/^[A-Za-z]*Error\b/.test(line) && line.indexOf("@") === -1) return; // 跳过首行错误名
+      var m = /^at\s+(.*?)\s*\((.+?):(\d+):(\d+)\)$/.exec(line);
+      if (m) { frames.push({ fn: m[1], url: m[2], line: +m[3], col: +m[4] }); return; }
+      m = /^at\s+(.+?):(\d+):(\d+)$/.exec(line);
+      if (m) { frames.push({ fn: "", url: m[1], line: +m[2], col: +m[3] }); return; }
+      m = /^(.*?)@(.+?):(\d+):(\d+)$/.exec(line);
+      if (m) { frames.push({ fn: m[1], url: m[2], line: +m[3], col: +m[4] }); return; }
+      frames.push({ raw: line });
+    });
     return frames;
   }
-
-  function logErrorEntry(entry) {
-    const countTag = entry.count > 1 ? " ×" + entry.count : "";
-    const errLabel = entry.errName && entry.errName !== entry.type
-      ? entry.errName + ": " : "";
-    const headText = "[" + entry.type + countTag + "] " + errLabel + entry.message;
-    const color = entry.type === "CSP" || entry.type === "RES-FAIL" ? "warn" : "err";
-    log(headText, color);
-    if (entry.count > 1) return;
-    if (entry.url) {
-      const pos = entry.line ? ":" + entry.line + (entry.col ? ":" + entry.col : "") : "";
-      log("  ⤷ " + entry.url + pos, "dim", { cls: "is-stack" });
-    }
-    const frames = parseStack(entry.stack);
-    frames.forEach(f => {
-      if (f.raw && !f.url) {
-        log("  " + f.raw, "dim", { cls: "is-stack" });
-      } else if (f.url) {
-        const pos = f.line ? ":" + f.line + (f.col ? ":" + f.col : "") : "";
-        log("  at " + f.fn + " (" + f.url + pos + ")", "dim", { cls: "is-stack" });
-      }
+  function isTarget(url) {
+    if (!url || !targetFile) return false;
+    var base = targetFile.replace(/^.*\//, "");
+    return url.indexOf(targetFile) !== -1 || url.indexOf(base) !== -1;
+  }
+  function renderStack(stack) {
+    var frames = parseStack(stack);
+    if (!frames.length) return "";
+    var html = '<div class="stack">';
+    frames.slice(0, 12).forEach(function (f) {
+      if (f.raw) { html += "<div>" + esc(f.raw) + "</div>"; return; }
+      var hit = isTarget(f.url);
+      var loc = hit
+        ? '<span class="frame-file">' + esc(f.url) + '</span>:<span class="frame-line">' + f.line + ":" + f.col + "</span>"
+        : esc(f.url) + ":" + f.line + ":" + f.col;
+      html += '<div class="' + (hit ? "hit" : "") + '">' +
+              (f.fn ? esc(f.fn) + " @ " : "") + loc + "</div>";
     });
+    return html + "</div>";
   }
 
-  const devtools = installDevToolsLike(log, (n) => {
-    btnNet.textContent = n ? ("网络·" + n) : "网络";
-  }, (entry) => {
-    logErrorEntry(entry);
-    try {
-      btnErr.classList.add("has-errors");
-      btnErr.textContent = "错误·" + devtools.errors.length;
-    } catch (_) {}
-  });
-
-  window.__probe = {
-    log, box: out, clear: clearOut,
-    netLog: devtools.netLog,
-    perf: devtools.perfStats,
-    errors: devtools.errors
-  };
-
-  const flash = (el) => {
-    if (!el || el.disabled) return;
-    el.classList.remove("is-flash");
-    void el.offsetWidth;
-    el.classList.add("is-flash");
-    setTimeout(() => el.classList.remove("is-flash"), 380);
-  };
-
-  const bindPress = (el) => {
-    if (!el) return;
-    const down = () => el.classList.add("is-pressed");
-    const up   = () => el.classList.remove("is-pressed");
-    el.addEventListener("pointerdown", down, { passive: true });
-    el.addEventListener("pointerup",   up,   { passive: true });
-    el.addEventListener("pointercancel", up, { passive: true });
-    el.addEventListener("pointerleave",  up, { passive: true });
-    el.addEventListener("touchstart",  down, { passive: true });
-    el.addEventListener("touchend",    up,   { passive: true });
-    el.addEventListener("touchcancel", up,   { passive: true });
-  };
-
-  [btnNet, btnSto, btnExp, btnClr, btnPerf, btnCopy, btnErr].forEach(bindPress);
-
-  async function withInternal(fn) {
-    window.__probeInternalCount = (window.__probeInternalCount || 0) + 1;
-    try { return await fn(); }
-    finally {
-      window.__probeInternalCount = Math.max(0, (window.__probeInternalCount || 0) - 1);
-    }
-  }
-
-  async function fetchWithTimeout(url, opts, timeout) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeout || 8000);
-    try {
-      return await fetch(url, Object.assign({}, opts, { signal: ctrl.signal }));
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  async function readTextLimited(res, maxBytes) {
-    maxBytes = maxBytes || (2 * 1024 * 1024);
-    if (!res.body || typeof res.body.getReader !== "function") {
-      const t = await res.text();
-      return t.length > maxBytes ? t.slice(0, maxBytes) : t;
-    }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let text = "", bytes = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        bytes += value.byteLength;
-        text += decoder.decode(value, { stream: true });
-        if (bytes >= maxBytes) { try { await reader.cancel(); } catch (_) {} break; }
-      }
-      text += decoder.decode();
-    } catch (_) {}
-    return text;
-  }
-
-  const HISTORY_KEY = "probe_history_v1";
-  const HISTORY_MAX = 10;
-  function loadHistory() {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      const list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list.filter(x => typeof x === "string" && x) : [];
-    } catch (_) { return []; }
-  }
-  function saveHistory(url) {
-    try {
-      const list = loadHistory().filter(x => x !== url);
-      list.unshift(url);
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, HISTORY_MAX)));
-    } catch (_) {}
-    renderHistory();
-  }
-  function renderHistory() {
-    if (!historyList) return;
-    historyList.innerHTML = "";
-    loadHistory().forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u;
-      historyList.appendChild(opt);
-    });
-  }
-
-  async function pool(tasks, limit, onTick) {
-    const results = new Array(tasks.length);
-    let next = 0;
-    async function worker() {
-      while (next < tasks.length) {
-        const i = next++;
-        try { results[i] = await tasks[i](); }
-        catch (e) { results[i] = { ok:false, ms:0, err:(e && e.message) || String(e) }; }
-        if (onTick) { try { onTick(); } catch (_) {} }
-      }
-    }
-    await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
-    return results;
-  }
-
-  async function probeFetch(url, timeout) {
-    timeout = timeout || 8000;
-    const s = performance.now();
-    return withInternal(async () => {
-      try {
-        await fetchWithTimeout(url, {
-          mode: "no-cors", cache: "no-store", referrerPolicy: "no-referrer"
-        }, timeout);
-        return { ok: true, ms: (performance.now() - s) | 0 };
-      } catch (e) {
-        return {
-          ok: false, ms: (performance.now() - s) | 0,
-          err: e.name === "AbortError" ? "超时" : (e.message || String(e))
-        };
-      }
-    });
-  }
-
-  function probeImage(url, timeout) {
-    timeout = timeout || 8000;
-    return new Promise((resolve) => {
-      const s = performance.now();
-      const img = new Image();
-      let done = false, timer = null;
-      const fin = (ok, err) => {
-        if (done) return; done = true;
-        if (timer) { clearTimeout(timer); timer = null; }
-        img.onload = img.onerror = null;
-        try { img.src = ""; } catch (_) {}
-        resolve({ ok, ms: (performance.now() - s) | 0, err });
-      };
-      img.onload  = () => fin(true);
-      img.onerror = () => fin(false, "加载失败");
-      img.referrerPolicy = "no-referrer";
-      timer = setTimeout(() => fin(false, "超时"), timeout);
-      img.src = url;
-    });
-  }
-
-  async function stageReach(url) {
-    const s = performance.now();
-    return withInternal(async () => {
-      try {
-        await fetchWithTimeout(url, {
-          mode: "no-cors", cache: "no-store", redirect: "follow",
-          referrerPolicy: "no-referrer"
-        }, 8000);
-        log("no-cors 请求完成（opaque），耗时 " + ((performance.now()-s)|0) + " ms", "ok");
-        log("说明：opaque 响应读不到状态码，仅证明网络层可达", "dim");
-        return true;
-      } catch (e) {
-        const isTimeout = e.name === "AbortError";
-        log("no-cors 请求失败，耗时 " + ((performance.now()-s)|0) + " ms：" +
-            (isTimeout ? "请求超时（8s）" : (e.message || e)), "err");
-        log("可能原因：DNS 失败 / 网络中断 / 服务端拒绝 / 策略拦截", "warn");
-        return false;
-      }
-    });
-  }
-
-  async function stageContent(url) {
-    const s = performance.now();
-    const MAX_HTML = 2 * 1024 * 1024;
-    return withInternal(async () => {
-      try {
-        const r = await fetchWithTimeout(url, {
-          mode: "cors", cache: "no-store", redirect: "follow",
-          referrerPolicy: "no-referrer"
-        }, 12000);
-        const ms = (performance.now() - s) | 0;
-        const ct = r.headers.get("content-type") || "(未暴露)";
-        log("CORS 请求成功：HTTP " + r.status + " " + (r.statusText || ""), r.ok ? "ok" : "warn");
-        log("Content-Type: " + ct + " | 耗时 " + ms + " ms", "info");
-        if (r.url && r.url !== url) log("最终 URL（含重定向）: " + r.url, "info");
-        const text = await readTextLimited(r, MAX_HTML);
-        const truncated = text.length >= MAX_HTML;
-        log("响应体长度: " + text.length + " 字符" + (truncated ? "（已达上限截断）" : ""), "ok");
-        if (/text\/html|xhtml/i.test(ct) || /<html[\s>]/i.test(text.slice(0, 2000))) {
-          log("判定为 HTML 文档，进入解析阶段", "ok");
-          return text;
-        }
-        log("响应体非 HTML，跳过 DOM 解析", "warn");
-        return null;
-      } catch (e) {
-        const ms = (performance.now() - s) | 0;
-        const isTimeout = e.name === "AbortError";
-        log("CORS 请求失败（" + ms + " ms）：" +
-            (isTimeout ? "请求超时（12s）" : (e.message || e)), "warn");
-        log("这是同源策略的正常限制：目标站未开启 Access-Control-Allow-Origin", "dim");
-        log("结果：无法读取 HTML 源码，资源清单无法枚举", "dim");
-        return null;
-      }
-    });
-  }
-
-  async function extractCssUrls(cssUrl) {
-    return withInternal(async () => {
-      try {
-        const r = await fetchWithTimeout(cssUrl, {
-          mode: "cors", cache: "no-store", referrerPolicy: "no-referrer"
-        }, 8000);
-        if (!r.ok) return { assets: [], imports: [] };
-        const text = await readTextLimited(r, 1024 * 1024);
-        const assets = [], imports = [];
-        let m;
-        const re = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
-        while ((m = re.exec(text))) {
-          const u = m[2].trim();
-          if (/^(data:|blob:|about:|#)/i.test(u)) continue;
-          try { assets.push(new URL(u, cssUrl).href); } catch (_) {}
-        }
-        const impRe = /@import\s+(?:url\(\s*)?(['"]?)([^'")\s;]+)\1\s*\)?[^;]*;/gi;
-        while ((m = impRe.exec(text))) {
-          const u = m[2].trim();
-          if (!u || /^(data:|blob:|about:|#)/i.test(u)) continue;
-          try { imports.push(new URL(u, cssUrl).href); } catch (_) {}
-        }
-        return { assets, imports };
-      } catch (_) { return { assets: [], imports: [] }; }
-    });
-  }
-
-  function parseSrcset(v) {
-    if (!v) return [];
-    return v.split(",").map(s => s.trim().split(/\s+/)[0]).filter(Boolean);
-  }
-
-  async function stageResources(baseUrl, html) {
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const baseEl = doc.querySelector("base[href]");
-    let base = baseUrl;
-    if (baseEl) {
-      try { base = new URL(baseEl.getAttribute("href"), baseUrl).href; } catch (_) {}
-      log("发现 <base href>: " + base, "info");
-    }
-    const abs   = (u) => { try { return new URL(u, base).href; } catch (_) { return null; } };
-    const valid = (u) => u && !/^(data:|blob:|javascript:|about:|#)/i.test(u);
-
-    const title = (doc.title || "").trim();
-    const lang  = doc.documentElement.getAttribute("lang") || "";
-    const cs    = doc.querySelector("meta[charset]");
-    const vp    = doc.querySelector('meta[name="viewport"]');
-    const desc  = doc.querySelector('meta[name="description"]');
-
-    log("页面标题: " + (title || "(空)"), "ok");
-    if (lang) log("lang: " + lang, "info"); else log("缺少 lang 属性", "warn");
-    if (cs)   log("charset: " + cs.getAttribute("charset"), "info");
-    if (vp)   log("viewport: " + vp.getAttribute("content"), "info");
-    else      log("缺少 viewport meta，移动端可能缩放异常", "warn");
-    if (desc) log("description: " + desc.getAttribute("content").slice(0, 120), "info");
-
-    const cspMeta = Array.from(doc.querySelectorAll("meta[http-equiv]")).find(
-      m => (m.getAttribute("http-equiv") || "").toLowerCase() === "content-security-policy"
-    );
-    if (cspMeta) log("页面 CSP(meta): " + (cspMeta.getAttribute("content") || "").slice(0, 200), "info");
-
-    const inventory = [];
-    const seen = new Set();
-    const add = (kind, raw) => {
-      if (!raw) return;
-      const u = abs(raw);
-      if (!valid(u) || seen.has(u)) return;
-      seen.add(u);
-      inventory.push({ kind, url: u });
-    };
-
-    doc.querySelectorAll("script[src]").forEach(e => add("script", e.getAttribute("src")));
-    doc.querySelectorAll("link[href]").forEach(e => {
-      const rel = (e.getAttribute("rel") || "").toLowerCase();
-      const kind = rel.includes("stylesheet") ? "style"
-                 : rel.includes("icon")        ? "icon"
-                 : rel.includes("manifest")    ? "manifest"
-                 : rel.includes("preload")     ? "preload"
-                 : "link";
-      add(kind, e.getAttribute("href"));
-    });
-    doc.querySelectorAll("img").forEach(e => {
-      const s = e.getAttribute("src"); if (s) add("img", s);
-      parseSrcset(e.getAttribute("srcset")).forEach(u => add("img", u));
-    });
-    doc.querySelectorAll("source").forEach(e => {
-      const s = e.getAttribute("src"); if (s) add("media", s);
-      parseSrcset(e.getAttribute("srcset")).forEach(u => add("media", u));
-    });
-    doc.querySelectorAll("video,audio").forEach(e => {
-      const s = e.getAttribute("src"); if (s) add("media", s);
-      const p = e.getAttribute("poster"); if (p) add("img", p);
-    });
-    doc.querySelectorAll("iframe[src]").forEach(e => add("iframe", e.getAttribute("src")));
-
-    log("HTML 静态资源清单: " + inventory.length + " 条（去重后）", "ok");
-
-    const cssUrls = inventory.filter(x => x.kind === "style").map(x => x.url);
-    if (cssUrls.length) {
-      log("尝试解析 " + cssUrls.length + " 个 CSS 内的 url() 与 @import（受 CORS 限制）…", "info");
-      const MAX_CSS_FETCH = 40;
-      const cssSeen = new Set();
-      const queue = cssUrls.slice();
-      let cssAssetCount = 0, cssImportCount = 0;
-      while (queue.length && cssSeen.size < MAX_CSS_FETCH) {
-        const cu = queue.shift();
-        if (cssSeen.has(cu)) continue;
-        cssSeen.add(cu);
-        const { assets, imports } = await extractCssUrls(cu);
-        cssAssetCount += assets.length;
-        assets.forEach(u => add("asset", u));
-        for (const iu of imports) {
-          cssImportCount++;
-          add("style", iu);
-          if (!cssSeen.has(iu)) queue.push(iu);
-        }
-      }
-      log("CSS 内资源: " + cssAssetCount + " 条，@import 样式表: " + cssImportCount + " 条" +
-          (cssAssetCount ? "" : "（可能全部被 CORS 拦截）"),
-          cssAssetCount ? "ok" : "warn");
-    }
-
-    const byKind = {};
-    inventory.forEach(x => { byKind[x.kind] = (byKind[x.kind] || 0) + 1; });
-    log("资源分类: " + Object.keys(byKind).map(k => k + "×" + byKind[k]).join("  "), "info");
-
-    log("──── 完整地址清单（共 " + inventory.length + " 条）────", "head");
-    inventory.forEach(x => log("  " + x.kind.padEnd(9) + " " + x.url, "dim"));
-
-    const toProbe = inventory.filter(x =>
-      /^https?:/i.test(x.url) && x.kind !== "icon" && x.kind !== "preload"
-    );
-    const LIMIT = 60;
-    const list = toProbe.slice(0, LIMIT);
-    if (toProbe.length > LIMIT)
-      log("探测上限 " + LIMIT + "，剩余 " + (toProbe.length - LIMIT) + " 个仅列清单不探测", "warn");
-    if (!list.length) { log("无可探测资源", "info"); return { inventory, results: [] }; }
-
-    log("开始探测 " + list.length + " 个资源（并发 6，超时 8s）…", "info");
-    const tasks = list.map(it => () =>
-      (it.kind === "img" ? probeImage(it.url) : probeFetch(it.url))
-        .then(r => ({ kind: it.kind, url: it.url, ...r }))
-    );
-    let finished = 0;
-    const results = await pool(tasks, 6, () => {
-      finished++;
-      btn.textContent = "探测中 " + finished + "/" + list.length;
-    });
-    results.forEach(r => {
-      log("[" + (r.ok ? "OK " : "ERR") + "] " + r.kind.padEnd(9) + " " + r.url +
-          "  (" + (r.ms|0) + "ms)" + (r.ok ? "" : "  ← " + r.err),
-          r.ok ? "ok" : "err");
-    });
-
-    return { inventory, results };
-  }
-
-  async function stageJsAudit(inventory) {
-    const scripts = inventory.filter(x => x.kind === "script" && /^https?:/i.test(x.url));
-    if (!scripts.length) {
-      log("无可审计的外链脚本（无 script 资源）", "dim");
-      return { audited: 0, fetched: 0, issues: [] };
-    }
-    const MAX_AUDIT = 20;
-    const list = scripts.slice(0, MAX_AUDIT);
-    if (scripts.length > MAX_AUDIT) {
-      log("审计上限 " + MAX_AUDIT + "，剩余 " + (scripts.length - MAX_AUDIT) + " 个跳过", "warn");
-    }
-    log("开始静态审计 " + list.length + " 个脚本（语法 / sourcemap / 危险模式）…", "info");
-
-    const fetchTasks = list.map(s => async () => {
-      return withInternal(async () => {
-        try {
-          const r = await fetchWithTimeout(s.url, {
-            mode: "cors", cache: "no-store", referrerPolicy: "no-referrer"
-          }, 8000);
-          if (!r.ok) return { url: s.url, ok: false, err: "HTTP " + r.status };
-          const src = await readTextLimited(r, 512 * 1024);
-          return { url: s.url, ok: true, src };
-        } catch (e) {
-          return { url: s.url, ok: false,
-                   err: e.name === "AbortError" ? "超时" : (e.message || String(e)) };
-        }
-      });
-    });
-
-    const results = await pool(fetchTasks, 4);
-    const issues = [];
-    let fetched = 0;
-
-    for (const r of results) {
-      if (!r.ok) {
-        issues.push({ level: "dim", kind: "FETCH", url: r.url, msg: "无法获取源码：" + r.err });
-        continue;
-      }
-      fetched++;
-      const src = r.src;
-
-      const sm = src.match(/\/\/[#@]\s*sourceMappingURL=(\S+)/);
-      if (sm) {
-        issues.push({ level: "warn", kind: "SRCMAP", url: r.url,
-                      msg: "包含 sourceMappingURL: " + sm[1] + "（源码可能被还原）" });
-      }
-
-      const isModule =
-        /\.mjs(\?|#|$)/i.test(r.url) ||
-        /\bimport\.meta\b/.test(src) ||
-        /\bimport\s+[\{*a-zA-Z'"]/.test(src) ||
-        /\bexport\s+[\{*a-zA-Z]/.test(src);
-
-      if (isModule) {
-        issues.push({ level: "dim", kind: "MODULE", url: r.url,
-                      msg: "模块脚本，跳过 Function 语法检查" });
-      } else if (src.length <= 512 * 1024) {
-        try { new Function(src); }
-        catch (e) {
-          if (e instanceof SyntaxError) {
-            issues.push({ level: "err", kind: "SYNTAX", url: r.url,
-                          msg: "SyntaxError: " + e.message });
-          }
-        }
-      }
-
-      const patterns = [
-        [/\beval\s*\(/,                 "EVAL",       "warn", "使用 eval()，CSP 严格模式下会被拒绝"],
-        [/new\s+Function\s*\(/,          "NEW-FN",     "dim",  "使用 new Function()"],
-        [/document\.write\s*\(/,         "DOC-WRITE",  "warn", "使用 document.write()，可能阻塞解析"],
-        [/\.innerHTML\s*=\s*(?!["'`])/,   "INNERHTML",  "dim",  "innerHTML 动态赋值（XSS 风险）"],
-        [/\bdebugger\b/,                 "DEBUGGER",   "warn", "包含 debugger 语句（生产环境不应保留）"],
-        [/\bconsole\.error\s*\(/,        "CONSOLE-ERR","info", "含 console.error 调用（非异常）"]
-      ];
-      for (const [re, kind, level, msg] of patterns) {
-        if (re.test(src)) issues.push({ level, kind, url: r.url, msg });
-      }
-    }
-
-    log("静态审计：成功获取 " + fetched + " / " + list.length + " 个脚本源码",
-        fetched ? "ok" : "warn");
-    if (!issues.length) {
-      log("静态审计：未发现问题", "ok");
-      return { audited: list.length, fetched, issues: [] };
-    }
-    const errs  = issues.filter(i => i.level === "err");
-    const warns = issues.filter(i => i.level === "warn");
-    log("静态审计：发现 " + issues.length + " 项（错误 " + errs.length +
-        "，警告 " + warns.length + "）",
-        errs.length ? "err" : warns.length ? "warn" : "info");
-    issues.forEach(it => log("[" + it.kind + "] " + it.url + " — " + it.msg, it.level));
-    return { audited: list.length, fetched, issues };
-  }
-
-  // =====================================================================
-  // ===== [IDB] IndexedDB 探测核心实现 =====
-  // =====================================================================
-
-  /**
-   * 打开一个「已存在」的 IndexedDB 库（只读，不升级）。
-   *
-   * 【重要副作用】若 name 指定的库不存在，open() 会创建一个空库。
-   * 因此调用方必须先通过 databases() 拿到库名列表再调本函数。
-   *
-   * 注意：
-   *  - 不传 version，浏览器用当前版本打开，不会触发 upgradeneeded
-   *  - onblocked：其他 tab 正在升级时会触发，2s 后拒绝
-   */
-  function idbOpenExisting(factory, name, timeoutMs) {
-    timeoutMs = timeoutMs || 2000;
-    return new Promise((resolve, reject) => {
-      let settled = false;
-      const req = factory.open(name);
-      req.onupgradeneeded = () => {
-        // 理论上不会触发（因为没指定 version），但以防万一中断升级
-        try { req.transaction.abort(); } catch (_) {}
-      };
-      req.onsuccess = () => {
-        if (settled) return; settled = true;
-        resolve(req.result);
-      };
-      req.onerror = () => {
-        if (settled) return; settled = true;
-        reject(req.error || new Error("open 失败"));
-      };
-      req.onblocked = () => {
-        if (settled) return; settled = true;
-        reject(new Error("被其他连接阻塞（其他 tab 正在升级）"));
-      };
-      setTimeout(() => {
-        if (settled) return; settled = true;
-        reject(new Error("打开超时（" + timeoutMs + "ms）"));
-      }, timeoutMs);
-    });
-  }
-
-  /** 统计某个 objectStore 的记录条数（1s 超时兜底，失败返回 -1） */
-  function idbCountStore(db, storeName) {
-    return new Promise((resolve) => {
-      try {
-        const tx = db.transaction(storeName, "readonly");
-        const req = tx.objectStore(storeName).count();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => resolve(-1);
-        setTimeout(() => resolve(-1), 1000);
-      } catch (_) { resolve(-1); }
-    });
-  }
-
-  /**
-   * 枚举并浅探一个 IDBFactory（可以是 window.indexedDB 或 iframe 的）。
-   *
-   * @param {IDBFactory} factory
-   * @param {string} label    用于日志标注来源（"探针页" / "iframe"）
-   * @returns {Promise<{supported,enumerable,databases,truncated?}>}
-   */
-  async function probeIndexedDB(factory, label) {
-    const result = { supported: false, enumerable: false, databases: [] };
-    if (!factory) return result;
-    result.supported = true;
-
-    // databases() 兼容性：Chrome 71+ / Firefox 126+ / Safari 14+
-    // 老内核没有这个 API，只能盲猜，无法枚举
-    if (typeof factory.databases !== "function") {
-      log("[" + label + "] IndexedDB 存在，但 indexedDB.databases() 不可用，无法枚举库名", "warn");
-      return result;
-    }
-    result.enumerable = true;
-
-    let list;
-    try {
-      list = await factory.databases();
-    } catch (e) {
-      log("[" + label + "] indexedDB.databases() 调用失败：" + ((e && e.message) || e), "err");
-      return result;
-    }
-
-    if (!list || !list.length) {
-      log("[" + label + "] IndexedDB 无已建库", "dim");
-      return result;
-    }
-
-    const MAX_DB = 20;
-    for (const d of list.slice(0, MAX_DB)) {
-      const info = { name: d.name, version: d.version || 0, stores: [], err: null };
-      try {
-        const db = await idbOpenExisting(factory, d.name, 2000);
-        // 用 objectStoreNames 遍历所有 store（不能猜 store 名）
-        const storeNames = Array.from(db.objectStoreNames);
-        for (const sName of storeNames) {
-          const cnt = await idbCountStore(db, sName);
-          info.stores.push({ name: sName, count: cnt });
-        }
-        db.close();
-      } catch (e) {
-        info.err = (e && e.message) || String(e);
-      }
-      result.databases.push(info);
-    }
-    if (list.length > MAX_DB) result.truncated = list.length - MAX_DB;
-    return result;
-  }
-
-  /** 统一格式化输出一次 IDB 探测结果 */
-  function logIndexedDBResult(result, label) {
-    if (!result.supported) {
-      log("[" + label + "] 浏览器不支持 IndexedDB", "dim");
+  function onWindowError(e) {
+    if (e.target && e.target !== window && e.target.tagName === "SCRIPT") {
+      add('<span class="badge" style="background:#f66;color:#000">LOAD</span> ' +
+          "脚本加载失败（404 / 路径 / CORS / CSP）: " + esc(e.target.src), "err");
+      finish("加载失败");
       return;
     }
-    if (!result.enumerable) return;  // 已在 probeIndexedDB 内部告警
-    if (!result.databases.length) return;
-
-    let totalStores = 0;
-    result.databases.forEach(d => { totalStores += d.stores.length; });
-    log("[" + label + "] IndexedDB: " + result.databases.length + " 个库，" +
-        totalStores + " 个 objectStore", "info");
-
-    result.databases.forEach(d => {
-      log("  · DB " + d.name + " (v" + d.version + ")", "dim", { cls: "is-stack" });
-      if (d.err) {
-        log("    ⚠ " + d.err, "warn", { cls: "is-stack" });
-      }
-      d.stores.forEach(s => {
-        const cnt = s.count >= 0 ? s.count + " 条" : "读取失败";
-        log("    ▸ store " + s.name + " — " + cnt, "dim", { cls: "is-stack" });
-      });
-    });
-    if (result.truncated) {
-      log("  …另有 " + result.truncated + " 个库省略", "dim");
+    var fname = e.filename || "";
+    var msg = e.message || (e.error && e.error.message) || "";
+    var masked = !msg || msg === "Script error.";
+    var hit = isTarget(fname);
+    var html = '<span class="badge" style="background:#f66;color:#000">ERROR</span> ' +
+      esc(masked ? "Script error.（错误信息被浏览器脱敏）" : msg) +
+      '<div class="dim">@ ' + esc(fname || "?") + ":" +
+      (e.lineno || "?") + ":" + (e.colno || "?") + "</div>";
+    if (masked) {
+      html += '<div class="warn">跨域或 file:// 下错误被脱敏，拿不到行号。' +
+              "请用本地 HTTP 服务器或同源部署。</div>";
     }
-  }
-  // ===== [IDB] END =====
-
-  // =====================================================================
-  // ===== [IDB] 同源 iframe 内的全部存储探测（localStorage / sessionStorage / IndexedDB） =====
-  // =====================================================================
-  async function probeIframeStorage(w, label) {
-    const out = {
-      label,
-      origin: "",
-      localStorage: null,
-      sessionStorage: null,
-      indexedDB: null,
-      blocked: false,
-      reason: ""
-    };
-
-    // 先确认同源：读 location.href 不抛异常即同源
-    try { out.origin = w.location.href; }
-    catch (e) {
-      out.blocked = true;
-      out.reason = "跨域：" + ((e && e.name) || "SecurityError");
-      return out;
-    }
-
-    // localStorage
-    try {
-      const ls = w.localStorage;
-      const total = ls.length;
-      let bytes = 0;
-      const items = [];
-      const keys = [];
-      for (let i = 0; i < total; i++) {
-        try { const k = ls.key(i); if (k != null) keys.push(k); } catch (_) {}
-      }
-      keys.forEach(k => {
-        try {
-          const v = ls.getItem(k) || "";
-          const b = k.length + v.length;
-          bytes += b;
-          items.push({ k, b, preview: v.slice(0, 60) });
-        } catch (_) {}
-      });
-      out.localStorage = { count: items.length, bytes, items };
-    } catch (e) {
-      out.localStorage = { error: (e && e.message) || String(e) };
-    }
-
-    // sessionStorage
-    try {
-      const ss = w.sessionStorage;
-      const total = ss.length;
-      let bytes = 0;
-      const items = [];
-      const keys = [];
-      for (let i = 0; i < total; i++) {
-        try { const k = ss.key(i); if (k != null) keys.push(k); } catch (_) {}
-      }
-      keys.forEach(k => {
-        try {
-          const v = ss.getItem(k) || "";
-          const b = k.length + v.length;
-          bytes += b;
-          items.push({ k, b, preview: v.slice(0, 60) });
-        } catch (_) {}
-      });
-      out.sessionStorage = { count: items.length, bytes, items };
-    } catch (e) {
-      out.sessionStorage = { error: (e && e.message) || String(e) };
-    }
-
-    // IndexedDB
-    try {
-      out.indexedDB = await probeIndexedDB(w.indexedDB, label);
-    } catch (e) {
-      out.indexedDB = { supported: false, error: (e && e.message) || String(e) };
-    }
-
-    return out;
+    if (e.error && e.error.stack) html += renderStack(e.error.stack);
+    add(html, "err" + (hit ? " hit" : ""));
+    finish("发现错误");
   }
 
-  /** 格式化 iframe 存储探测结果 */
-  function logIframeStorage(r) {
-    log("──── iframe 存储快照（" + r.label + "）────", "head");
-    if (r.blocked) {
-      log(r.reason + "：无法读取 iframe 内的任何存储", "warn");
-      log("这是浏览器同源策略的硬限制，非代码 bug", "dim");
-      return;
-    }
-    log("origin: " + r.origin, "info");
-
-    // localStorage
-    if (r.localStorage && !r.localStorage.error) {
-      log("localStorage: " + r.localStorage.count + " 项，约 " +
-          (r.localStorage.bytes / 1024).toFixed(1) + " KB", "info");
-      r.localStorage.items.slice(0, 20).forEach(it => {
-        log("  · " + it.k + " (" + it.b + " B) = " + JSON.stringify(it.preview), "dim", { cls: "is-stack" });
-      });
-      if (r.localStorage.items.length > 20) {
-        log("  · …剩余 " + (r.localStorage.items.length - 20) + " 项省略", "dim");
-      }
-    } else if (r.localStorage) {
-      log("localStorage: 访问失败 — " + r.localStorage.error, "err");
-    }
-
-    // sessionStorage
-    if (r.sessionStorage && !r.sessionStorage.error) {
-      log("sessionStorage: " + r.sessionStorage.count + " 项，约 " +
-          (r.sessionStorage.bytes / 1024).toFixed(1) + " KB", "info");
-      r.sessionStorage.items.slice(0, 20).forEach(it => {
-        log("  · " + it.k + " (" + it.b + " B) = " + JSON.stringify(it.preview), "dim", { cls: "is-stack" });
-      });
-      if (r.sessionStorage.items.length > 20) {
-        log("  · …剩余 " + (r.sessionStorage.items.length - 20) + " 项省略", "dim");
-      }
-    } else if (r.sessionStorage) {
-      log("sessionStorage: 访问失败 — " + r.sessionStorage.error, "err");
-    }
-
-    // IndexedDB
-    logIndexedDBResult(r.indexedDB, r.label);
+  function onRejection(e) {
+    var r = e.reason;
+    var msg = (r && r.message) || (typeof r === "string" ? r : (function () {
+      try { return JSON.stringify(r); } catch (_) { return String(r); }
+    })());
+    var html = '<span class="badge" style="background:#f80;color:#000">REJECT</span> ' + esc(msg);
+    if (r && r.stack) html += renderStack(r.stack);
+    add(html, "err");
+    finish("发现未处理拒绝");
   }
-  // ===== [IDB] END =====
 
-  // =====================================================================
-  // ===== [IDB·修改] stageIframe：同源时桥接错误 + 探测存储 =====
-  // =====================================================================
-  function stageIframe(url) {
-    return new Promise((resolve) => {
-      const iframe = document.createElement("iframe");
-      iframe.setAttribute("sandbox",
-        "allow-scripts allow-forms allow-popups allow-same-origin");
-      iframe.setAttribute("referrerpolicy", "no-referrer");
-      iframe.style.cssText =
-        "position:absolute;left:-9999px;top:0;width:" + Math.max(320, window.innerWidth) +
-        "px;height:" + Math.max(480, window.innerHeight) +
-        "px;border:0;visibility:hidden;";
+  window.addEventListener("error", onWindowError, true);
+  window.addEventListener("unhandledrejection", onRejection);
 
-      let done = false;
-      const s = performance.now();
-      const timer = setTimeout(() => fin(false, "超时 15s"), 15000);
+  function finish(reason) {
+    if (done) return;
+    done = true;
+    $run.disabled = false;
+    var ms = Math.round(performance.now() - t0);
+    setStatus("完成 (" + ms + "ms)");
+    add('<span class="dim">=== 诊断结束：' + esc(reason) + "（" + ms + "ms）===</span>", "dim");
+  }
 
-      function fin(ok, note) {
-        if (done) return; done = true; clearTimeout(timer);
-        const ms = (performance.now() - s) | 0;
-        if (ok) {
-          log("[IFRAME] 加载完成，耗时 " + ms + " ms", "ok");
-          log("注意：load 事件不代表真实渲染成功。X-Frame-Options / CSP frame-ancestors 拒绝时仍会触发 load", "dim");
-        } else {
-          log("[IFRAME] 加载失败，耗时 " + ms + " ms：" + note, "err");
-        }
-        iframe.remove();
-        resolve(ok);
-      }
-
-      async function tryBridgeAndStorage() {
-        const w = iframe.contentWindow;
-        if (!w) return;
-        // 同源判定
+  function syntaxCheck(url) {
+    if (location.protocol === "file:") {
+      add('<span class="warn">跳过语法预检：file:// 下 fetch 不可用，请用本地 HTTP 服务器。</span>', "warn");
+      return Promise.resolve();
+    }
+    return fetch(url, { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status + " " + r.statusText);
+        return r.text();
+      })
+      .then(function (code) {
         try {
-          // eslint-disable-next-line no-unused-expressions
-          w.location.href;
-        } catch (_) {
-          log("[IFRAME] 跨域限制，无法桥接运行时错误与存储探测", "warn");
-          log("说明：浏览器同源策略禁止父页读取跨域 iframe 的 error / storage / indexedDB", "dim");
-          log("替代方案：查看阶段 4「JS 静态审计」/ 使用浏览器 F12 Application 面板", "dim");
-          return;
-        }
-
-        // ===== 同源：挂错误监听 =====
-        w.addEventListener("error", (ev) => {
-          const err = ev.error;
-          const entry = devtools.pushError({
-            type: "IFRAME-JS",
-            errName: (err && err.name) || "Error",
-            message: (ev.message || (err && err.message) || "(unknown)"),
-            url: ev.filename || "",
-            line: ev.lineno || 0,
-            col: ev.colno || 0,
-            stack: err && err.stack ? String(err.stack) : ""
-          });
-          logErrorEntry(entry);
-          btnErr.classList.add("has-errors");
-          btnErr.textContent = "错误·" + devtools.errors.length;
-        });
-        w.addEventListener("unhandledrejection", (ev) => {
-          const r = ev.reason;
-          const isErr = r instanceof Error;
-          const entry = devtools.pushError({
-            type: "IFRAME-PROMISE",
-            errName: isErr ? (r.name || "Error") : "PromiseRejection",
-            message: isErr ? r.message : String(r),
-            url: "", line: 0, col: 0,
-            stack: isErr && r.stack ? String(r.stack) : ""
-          });
-          logErrorEntry(entry);
-          btnErr.classList.add("has-errors");
-          btnErr.textContent = "错误·" + devtools.errors.length;
-        });
-        log("[IFRAME] 同源可访问，已桥接 JS 错误监听", "ok");
-        log("提示：桥接只捕获 load 之后发生的错误，解析期错误已在浏览器内抛出、无法拦截", "dim");
-
-        // ===== [IDB·新增] 同源：探测 iframe 内全部存储 =====
-        try {
-          log("[IFRAME] 正在探测 iframe 内存储（localStorage / sessionStorage / IndexedDB）…", "info");
-          const snap = await probeIframeStorage(w, "iframe(" + url + ")");
-          lastIframeStorage = snap;
-          logIframeStorage(snap);
+          new Function(code); 
+          add('<span class="badge" style="background:#4c4;color:#000">SYNTAX</span> 语法预检通过', "ok");
         } catch (e) {
-          log("[IFRAME] 存储探测异常：" + ((e && e.message) || e), "err");
+          add('<span class="badge" style="background:#f66;color:#000">SYNTAX</span> 语法错误: ' + esc(e.message), "err");
+          var m = /\(at\s+([^:)]+):(\d+):(\d+)\)/.exec(e.message || "");
+          if (m) add('<div class="dim">→ 定位 ' + esc(m[1]) + ":" + m[2] + ":" + m[3] + "</div>", "dim");
         }
-        // ===== [IDB] END =====
-      }
-
-      iframe.onload  = async () => { await tryBridgeAndStorage(); fin(true); };
-      iframe.onerror = () => fin(false, "onerror 触发");
-      document.body.appendChild(iframe);
-      iframe.src = url;
-    });
-  }
-
-  function printNetwork() {
-    const list = devtools.netLog;
-    log("──── 网络缓冲区（共 " + list.length + " 条，上限 " + devtools.NET_CAP + "）────", "head");
-    if (!list.length) { log("暂无网络记录", "dim"); return; }
-    list.forEach((r, i) => {
-      const tag = r.internal ? " [探针]" : "";
-      const status = r.status ? " " + r.status : (r.err ? " ERR" : " -");
-      log(
-        "#" + String(i + 1).padStart(3, " ") + " " +
-        r.kind.padEnd(5) + " " + r.method.padEnd(4) + status + " " +
-        r.url + " (" + r.ms + "ms)" +
-        (r.err ? " ← " + r.err : "") + tag,
-        r.ok ? "dim" : "err"
-      );
-    });
-    log("提示：长按「网络」按钮 0.7s 可清空缓冲区", "dim");
-  }
-
-  // =====================================================================
-  // ===== [IDB·修改] printStorage：探针页自身 + 最近 iframe 快照（异步） =====
-  // =====================================================================
-  async function printStorage() {
-    log("──── 存储摘要 ────", "head");
-
-    // --- 探针页自身 ---
-    log("【探针页自身】origin: " + location.origin, "info");
-    [["localStorage", localStorage], ["sessionStorage", sessionStorage]].forEach(([name, store]) => {
-      let total = 0;
-      try { total = store.length; } catch (_) { log(name + ": 不可访问", "err"); return; }
-      const keys = [];
-      for (let i = 0; i < total; i++) {
-        try { const k = store.key(i); if (k != null) keys.push(k); } catch (_) {}
-      }
-      let bytes = 0;
-      const items = [];
-      keys.forEach(k => {
-        try {
-          const v = store.getItem(k) || "";
-          const b = k.length + v.length;
-          bytes += b;
-          items.push({ k, b });
-        } catch (_) {}
+      })
+      .catch(function (e) {
+        add('<span class="warn">语法预检失败（不影响执行诊断）: ' + esc(e.message) + "</span>", "warn");
       });
-      log(name + ": " + items.length + " 项，约 " + (bytes / 1024).toFixed(1) + " KB", "info");
-      items.slice(0, 20).forEach(it => log("  · " + it.k + " (" + it.b + " B)", "dim"));
-      if (items.length > 20) log("  · …剩余 " + (items.length - 20) + " 项省略", "dim");
-    });
-
-    // 探针页自身的 IndexedDB
-    try {
-      const idbResult = await probeIndexedDB(window.indexedDB, "探针页");
-      logIndexedDBResult(idbResult, "探针页");
-    } catch (e) {
-      log("[探针页] IndexedDB 探测异常：" + ((e && e.message) || e), "err");
-    }
-
-    // --- 最近一次同源 iframe 快照 ---
-    if (lastIframeStorage) {
-      log("", "dim");
-      log("【最近一次探测的 iframe 快照】", "head");
-      logIframeStorage(lastIframeStorage);
-    } else {
-      log("", "dim");
-      log("未探测过 iframe 存储（请先探测一个与探针同源的目标，或点击「开始探测」）", "dim");
-      log("提示：跨域目标站点的 localStorage / IndexedDB 浏览器禁止访问，本探针无法获取", "dim");
-    }
-  }
-  // ===== [IDB] END =====
-
-  function printPerf() {
-    const p = devtools.perfStats;
-    log("──── 性能指标（本探针页自身） ────", "head");
-    if (p.lcp) {
-      const grade = p.lcp <= 2500 ? "良好" : p.lcp <= 4000 ? "需改进" : "较差";
-      log("LCP 最大内容绘制: " + p.lcp.toFixed(0) + " ms（" + grade + "）",
-          p.lcp <= 2500 ? "ok" : p.lcp <= 4000 ? "warn" : "err");
-    } else {
-      log("LCP: 未采集到（页面可能尚未发生内容绘制）", "dim");
-    }
-    const clsGrade = p.cls <= 0.1 ? "良好" : p.cls <= 0.25 ? "需改进" : "较差";
-    log("CLS 累积布局偏移: " + p.cls.toFixed(3) + "（" + clsGrade + "）",
-        p.cls <= 0.1 ? "ok" : p.cls <= 0.25 ? "warn" : "err");
-    if (p.longTasks.length) {
-      const avg = p.longTaskTotal / p.longTasks.length;
-      log("长任务(>50ms): " + p.longTasks.length + " 个，累计 " +
-          p.longTaskTotal.toFixed(0) + " ms，平均 " + avg.toFixed(0) + " ms", "warn");
-      p.longTasks.slice().sort((a, b) => b - a).slice(0, 5).forEach((d, i) => {
-        log("  #" + (i + 1) + " 耗时 " + d.toFixed(0) + " ms", "dim");
-      });
-    } else {
-      log("长任务: 无（未出现 >50ms 的任务）", "ok");
-    }
-    log("提示：以上为探针页自身指标，不代表被测站点的真实性能", "dim");
   }
 
-  function printErrors() {
-    const list = devtools.errors;
-    log("──── 错误汇总（共 " + list.length + " 条唯一错误）────", "head");
-    if (!list.length) { log("未捕获到任何错误", "ok"); return; }
-    const byType = {};
-    list.forEach(e => { byType[e.type] = (byType[e.type] || 0) + 1; });
-    log("按类型: " + Object.keys(byType).map(k => k + "×" + byType[k]).join("  "), "info");
-    const totalHits = list.reduce((a, e) => a + e.count, 0);
-    log("总命中次数: " + totalHits + "（同一条错误会被合并计数）", "info");
-    log("", "dim");
-    list.forEach((e, i) => {
-      const countTag = e.count > 1 ? " ×" + e.count : "";
-      const errLabel = e.errName && e.errName !== e.type ? e.errName + ": " : "";
-      const color = e.type === "CSP" || e.type === "RES-FAIL" ? "warn" : "err";
-      log("#" + (i + 1) + " [" + e.type + countTag + "] " + errLabel + e.message, color);
-      if (e.url) {
-        const pos = e.line ? ":" + e.line + (e.col ? ":" + e.col : "") : "";
-        log("  ⤷ " + e.url + pos, "dim", { cls: "is-stack" });
-      }
-      const frames = parseStack(e.stack);
-      frames.slice(0, 10).forEach(f => {
-        if (f.raw && !f.url) {
-          log("  " + f.raw, "dim", { cls: "is-stack" });
-        } else if (f.url) {
-          const pos = f.line ? ":" + f.line + (f.col ? ":" + f.col : "") : "";
-          log("  at " + f.fn + " (" + f.url + pos + ")", "dim", { cls: "is-stack" });
-        }
-      });
-      if (frames.length > 10) {
-        log("  …还有 " + (frames.length - 10) + " 帧省略", "dim", { cls: "is-stack" });
-      }
-    });
-  }
+  function diagnose() {
+    var raw = ($src.value || "").trim();
+    if (!raw) { setStatus("请填写脚本路径"); return; }
 
-  async function copyOutput() {
-    const text = out.innerText || out.textContent || "";
-    if (!text.trim()) { log("输出为空，无需复制", "warn"); return; }
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;";
-        document.body.appendChild(ta);
-        ta.select();
-        const ok = document.execCommand("copy");
-        ta.remove();
-        if (!ok) throw new Error("execCommand 返回 false");
-      }
-      log("已复制输出内容（" + text.length + " 字符）到剪贴板", "ok");
-    } catch (e) {
-      log("复制失败：" + ((e && e.message) || e), "err");
-    }
-    out.scrollTop = out.scrollHeight;
-  }
-
-  async function run(raw) {
-    if (running) return;
-    running = true;
-    btn.disabled = true;
-    btn.textContent = "探测中…";
-    out.innerHTML = "";
-    rowCount = 0;
+    $panel.innerHTML = "";
+    done = false;
+    $run.disabled = true;
+    setStatus("诊断中…");
     t0 = performance.now();
-    lastResources = [];
-    lastResults = [];
-    lastAudit = null;
-    lastIframeStorage = null;           // [IDB] 每次新探测重置 iframe 存储快照
-    lastTarget = "";
-    btnExp.disabled = true;
-    devtools.errors.length = 0;
-    btnErr.classList.remove("has-errors");
-    btnErr.textContent = "错误";
 
-    try {
-      let v = (raw || "").trim();
-      if (!v) { log("请输入网址", "err"); return; }
-      if (!/^[a-z][a-z0-9+.\-]*:\/\//i.test(v)) v = "https://" + v;
+    targetFile = raw.replace(/[?#].*$/, "");
+    var abs = raw;
+    try { abs = new URL(raw, location.href).href; } catch (_) {}
 
-      let target;
-      try { target = new URL(v); }
-      catch (_) { log("URL 格式非法: " + raw, "err"); return; }
-
-      if (!/^https?:$/.test(target.protocol)) {
-        log("仅支持 http/https，当前协议: " + target.protocol, "err");
-        return;
-      }
-
-      log("探测目标: " + target.href, "head");
-      saveHistory(target.href);
-      log("探针环境: " + navigator.userAgent, "dim");
-      log("视口: " + window.innerWidth + "×" + window.innerHeight +
-          " · DPR " + (window.devicePixelRatio || 1), "dim");
-      if (target.protocol === "http:") {
-        log("警告：目标为明文 HTTP 连接，传输内容可能被中间人篡改", "warn");
-      }
-
-      log("──── 阶段 1 / 5：网络可达性 ────", "head");
-      const reachable = await stageReach(target.href);
-
-      log("──── 阶段 2 / 5：内容抓取与解析 ────", "head");
-      const html = await stageContent(target.href);
-
-      let inventory = [], results = [];
-      if (html) {
-        log("──── 阶段 3 / 5：资源清单 + 探测 ────", "head");
-        const r = await stageResources(target.href, html);
-        inventory = r.inventory;
-        results   = r.results;
-        lastResources = inventory;
-        lastResults   = results;
-        lastTarget = target.href;
-        btnExp.disabled = !inventory.length;
-      } else {
-        log("──── 阶段 3 / 5：资源探测（已跳过） ────", "head");
-        log("未获取 HTML 源码，无法枚举资源", "warn");
-      }
-
-      if (inventory.length) {
-        log("──── 阶段 4 / 5：JS 静态审计 ────", "head");
-        lastAudit = await stageJsAudit(inventory);
-      } else {
-        log("──── 阶段 4 / 5：JS 静态审计（已跳过） ────", "head");
-      }
-
-      log("──── 阶段 5 / 5：页面渲染 + 同源存储探测（iframe） ────", "head");
-      await stageIframe(target.href);
-
-      log("════════ 探测结束 ════════", "head");
-      log("总耗时: " + now() + " ms", "ok");
-      log("网络可达性: " + (reachable ? "通" : "不通"), reachable ? "ok" : "err");
-      log("HTML 源码: " + (html ? "已获取（" + html.length + " 字符）" : "未获取（CORS 限制）"),
-          html ? "ok" : "warn");
-      log("资源清单: " + inventory.length + " 条完整地址", inventory.length ? "ok" : "warn");
-      if (results.length) {
-        const okN = results.filter(r => r.ok).length;
-        log("可达性探测: 共 " + results.length + "，可达 " + okN +
-            "，失败 " + (results.length - okN),
-            okN === results.length ? "ok" : "warn");
-      }
-      if (devtools.errors.length) {
-        log("错误捕获: " + devtools.errors.length + " 条唯一错误（点「错误」查看详情）", "err");
-      } else {
-        log("错误捕获: 无", "ok");
-      }
-      if (lastAudit && lastAudit.issues.length) {
-        const errs = lastAudit.issues.filter(i => i.level === "err").length;
-        log("JS 静态审计: " + lastAudit.issues.length + " 项问题" +
-            (errs ? "（其中 " + errs + " 项错误）" : ""),
-            errs ? "err" : "warn");
-      }
-      /* ===== [IDB] 结束时汇报 iframe 存储探测情况 ===== */
-      if (lastIframeStorage) {
-        if (lastIframeStorage.blocked) {
-          log("iframe 存储: 跨域，未探测（同源策略限制）", "warn");
-        } else {
-          const ls = lastIframeStorage.localStorage;
-          const ss = lastIframeStorage.sessionStorage;
-          const idb = lastIframeStorage.indexedDB;
-          log("iframe 存储: localStorage " + (ls && !ls.error ? ls.count + " 项" : "失败") +
-              " · sessionStorage " + (ss && !ss.error ? ss.count + " 项" : "失败") +
-              " · IndexedDB " + (idb && idb.enumerable ? idb.databases.length + " 库" : "不可枚举"),
-              "ok");
-        }
-      }
-      /* ===== [IDB] END ===== */
-    } catch (e) {
-      log("探针内部异常: " + ((e && e.message) || e), "err");
-      if (e && e.stack) console.error(e);
-    } finally {
-      running = false;
-      btn.disabled = false;
-      btn.textContent = "开始探测";
+    add('<span class="info">[诊断开始]</span> 页面协议: ' + esc(location.protocol), "info");
+    add('<div class="dim">目标: ' + esc(abs) + "</div>", "dim");
+    if (location.protocol === "file:") {
+      add('<div class="warn">file:// 提示：脚本能加载，但错误可能被脱敏为 "Script error." 且行号丢失。' +
+          "建议用本地 HTTP 服务器（如 npx serve / python -m http.server）。</div>", "warn");
     }
+    add('<div class="warn">注意：诊断页是空 DOM，若脚本依赖页面特定元素，' +
+        "可能报出与业务无关的 null 错误。</div>", "warn");
+
+    syntaxCheck(raw);
+
+    var s = document.createElement("script");
+    s.src = raw + (raw.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
+    s.async = false;
+    s.onload = function () {
+      add('<span class="badge" style="background:#4c4;color:#000">LOAD</span> ' +
+          "下载完成（load 触发 ≠ 无错误，错误看 ERROR 行）", "ok");
+      setTimeout(function () { finish("执行完成，暂未捕获错误（异步回调中的错误可能稍后出现）"); }, 300);
+    };
+    s.onerror = function () {
+      add('<span class="badge" style="background:#f66;color:#000">LOAD</span> ' +
+          "无法加载脚本（404 / 路径 / CORS / CSP）: " + esc(abs), "err");
+      finish("加载失败");
+    };
+    (document.head || document.documentElement).appendChild(s);
   }
 
-  btn.addEventListener("click", () => run(input.value));
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); input.blur(); run(input.value); }
-  });
+  $run.addEventListener("click", diagnose);
+  $src.addEventListener("keydown", function (e) { if (e.key === "Enter") diagnose(); });
 
-  btnClr.addEventListener("click", () => {
-    clearOut();
-    devtools.netLog.length = 0;
-    devtools.errors.length = 0;
-    btnNet.textContent = "网络";
-    btnErr.classList.remove("has-errors");
-    btnErr.textContent = "错误";
-    lastIframeStorage = null;           // [IDB] 清空时一并重置
-    flash(btnClr);
-  });
-
-  let netLongPressTimer = null;
-  let netLongPressed = false;
-  const startNetLongPress = () => {
-    netLongPressed = false;
-    clearTimeout(netLongPressTimer);
-    netLongPressTimer = setTimeout(() => {
-      netLongPressed = true;
-      devtools.netLog.length = 0;
-      btnNet.textContent = "网络";
-      log("已清空网络缓冲区（长按「网络」触发）", "ok");
-      out.scrollTop = out.scrollHeight;
-    }, 700);
-  };
-  const cancelNetLongPress = () => clearTimeout(netLongPressTimer);
-  btnNet.addEventListener("pointerdown", startNetLongPress);
-  ["pointerup", "pointercancel", "pointerleave"].forEach(ev =>
-    btnNet.addEventListener(ev, cancelNetLongPress)
-  );
-
-  btnNet.addEventListener("click", () => {
-    if (netLongPressed) { netLongPressed = false; return; }
-    printNetwork();
-    out.scrollTop = out.scrollHeight;
-    flash(btnNet);
-  });
-
-  // ===== [IDB·修改] 存储按钮改为异步调用 =====
-  btnSto.addEventListener("click", async () => {
-    flash(btnSto);
-    await printStorage();
-    out.scrollTop = out.scrollHeight;
-  });
-
-  btnPerf.addEventListener("click", () => {
-    printPerf();
-    out.scrollTop = out.scrollHeight;
-    flash(btnPerf);
-  });
-
-  btnCopy.addEventListener("click", () => {
-    copyOutput();
-    flash(btnCopy);
-  });
-
-  btnErr.addEventListener("click", () => {
-    printErrors();
-    out.scrollTop = out.scrollHeight;
-    flash(btnErr);
-  });
-
-  btnExp.addEventListener("click", () => {
-    if (!lastResources.length) return;
-    const payload = {
-      target: lastTarget,
-      probedAt: new Date().toISOString(),
-      total: lastResources.length,
-      resources: lastResources,
-      probeResults: lastResults,
-      network: devtools.netLog.slice(),
-      perf: devtools.perfStats,
-      errors: devtools.errors.map(e => ({
-        type: e.type, errName: e.errName, message: e.message,
-        url: e.url, line: e.line, col: e.col, count: e.count, stack: e.stack
-      })),
-      jsAudit: lastAudit,
-      /* ===== [IDB] 导出增加 iframe 存储快照 ===== */
-      iframeStorage: lastIframeStorage,
-      /* ===== [IDB] END ===== */
-      userAgent: navigator.userAgent
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)],
-                          { type: "application/json;charset=utf-8" });
-    const objUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = objUrl;
-    let host = "site";
-    try { host = new URL(lastTarget).hostname; } catch (_) {}
-    a.download = "probe-" + host + "-" + Date.now() + ".json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(objUrl), 3000);
-    log("已导出 " + lastResources.length + " 条地址 + " +
-        lastResults.length + " 条探测结果 + " +
-        devtools.errors.length + " 条错误 → " + a.download, "ok");
-    out.scrollTop = out.scrollHeight;
-    flash(btnExp);
-  });
-
-  renderHistory();
-
-  t0 = performance.now();
-  log("网站探针已就绪 · " + new Date().toLocaleString(), "head");
-  log("视口 " + window.innerWidth + "×" + window.innerHeight +
-      " · DPR " + (window.devicePixelRatio || 1) +
-      " · 语言 " + navigator.language, "dim");
-  if (navigator.connection && navigator.connection.effectiveType)
-    log("网络类型: " + navigator.connection.effectiveType, "dim");
-  log("F12 诊断已安装：JS 错误 / Promise / CSP / 资源失败 / console / fetch+XHR / 性能", "info");
-  log("「存储」探 localStorage / sessionStorage / IndexedDB（跨域目标受同源策略限制）", "info");
-  log("跨域 iframe 的运行时错误与存储均无法访问，用「JS 静态审计」替代", "info");
+  add('<span class="dim">填写 script.js 路径后点「开始诊断」。语法错误、运行错误、未处理 Promise、行号与调用栈都会显示在此。</span>', "dim");
 })();
 </script>
 </body>
