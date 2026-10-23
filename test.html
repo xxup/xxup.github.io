@@ -45,9 +45,9 @@
   scrollbar-width: none; /* 隐藏滚动条(Firefox) */
 }
 /* 隐藏滚动条(WebKit) */
-#toolbar::-webkit-scrollbar { display: none; }
+  #toolbar::-webkit-scrollbar { display: none; }
 
-  #toolbar .title { flex: none; color: #0f0; font-weight: bold; min-width: 80px; }
+  #toolbar .title { flex: none; color: #0f0; font-weight: bold; min-width: auto; white-space: nowrap; padding-right: 2px; }
   #toolbar button {
   padding: 4px 6px; /* 缩小上下左右内边距，让文本与边框更紧凑 */
   border-radius: 6px; /* 稍微收紧圆角以配合小尺寸 */
