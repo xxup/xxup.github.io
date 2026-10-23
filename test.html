@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a0a">
-<title>WebProbe</title>
+<title>网站探针Web Probe</title>
 <style>
   :root { --app-h: 100dvh; --app-top: 0px; }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -73,9 +73,7 @@
     0%   { background: #0a0; border-color: #0f0; color: #fff; transform: scale(0.94); }
     100% { background: #000; border-color: #333; color: #999; transform: scale(1); }
   }
-  #toolbar button.is-flash {
-    animation: btnFlash .35s ease;
-  }
+  #toolbar button.is-flash { animation: btnFlash .35s ease; }
   #output {
     flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
     padding: 10px 12px;
@@ -126,7 +124,7 @@
 
 <section id="panel">
   <div id="toolbar">
-    <span class="title">●</span>
+    <span class="title">● 探针输出</span>
     <button id="btnErrors" type="button">错误</button>
     <button id="btnNetwork" type="button">网络</button>
     <button id="btnStorage" type="button">存储</button>
@@ -276,13 +274,12 @@ function installDevToolsLike(log, onNetPush, onError) {
     if (errors.length > ERR_CAP) errors.shift();
     return e;
   }
-
   function guessErrorName(msg) {
     if (!msg) return "Error";
     const m = /^(\w*Error)\b/.exec(msg);
     return m ? m[1] : "Error";
   }
-  
+
   window.addEventListener("error", (e) => {
     if (e.target && e.target !== window) return;
     const err = e.error;
@@ -297,6 +294,7 @@ function installDevToolsLike(log, onNetPush, onError) {
     });
     if (onError) { try { onError(entry); } catch (_) {} }
   });
+
   window.addEventListener("unhandledrejection", (e) => {
     const r = e.reason;
     const isErr = r instanceof Error;
@@ -304,13 +302,12 @@ function installDevToolsLike(log, onNetPush, onError) {
       type: "PROMISE",
       errName: isErr ? (r.name || "Error") : "PromiseRejection",
       message: isErr ? r.message : String(r),
-      url: "",
-      line: 0,
-      col: 0,
+      url: "", line: 0, col: 0,
       stack: isErr && r.stack ? String(r.stack) : ""
     });
     if (onError) { try { onError(entry); } catch (_) {} }
   });
+
   document.addEventListener("securitypolicyviolation", (e) => {
     const entry = pushError({
       type: "CSP",
@@ -332,13 +329,8 @@ function installDevToolsLike(log, onNetPush, onError) {
         tag !== "VIDEO" && tag !== "AUDIO" && tag !== "SOURCE") return;
     const url = t.src || t.href || "(unknown)";
     const entry = pushError({
-      type: "RES-FAIL",
-      errName: tag,
-      message: "资源加载失败",
-      url,
-      line: 0,
-      col: 0,
-      stack: ""
+      type: "RES-FAIL", errName: tag,
+      message: "资源加载失败", url, line: 0, col: 0, stack: ""
     });
     if (onError) { try { onError(entry); } catch (_) {} }
   }, true);
@@ -367,7 +359,6 @@ function installDevToolsLike(log, onNetPush, onError) {
 
   const netLog = [];
   const NET_CAP = 200;
-
   const perfStats = { lcp: 0, cls: 0, longTasks: [], longTaskTotal: 0 };
 
   function pushNet(rec) {
@@ -385,21 +376,13 @@ function installDevToolsLike(log, onNetPush, onError) {
       const s = performance.now();
       try {
         const res = await origFetch.apply(this, args);
-        pushNet({
-          kind: "fetch", method, url,
-          status: res.status, ok: res.ok,
-          ms: (performance.now() - s) | 0,
-          internal
-        });
+        pushNet({ kind: "fetch", method, url, status: res.status, ok: res.ok,
+                  ms: (performance.now() - s) | 0, internal });
         return res;
       } catch (e) {
-        pushNet({
-          kind: "fetch", method, url,
-          status: 0, ok: false,
-          ms: (performance.now() - s) | 0,
-          err: e && e.message || String(e),
-          internal
-        });
+        pushNet({ kind: "fetch", method, url, status: 0, ok: false,
+                  ms: (performance.now() - s) | 0,
+                  err: e && e.message || String(e), internal });
         throw e;
       }
     };
@@ -421,12 +404,9 @@ function installDevToolsLike(log, onNetPush, onError) {
       if (!req) return oSend.apply(this, args);
       const s = performance.now();
       this.addEventListener("loadend", () => {
-        pushNet({
-          kind: "xhr", method: req.method, url: req.url,
-          status: this.status, ok: this.status >= 200 && this.status < 300,
-          ms: (performance.now() - s) | 0,
-          internal: req.internal
-        });
+        pushNet({ kind: "xhr", method: req.method, url: req.url,
+                  status: this.status, ok: this.status >= 200 && this.status < 300,
+                  ms: (performance.now() - s) | 0, internal: req.internal });
       });
       return oSend.apply(this, args);
     };
@@ -448,13 +428,10 @@ function installDevToolsLike(log, onNetPush, onError) {
     try {
       let cls = 0, lastLogged = -1;
       new PerformanceObserver((list) => {
-        for (const e of list.getEntries()) {
-          if (!e.hadRecentInput) cls += e.value;
-        }
+        for (const e of list.getEntries()) if (!e.hadRecentInput) cls += e.value;
         const v = Math.round(cls * 1000) / 1000;
         if (v !== lastLogged) {
-          lastLogged = v;
-          perfStats.cls = v;
+          lastLogged = v; perfStats.cls = v;
           try { log("[PERF-CLS] 累积布局偏移 " + v, "#0ff"); } catch (_) {}
         }
       }).observe({ type: "layout-shift", buffered: true });
@@ -488,7 +465,6 @@ function installDevToolsLike(log, onNetPush, onError) {
   const btnSto = document.getElementById("btnStorage");
   const btnPerf = document.getElementById("btnPerf");
   const btnCopy = document.getElementById("btnCopy");
-
   const btnErr  = document.getElementById("btnErrors");
   const historyList = document.getElementById("urlHistory");
 
@@ -498,8 +474,10 @@ function installDevToolsLike(log, onNetPush, onError) {
   let lastResources = [];
   let lastTarget = "";
   let lastResults = [];
-  let lastAudit = null;           
-  
+  let lastAudit = null;
+  /* ===== [IDB] 保存最近一次同源 iframe 存储探测结果，供「存储」按钮展示与导出 ===== */
+  let lastIframeStorage = null;
+  /* ===== [IDB] ===== */
   const MAX_ROWS = 3000;
   let rowCount = 0;
 
@@ -545,26 +523,16 @@ function installDevToolsLike(log, onNetPush, onError) {
     for (const raw of lines) {
       const line = raw.trim();
       if (!line) continue;
-      if (!/^at\s/.test(line) && !/^[^@\s]+@/.test(line)) {
-        continue;
-      }
+      if (!/^at\s/.test(line) && !/^[^@\s]+@/.test(line)) continue;
       let m = line.match(/^([^@\s]*)@(.+?):(\d+):(\d+)$/);
       if (m) {
-        frames.push({
-          fn: m[1] || "(anonymous)",
-          url: m[2], line: +m[3], col: +m[4], raw: line
-        });
+        frames.push({ fn: m[1] || "(anonymous)", url: m[2], line: +m[3], col: +m[4], raw: line });
         continue;
       }
       m = line.match(/^at\s+(?:(?:async\s+)?(?:new\s+)?([^\s(]+)\s+)?\(?(.+?)(?::(\d+))?(?::(\d+))?\)?$/);
       if (m && m[2]) {
-        frames.push({
-          fn: m[1] || "(anonymous)",
-          url: m[2],
-          line: m[3] ? +m[3] : null,
-          col: m[4] ? +m[4] : null,
-          raw: line
-        });
+        frames.push({ fn: m[1] || "(anonymous)", url: m[2],
+                      line: m[3] ? +m[3] : null, col: m[4] ? +m[4] : null, raw: line });
       } else {
         frames.push({ raw: line });
       }
@@ -575,36 +543,26 @@ function installDevToolsLike(log, onNetPush, onError) {
   function logErrorEntry(entry) {
     const countTag = entry.count > 1 ? " ×" + entry.count : "";
     const errLabel = entry.errName && entry.errName !== entry.type
-      ? entry.errName + ": "
-      : "";
+      ? entry.errName + ": " : "";
     const headText = "[" + entry.type + countTag + "] " + errLabel + entry.message;
-    const color = entry.type === "CSP" ? "warn"
-                : entry.type === "RES-FAIL" ? "warn"
-                : "err";
-
+    const color = entry.type === "CSP" || entry.type === "RES-FAIL" ? "warn" : "err";
     log(headText, color);
-
     if (entry.count > 1) return;
-
     if (entry.url) {
-      const pos = entry.line
-        ? ":" + entry.line + (entry.col ? ":" + entry.col : "")
-        : "";
+      const pos = entry.line ? ":" + entry.line + (entry.col ? ":" + entry.col : "") : "";
       log("  ⤷ " + entry.url + pos, "dim", { cls: "is-stack" });
     }
-
     const frames = parseStack(entry.stack);
     frames.forEach(f => {
       if (f.raw && !f.url) {
         log("  " + f.raw, "dim", { cls: "is-stack" });
       } else if (f.url) {
-        const pos = f.line
-          ? ":" + f.line + (f.col ? ":" + f.col : "")
-          : "";
+        const pos = f.line ? ":" + f.line + (f.col ? ":" + f.col : "") : "";
         log("  at " + f.fn + " (" + f.url + pos + ")", "dim", { cls: "is-stack" });
       }
     });
   }
+
   const devtools = installDevToolsLike(log, (n) => {
     btnNet.textContent = n ? ("网络·" + n) : "网络";
   }, (entry) => {
@@ -856,7 +814,6 @@ function installDevToolsLike(log, onNetPush, onError) {
 
   async function stageResources(baseUrl, html) {
     const doc = new DOMParser().parseFromString(html, "text/html");
-
     const baseEl = doc.querySelector("base[href]");
     let base = baseUrl;
     if (baseEl) {
@@ -882,9 +839,7 @@ function installDevToolsLike(log, onNetPush, onError) {
     const cspMeta = Array.from(doc.querySelectorAll("meta[http-equiv]")).find(
       m => (m.getAttribute("http-equiv") || "").toLowerCase() === "content-security-policy"
     );
-    if (cspMeta) {
-      log("页面 CSP(meta): " + (cspMeta.getAttribute("content") || "").slice(0, 200), "info");
-    }
+    if (cspMeta) log("页面 CSP(meta): " + (cspMeta.getAttribute("content") || "").slice(0, 200), "info");
 
     const inventory = [];
     const seen = new Set();
@@ -988,7 +943,6 @@ function installDevToolsLike(log, onNetPush, onError) {
       log("无可审计的外链脚本（无 script 资源）", "dim");
       return { audited: 0, fetched: 0, issues: [] };
     }
-
     const MAX_AUDIT = 20;
     const list = scripts.slice(0, MAX_AUDIT);
     if (scripts.length > MAX_AUDIT) {
@@ -1006,10 +960,8 @@ function installDevToolsLike(log, onNetPush, onError) {
           const src = await readTextLimited(r, 512 * 1024);
           return { url: s.url, ok: true, src };
         } catch (e) {
-          return {
-            url: s.url, ok: false,
-            err: e.name === "AbortError" ? "超时" : (e.message || String(e))
-          };
+          return { url: s.url, ok: false,
+                   err: e.name === "AbortError" ? "超时" : (e.message || String(e)) };
         }
       });
     });
@@ -1028,10 +980,8 @@ function installDevToolsLike(log, onNetPush, onError) {
 
       const sm = src.match(/\/\/[#@]\s*sourceMappingURL=(\S+)/);
       if (sm) {
-        issues.push({
-          level: "warn", kind: "SRCMAP", url: r.url,
-          msg: "包含 sourceMappingURL: " + sm[1] + "（源码可能被还原）"
-        });
+        issues.push({ level: "warn", kind: "SRCMAP", url: r.url,
+                      msg: "包含 sourceMappingURL: " + sm[1] + "（源码可能被还原）" });
       }
 
       const isModule =
@@ -1041,59 +991,309 @@ function installDevToolsLike(log, onNetPush, onError) {
         /\bexport\s+[\{*a-zA-Z]/.test(src);
 
       if (isModule) {
-        issues.push({
-          level: "dim", kind: "MODULE", url: r.url,
-          msg: "模块脚本，跳过 Function 语法检查"
-        });
+        issues.push({ level: "dim", kind: "MODULE", url: r.url,
+                      msg: "模块脚本，跳过 Function 语法检查" });
       } else if (src.length <= 512 * 1024) {
-        try {
-          new Function(src);
-        } catch (e) {
+        try { new Function(src); }
+        catch (e) {
           if (e instanceof SyntaxError) {
-            issues.push({
-              level: "err", kind: "SYNTAX", url: r.url,
-              msg: "SyntaxError: " + e.message
-            });
+            issues.push({ level: "err", kind: "SYNTAX", url: r.url,
+                          msg: "SyntaxError: " + e.message });
           }
         }
       }
 
       const patterns = [
-        [/\beval\s*\(/,                        "EVAL",         "warn", "使用 eval()，CSP 严格模式下会被拒绝"],
-        [/new\s+Function\s*\(/,                 "NEW-FN",       "dim",  "使用 new Function()"],
-        [/document\.write\s*\(/,                "DOC-WRITE",    "warn", "使用 document.write()，可能阻塞解析"],
-        [/\.innerHTML\s*=\s*(?!["'`])/,          "INNERHTML",    "dim",  "innerHTML 动态赋值（XSS 风险）"],
-        [/\bdebugger\b/,                        "DEBUGGER",     "warn", "包含 debugger 语句（生产环境不应保留）"],
-        [/\bconsole\.error\s*\(/,               "CONSOLE-ERR",  "info", "含 console.error 调用（非异常）"]
+        [/\beval\s*\(/,                 "EVAL",       "warn", "使用 eval()，CSP 严格模式下会被拒绝"],
+        [/new\s+Function\s*\(/,          "NEW-FN",     "dim",  "使用 new Function()"],
+        [/document\.write\s*\(/,         "DOC-WRITE",  "warn", "使用 document.write()，可能阻塞解析"],
+        [/\.innerHTML\s*=\s*(?!["'`])/,   "INNERHTML",  "dim",  "innerHTML 动态赋值（XSS 风险）"],
+        [/\bdebugger\b/,                 "DEBUGGER",   "warn", "包含 debugger 语句（生产环境不应保留）"],
+        [/\bconsole\.error\s*\(/,        "CONSOLE-ERR","info", "含 console.error 调用（非异常）"]
       ];
       for (const [re, kind, level, msg] of patterns) {
-        if (re.test(src)) {
-          issues.push({ level, kind, url: r.url, msg });
-        }
+        if (re.test(src)) issues.push({ level, kind, url: r.url, msg });
       }
     }
 
     log("静态审计：成功获取 " + fetched + " / " + list.length + " 个脚本源码",
         fetched ? "ok" : "warn");
-
     if (!issues.length) {
       log("静态审计：未发现问题", "ok");
       return { audited: list.length, fetched, issues: [] };
     }
-
     const errs  = issues.filter(i => i.level === "err");
     const warns = issues.filter(i => i.level === "warn");
     log("静态审计：发现 " + issues.length + " 项（错误 " + errs.length +
         "，警告 " + warns.length + "）",
         errs.length ? "err" : warns.length ? "warn" : "info");
-
-    issues.forEach(it => {
-      log("[" + it.kind + "] " + it.url + " — " + it.msg, it.level);
-    });
-
+    issues.forEach(it => log("[" + it.kind + "] " + it.url + " — " + it.msg, it.level));
     return { audited: list.length, fetched, issues };
   }
-  
+
+  // =====================================================================
+  // ===== [IDB] IndexedDB 探测核心实现 =====
+  // =====================================================================
+
+  /**
+   * 打开一个「已存在」的 IndexedDB 库（只读，不升级）。
+   *
+   * 【重要副作用】若 name 指定的库不存在，open() 会创建一个空库。
+   * 因此调用方必须先通过 databases() 拿到库名列表再调本函数。
+   *
+   * 注意：
+   *  - 不传 version，浏览器用当前版本打开，不会触发 upgradeneeded
+   *  - onblocked：其他 tab 正在升级时会触发，2s 后拒绝
+   */
+  function idbOpenExisting(factory, name, timeoutMs) {
+    timeoutMs = timeoutMs || 2000;
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const req = factory.open(name);
+      req.onupgradeneeded = () => {
+        // 理论上不会触发（因为没指定 version），但以防万一中断升级
+        try { req.transaction.abort(); } catch (_) {}
+      };
+      req.onsuccess = () => {
+        if (settled) return; settled = true;
+        resolve(req.result);
+      };
+      req.onerror = () => {
+        if (settled) return; settled = true;
+        reject(req.error || new Error("open 失败"));
+      };
+      req.onblocked = () => {
+        if (settled) return; settled = true;
+        reject(new Error("被其他连接阻塞（其他 tab 正在升级）"));
+      };
+      setTimeout(() => {
+        if (settled) return; settled = true;
+        reject(new Error("打开超时（" + timeoutMs + "ms）"));
+      }, timeoutMs);
+    });
+  }
+
+  /** 统计某个 objectStore 的记录条数（1s 超时兜底，失败返回 -1） */
+  function idbCountStore(db, storeName) {
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(storeName, "readonly");
+        const req = tx.objectStore(storeName).count();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(-1);
+        setTimeout(() => resolve(-1), 1000);
+      } catch (_) { resolve(-1); }
+    });
+  }
+
+  /**
+   * 枚举并浅探一个 IDBFactory（可以是 window.indexedDB 或 iframe 的）。
+   *
+   * @param {IDBFactory} factory
+   * @param {string} label    用于日志标注来源（"探针页" / "iframe"）
+   * @returns {Promise<{supported,enumerable,databases,truncated?}>}
+   */
+  async function probeIndexedDB(factory, label) {
+    const result = { supported: false, enumerable: false, databases: [] };
+    if (!factory) return result;
+    result.supported = true;
+
+    // databases() 兼容性：Chrome 71+ / Firefox 126+ / Safari 14+
+    // 老内核没有这个 API，只能盲猜，无法枚举
+    if (typeof factory.databases !== "function") {
+      log("[" + label + "] IndexedDB 存在，但 indexedDB.databases() 不可用，无法枚举库名", "warn");
+      return result;
+    }
+    result.enumerable = true;
+
+    let list;
+    try {
+      list = await factory.databases();
+    } catch (e) {
+      log("[" + label + "] indexedDB.databases() 调用失败：" + ((e && e.message) || e), "err");
+      return result;
+    }
+
+    if (!list || !list.length) {
+      log("[" + label + "] IndexedDB 无已建库", "dim");
+      return result;
+    }
+
+    const MAX_DB = 20;
+    for (const d of list.slice(0, MAX_DB)) {
+      const info = { name: d.name, version: d.version || 0, stores: [], err: null };
+      try {
+        const db = await idbOpenExisting(factory, d.name, 2000);
+        // 用 objectStoreNames 遍历所有 store（不能猜 store 名）
+        const storeNames = Array.from(db.objectStoreNames);
+        for (const sName of storeNames) {
+          const cnt = await idbCountStore(db, sName);
+          info.stores.push({ name: sName, count: cnt });
+        }
+        db.close();
+      } catch (e) {
+        info.err = (e && e.message) || String(e);
+      }
+      result.databases.push(info);
+    }
+    if (list.length > MAX_DB) result.truncated = list.length - MAX_DB;
+    return result;
+  }
+
+  /** 统一格式化输出一次 IDB 探测结果 */
+  function logIndexedDBResult(result, label) {
+    if (!result.supported) {
+      log("[" + label + "] 浏览器不支持 IndexedDB", "dim");
+      return;
+    }
+    if (!result.enumerable) return;  // 已在 probeIndexedDB 内部告警
+    if (!result.databases.length) return;
+
+    let totalStores = 0;
+    result.databases.forEach(d => { totalStores += d.stores.length; });
+    log("[" + label + "] IndexedDB: " + result.databases.length + " 个库，" +
+        totalStores + " 个 objectStore", "info");
+
+    result.databases.forEach(d => {
+      log("  · DB " + d.name + " (v" + d.version + ")", "dim", { cls: "is-stack" });
+      if (d.err) {
+        log("    ⚠ " + d.err, "warn", { cls: "is-stack" });
+      }
+      d.stores.forEach(s => {
+        const cnt = s.count >= 0 ? s.count + " 条" : "读取失败";
+        log("    ▸ store " + s.name + " — " + cnt, "dim", { cls: "is-stack" });
+      });
+    });
+    if (result.truncated) {
+      log("  …另有 " + result.truncated + " 个库省略", "dim");
+    }
+  }
+  // ===== [IDB] END =====
+
+  // =====================================================================
+  // ===== [IDB] 同源 iframe 内的全部存储探测（localStorage / sessionStorage / IndexedDB） =====
+  // =====================================================================
+  async function probeIframeStorage(w, label) {
+    const out = {
+      label,
+      origin: "",
+      localStorage: null,
+      sessionStorage: null,
+      indexedDB: null,
+      blocked: false,
+      reason: ""
+    };
+
+    // 先确认同源：读 location.href 不抛异常即同源
+    try { out.origin = w.location.href; }
+    catch (e) {
+      out.blocked = true;
+      out.reason = "跨域：" + ((e && e.name) || "SecurityError");
+      return out;
+    }
+
+    // localStorage
+    try {
+      const ls = w.localStorage;
+      const total = ls.length;
+      let bytes = 0;
+      const items = [];
+      const keys = [];
+      for (let i = 0; i < total; i++) {
+        try { const k = ls.key(i); if (k != null) keys.push(k); } catch (_) {}
+      }
+      keys.forEach(k => {
+        try {
+          const v = ls.getItem(k) || "";
+          const b = k.length + v.length;
+          bytes += b;
+          items.push({ k, b, preview: v.slice(0, 60) });
+        } catch (_) {}
+      });
+      out.localStorage = { count: items.length, bytes, items };
+    } catch (e) {
+      out.localStorage = { error: (e && e.message) || String(e) };
+    }
+
+    // sessionStorage
+    try {
+      const ss = w.sessionStorage;
+      const total = ss.length;
+      let bytes = 0;
+      const items = [];
+      const keys = [];
+      for (let i = 0; i < total; i++) {
+        try { const k = ss.key(i); if (k != null) keys.push(k); } catch (_) {}
+      }
+      keys.forEach(k => {
+        try {
+          const v = ss.getItem(k) || "";
+          const b = k.length + v.length;
+          bytes += b;
+          items.push({ k, b, preview: v.slice(0, 60) });
+        } catch (_) {}
+      });
+      out.sessionStorage = { count: items.length, bytes, items };
+    } catch (e) {
+      out.sessionStorage = { error: (e && e.message) || String(e) };
+    }
+
+    // IndexedDB
+    try {
+      out.indexedDB = await probeIndexedDB(w.indexedDB, label);
+    } catch (e) {
+      out.indexedDB = { supported: false, error: (e && e.message) || String(e) };
+    }
+
+    return out;
+  }
+
+  /** 格式化 iframe 存储探测结果 */
+  function logIframeStorage(r) {
+    log("──── iframe 存储快照（" + r.label + "）────", "head");
+    if (r.blocked) {
+      log(r.reason + "：无法读取 iframe 内的任何存储", "warn");
+      log("这是浏览器同源策略的硬限制，非代码 bug", "dim");
+      return;
+    }
+    log("origin: " + r.origin, "info");
+
+    // localStorage
+    if (r.localStorage && !r.localStorage.error) {
+      log("localStorage: " + r.localStorage.count + " 项，约 " +
+          (r.localStorage.bytes / 1024).toFixed(1) + " KB", "info");
+      r.localStorage.items.slice(0, 20).forEach(it => {
+        log("  · " + it.k + " (" + it.b + " B) = " + JSON.stringify(it.preview), "dim", { cls: "is-stack" });
+      });
+      if (r.localStorage.items.length > 20) {
+        log("  · …剩余 " + (r.localStorage.items.length - 20) + " 项省略", "dim");
+      }
+    } else if (r.localStorage) {
+      log("localStorage: 访问失败 — " + r.localStorage.error, "err");
+    }
+
+    // sessionStorage
+    if (r.sessionStorage && !r.sessionStorage.error) {
+      log("sessionStorage: " + r.sessionStorage.count + " 项，约 " +
+          (r.sessionStorage.bytes / 1024).toFixed(1) + " KB", "info");
+      r.sessionStorage.items.slice(0, 20).forEach(it => {
+        log("  · " + it.k + " (" + it.b + " B) = " + JSON.stringify(it.preview), "dim", { cls: "is-stack" });
+      });
+      if (r.sessionStorage.items.length > 20) {
+        log("  · …剩余 " + (r.sessionStorage.items.length - 20) + " 项省略", "dim");
+      }
+    } else if (r.sessionStorage) {
+      log("sessionStorage: 访问失败 — " + r.sessionStorage.error, "err");
+    }
+
+    // IndexedDB
+    logIndexedDBResult(r.indexedDB, r.label);
+  }
+  // ===== [IDB] END =====
+
+  // =====================================================================
+  // ===== [IDB·修改] stageIframe：同源时桥接错误 + 探测存储 =====
+  // =====================================================================
   function stageIframe(url) {
     return new Promise((resolve) => {
       const iframe = document.createElement("iframe");
@@ -1122,54 +1322,66 @@ function installDevToolsLike(log, onNetPush, onError) {
         resolve(ok);
       }
 
-      function tryBridge() {
+      async function tryBridgeAndStorage() {
+        const w = iframe.contentWindow;
+        if (!w) return;
+        // 同源判定
         try {
-          const w = iframe.contentWindow;
-          if (!w) return;
-
-          const href = w.location.href;
-
-          w.addEventListener("error", (ev) => {
-            const err = ev.error;
-            const entry = devtools.pushError({
-              type: "IFRAME-JS",
-              errName: (err && err.name) || "Error",
-              message: (ev.message || (err && err.message) || "(unknown)"),
-              url: ev.filename || "",
-              line: ev.lineno || 0,
-              col: ev.colno || 0,
-              stack: err && err.stack ? String(err.stack) : ""
-            });
-            logErrorEntry(entry);
-            btnErr.classList.add("has-errors");
-            btnErr.textContent = "错误·" + devtools.errors.length;
-          });
-
-          w.addEventListener("unhandledrejection", (ev) => {
-            const r = ev.reason;
-            const isErr = r instanceof Error;
-            const entry = devtools.pushError({
-              type: "IFRAME-PROMISE",
-              errName: isErr ? (r.name || "Error") : "PromiseRejection",
-              message: isErr ? r.message : String(r),
-              url: "", line: 0, col: 0,
-              stack: isErr && r.stack ? String(r.stack) : ""
-            });
-            logErrorEntry(entry);
-            btnErr.classList.add("has-errors");
-            btnErr.textContent = "错误·" + devtools.errors.length;
-          });
-
-          log("[IFRAME] 同源可访问（" + href + "），已桥接 JS 错误监听", "ok");
-          log("提示：桥接只捕获 load 之后发生的错误，解析期错误已在浏览器内抛出、无法拦截", "dim");
+          // eslint-disable-next-line no-unused-expressions
+          w.location.href;
         } catch (_) {
-          log("[IFRAME] 跨域限制，无法桥接运行时 JS 错误", "warn");
-          log("说明：浏览器同源策略禁止父页读取跨域 iframe 的 error / unhandledrejection", "dim");
-          log("替代方案：查看阶段 4「JS 静态审计」/ 使用浏览器 F12 Network & Console", "dim");
+          log("[IFRAME] 跨域限制，无法桥接运行时错误与存储探测", "warn");
+          log("说明：浏览器同源策略禁止父页读取跨域 iframe 的 error / storage / indexedDB", "dim");
+          log("替代方案：查看阶段 4「JS 静态审计」/ 使用浏览器 F12 Application 面板", "dim");
+          return;
         }
+
+        // ===== 同源：挂错误监听 =====
+        w.addEventListener("error", (ev) => {
+          const err = ev.error;
+          const entry = devtools.pushError({
+            type: "IFRAME-JS",
+            errName: (err && err.name) || "Error",
+            message: (ev.message || (err && err.message) || "(unknown)"),
+            url: ev.filename || "",
+            line: ev.lineno || 0,
+            col: ev.colno || 0,
+            stack: err && err.stack ? String(err.stack) : ""
+          });
+          logErrorEntry(entry);
+          btnErr.classList.add("has-errors");
+          btnErr.textContent = "错误·" + devtools.errors.length;
+        });
+        w.addEventListener("unhandledrejection", (ev) => {
+          const r = ev.reason;
+          const isErr = r instanceof Error;
+          const entry = devtools.pushError({
+            type: "IFRAME-PROMISE",
+            errName: isErr ? (r.name || "Error") : "PromiseRejection",
+            message: isErr ? r.message : String(r),
+            url: "", line: 0, col: 0,
+            stack: isErr && r.stack ? String(r.stack) : ""
+          });
+          logErrorEntry(entry);
+          btnErr.classList.add("has-errors");
+          btnErr.textContent = "错误·" + devtools.errors.length;
+        });
+        log("[IFRAME] 同源可访问，已桥接 JS 错误监听", "ok");
+        log("提示：桥接只捕获 load 之后发生的错误，解析期错误已在浏览器内抛出、无法拦截", "dim");
+
+        // ===== [IDB·新增] 同源：探测 iframe 内全部存储 =====
+        try {
+          log("[IFRAME] 正在探测 iframe 内存储（localStorage / sessionStorage / IndexedDB）…", "info");
+          const snap = await probeIframeStorage(w, "iframe(" + url + ")");
+          lastIframeStorage = snap;
+          logIframeStorage(snap);
+        } catch (e) {
+          log("[IFRAME] 存储探测异常：" + ((e && e.message) || e), "err");
+        }
+        // ===== [IDB] END =====
       }
 
-      iframe.onload  = () => { tryBridge(); fin(true); };
+      iframe.onload  = async () => { await tryBridgeAndStorage(); fin(true); };
       iframe.onerror = () => fin(false, "onerror 触发");
       document.body.appendChild(iframe);
       iframe.src = url;
@@ -1194,8 +1406,14 @@ function installDevToolsLike(log, onNetPush, onError) {
     log("提示：长按「网络」按钮 0.7s 可清空缓冲区", "dim");
   }
 
-  function printStorage() {
+  // =====================================================================
+  // ===== [IDB·修改] printStorage：探针页自身 + 最近 iframe 快照（异步） =====
+  // =====================================================================
+  async function printStorage() {
     log("──── 存储摘要 ────", "head");
+
+    // --- 探针页自身 ---
+    log("【探针页自身】origin: " + location.origin, "info");
     [["localStorage", localStorage], ["sessionStorage", sessionStorage]].forEach(([name, store]) => {
       let total = 0;
       try { total = store.length; } catch (_) { log(name + ": 不可访问", "err"); return; }
@@ -1217,7 +1435,27 @@ function installDevToolsLike(log, onNetPush, onError) {
       items.slice(0, 20).forEach(it => log("  · " + it.k + " (" + it.b + " B)", "dim"));
       if (items.length > 20) log("  · …剩余 " + (items.length - 20) + " 项省略", "dim");
     });
+
+    // 探针页自身的 IndexedDB
+    try {
+      const idbResult = await probeIndexedDB(window.indexedDB, "探针页");
+      logIndexedDBResult(idbResult, "探针页");
+    } catch (e) {
+      log("[探针页] IndexedDB 探测异常：" + ((e && e.message) || e), "err");
+    }
+
+    // --- 最近一次同源 iframe 快照 ---
+    if (lastIframeStorage) {
+      log("", "dim");
+      log("【最近一次探测的 iframe 快照】", "head");
+      logIframeStorage(lastIframeStorage);
+    } else {
+      log("", "dim");
+      log("未探测过 iframe 存储（请先探测一个与探针同源的目标，或点击「开始探测」）", "dim");
+      log("提示：跨域目标站点的 localStorage / IndexedDB 浏览器禁止访问，本探针无法获取", "dim");
+    }
   }
+  // ===== [IDB] END =====
 
   function printPerf() {
     const p = devtools.perfStats;
@@ -1248,23 +1486,18 @@ function installDevToolsLike(log, onNetPush, onError) {
   function printErrors() {
     const list = devtools.errors;
     log("──── 错误汇总（共 " + list.length + " 条唯一错误）────", "head");
-    if (!list.length) {
-      log("未捕获到任何错误", "ok");
-      return;
-    }
+    if (!list.length) { log("未捕获到任何错误", "ok"); return; }
     const byType = {};
     list.forEach(e => { byType[e.type] = (byType[e.type] || 0) + 1; });
     log("按类型: " + Object.keys(byType).map(k => k + "×" + byType[k]).join("  "), "info");
     const totalHits = list.reduce((a, e) => a + e.count, 0);
     log("总命中次数: " + totalHits + "（同一条错误会被合并计数）", "info");
     log("", "dim");
-
     list.forEach((e, i) => {
       const countTag = e.count > 1 ? " ×" + e.count : "";
       const errLabel = e.errName && e.errName !== e.type ? e.errName + ": " : "";
       const color = e.type === "CSP" || e.type === "RES-FAIL" ? "warn" : "err";
       log("#" + (i + 1) + " [" + e.type + countTag + "] " + errLabel + e.message, color);
-
       if (e.url) {
         const pos = e.line ? ":" + e.line + (e.col ? ":" + e.col : "") : "";
         log("  ⤷ " + e.url + pos, "dim", { cls: "is-stack" });
@@ -1318,9 +1551,9 @@ function installDevToolsLike(log, onNetPush, onError) {
     lastResources = [];
     lastResults = [];
     lastAudit = null;
+    lastIframeStorage = null;           // [IDB] 每次新探测重置 iframe 存储快照
     lastTarget = "";
     btnExp.disabled = true;
-
     devtools.errors.length = 0;
     btnErr.classList.remove("has-errors");
     btnErr.textContent = "错误";
@@ -1368,6 +1601,7 @@ function installDevToolsLike(log, onNetPush, onError) {
         log("──── 阶段 3 / 5：资源探测（已跳过） ────", "head");
         log("未获取 HTML 源码，无法枚举资源", "warn");
       }
+
       if (inventory.length) {
         log("──── 阶段 4 / 5：JS 静态审计 ────", "head");
         lastAudit = await stageJsAudit(inventory);
@@ -1375,7 +1609,7 @@ function installDevToolsLike(log, onNetPush, onError) {
         log("──── 阶段 4 / 5：JS 静态审计（已跳过） ────", "head");
       }
 
-      log("──── 阶段 5 / 5：页面渲染（iframe） ────", "head");
+      log("──── 阶段 5 / 5：页面渲染 + 同源存储探测（iframe） ────", "head");
       await stageIframe(target.href);
 
       log("════════ 探测结束 ════════", "head");
@@ -1401,6 +1635,21 @@ function installDevToolsLike(log, onNetPush, onError) {
             (errs ? "（其中 " + errs + " 项错误）" : ""),
             errs ? "err" : "warn");
       }
+      /* ===== [IDB] 结束时汇报 iframe 存储探测情况 ===== */
+      if (lastIframeStorage) {
+        if (lastIframeStorage.blocked) {
+          log("iframe 存储: 跨域，未探测（同源策略限制）", "warn");
+        } else {
+          const ls = lastIframeStorage.localStorage;
+          const ss = lastIframeStorage.sessionStorage;
+          const idb = lastIframeStorage.indexedDB;
+          log("iframe 存储: localStorage " + (ls && !ls.error ? ls.count + " 项" : "失败") +
+              " · sessionStorage " + (ss && !ss.error ? ss.count + " 项" : "失败") +
+              " · IndexedDB " + (idb && idb.enumerable ? idb.databases.length + " 库" : "不可枚举"),
+              "ok");
+        }
+      }
+      /* ===== [IDB] END ===== */
     } catch (e) {
       log("探针内部异常: " + ((e && e.message) || e), "err");
       if (e && e.stack) console.error(e);
@@ -1419,10 +1668,11 @@ function installDevToolsLike(log, onNetPush, onError) {
   btnClr.addEventListener("click", () => {
     clearOut();
     devtools.netLog.length = 0;
-    devtools.errors.length = 0;                     
+    devtools.errors.length = 0;
     btnNet.textContent = "网络";
-    btnErr.classList.remove("has-errors");           
+    btnErr.classList.remove("has-errors");
     btnErr.textContent = "错误";
+    lastIframeStorage = null;           // [IDB] 清空时一并重置
     flash(btnClr);
   });
 
@@ -1452,10 +1702,11 @@ function installDevToolsLike(log, onNetPush, onError) {
     flash(btnNet);
   });
 
-  btnSto.addEventListener("click", () => {
-    printStorage();
-    out.scrollTop = out.scrollHeight;
+  // ===== [IDB·修改] 存储按钮改为异步调用 =====
+  btnSto.addEventListener("click", async () => {
     flash(btnSto);
+    await printStorage();
+    out.scrollTop = out.scrollHeight;
   });
 
   btnPerf.addEventListener("click", () => {
@@ -1486,16 +1737,13 @@ function installDevToolsLike(log, onNetPush, onError) {
       network: devtools.netLog.slice(),
       perf: devtools.perfStats,
       errors: devtools.errors.map(e => ({
-        type: e.type,
-        errName: e.errName,
-        message: e.message,
-        url: e.url,
-        line: e.line,
-        col: e.col,
-        count: e.count,
-        stack: e.stack
+        type: e.type, errName: e.errName, message: e.message,
+        url: e.url, line: e.line, col: e.col, count: e.count, stack: e.stack
       })),
       jsAudit: lastAudit,
+      /* ===== [IDB] 导出增加 iframe 存储快照 ===== */
+      iframeStorage: lastIframeStorage,
+      /* ===== [IDB] END ===== */
       userAgent: navigator.userAgent
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)],
@@ -1527,8 +1775,8 @@ function installDevToolsLike(log, onNetPush, onError) {
   if (navigator.connection && navigator.connection.effectiveType)
     log("网络类型: " + navigator.connection.effectiveType, "dim");
   log("F12 诊断已安装：JS 错误 / Promise / CSP / 资源失败 / console / fetch+XHR / 性能", "info");
-  log("「错误」查看结构化错误（含堆栈），「性能」查看 LCP/CLS/长任务", "info");
-  log("跨域 iframe 的运行时错误受同源策略限制，用「JS 静态审计」替代", "info");
+  log("「存储」探 localStorage / sessionStorage / IndexedDB（跨域目标受同源策略限制）", "info");
+  log("跨域 iframe 的运行时错误与存储均无法访问，用「JS 静态审计」替代", "info");
 })();
 </script>
 </body>
