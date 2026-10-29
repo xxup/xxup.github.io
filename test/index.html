@@ -3,323 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>瀑布流图片墙 · 真实数据版</title>
+<title>瀑布流图片墙 · 导航固定</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                 "Microsoft YaHei", sans-serif;
-    background: #f5f5f5;
-    color: #111;
-    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
+    /* 【重要修改】为固定导航栏留出 65px 的高度空间（64px高 + 1px边框） */
+    padding-top: 65px; 
   }
 
-  /* ============================================================
-     顶栏
-     ============================================================ */
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 60;
-    background: #ffffff;
-    border-bottom: 1px solid #e0e0e0;
+  /* 顶栏与搜索 */
+  .topbar { 
+    /* 【重要修改】从 sticky 改为 fixed，绝对固定 */
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 60; 
+    background: #fff; 
+    border-bottom: 1px solid #e0e0e0; 
   }
-  .topbar-inner {
-    display: flex;
-    height: 64px;
-    max-width: 100%;
-    margin: 0 auto;
-    align-items: stretch;
-  }
-  .nav-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-  }
-  .logo-cell {
-    width: 64px;
-    border-right: 1px solid #e0e0e0;
-    text-decoration: none;
-    color: #000;
-  }
-  .logo-cell svg { display: block; }
-  .center-cell {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-  .icon-cell {
-    width: 64px;
-    background: transparent;
-    border: none;
-    color: #111;
-    cursor: pointer;
-    transition: background 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
+  .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .logo-cell { width: 64px; border-right: 1px solid #e0e0e0; text-decoration: none; color: #000; }
+  .center-cell { flex: 1; position: relative; overflow: hidden; }
+  .icon-cell { width: 64px; background: transparent; border: none; cursor: pointer; color: #111; transition: background 0.15s; }
   .icon-cell:hover { background: #f9f9f9; }
-  .icon-cell svg { display: block; }
-
   #searchBtn { border-left: none; }
   #hamburger { border-left: 1px solid #e0e0e0; }
 
-  /* 搜索动画 */
-  body.searching #searchBtn svg {
-    animation: searchBloom 0.3s forwards;
-    pointer-events: none;
-  }
-  @keyframes searchBloom {
-    0%   { transform: scale(1);   opacity: 1; }
-    50%  { transform: scale(1.2); opacity: 0.8; }
-    100% { transform: scale(0.5); opacity: 0; }
-  }
+  body.searching #searchBtn svg { animation: searchBloom 0.3s forwards; pointer-events: none; }
+  @keyframes searchBloom { 0% { transform: scale(1); } 100% { transform: scale(0.5); opacity: 0; } }
 
-  /* 搜索框 */
-  .search-wrap {
-    position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 0;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-    overflow: hidden;
-  }
+  .search-wrap { position: absolute; top: 0; right: 0; bottom: 0; width: 0; background: #fff; display: flex; align-items: center; transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); overflow: hidden; }
   body.searching .search-wrap { width: 100%; }
-  .search-input {
-    width: 100%;
-    min-width: 200px;
-    height: 100%;
-    border: none;
-    background: transparent;
-    padding: 0 24px;
-    font-size: 15px;
-    color: #111;
-    outline: none;
-    line-height: 64px;
-  }
-  .search-input::placeholder { color: #999; }
+  .search-input { width: 100%; min-width: 200px; height: 100%; border: none; background: transparent; padding: 0 24px; font-size: 15px; outline: none; }
 
-  /* ============================================================
-     内容区（瀑布流）
-     ============================================================ */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 16px;
-    padding: 16px;
-    align-items: start;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
-  .gallery.js-ready {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 16px;
-  }
-  .gallery.js-ready .col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
+  /* 瀑布流 */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding: 16px; align-items: start; max-width: 1600px; margin: 0 auto; }
+  .gallery.js-ready { display: flex; align-items: flex-start; gap: 16px; }
+  .gallery.js-ready .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
   @media (orientation: portrait) and (max-width: 640px) {
-    .gallery { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-    .gallery.js-ready { gap: 10px; padding: 10px; }
+    .gallery, .gallery.js-ready { gap: 10px; padding: 10px; }
     .gallery.js-ready .col { gap: 10px; }
   }
   @media (orientation: landscape) and (max-width: 900px) {
-    .gallery { grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; }
-    .gallery.js-ready { gap: 12px; padding: 12px; }
+    .gallery, .gallery.js-ready { gap: 12px; padding: 12px; }
     .gallery.js-ready .col { gap: 12px; }
   }
 
-  /* 卡片设计 */
-  .card {
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: zoom-in;
-    transition: transform .15s ease, box-shadow .15s ease;
-    contain: layout paint style;
-  }
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
-  }
-  .card img {
-    display: block;
-    width: 100%;
-    height: auto;
-    background: #f0f0f0;
-  }
-  .card-body { padding: 12px 14px 14px; }
-  .card-body h2 {
-    margin: 0 0 6px;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: #111;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .card-meta {
-    font-size: 12px;
-    color: #666;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .card-meta span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  /* 卡片与骨架屏占位 */
+  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+  
+  .card-img-wrap { width: 100%; background: #f0f0f0; position: relative; overflow: hidden; }
+  .card-img-wrap::before { content: ''; display: block; padding-bottom: var(--ratio, 75%); }
+  .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
+  .card-img-wrap img.loaded { opacity: 1; }
+
+  .card-body { padding: 12px 14px; }
+  .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
+  .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
 
   .status { text-align: center; padding: 20px; color: #888; font-size: 13px; }
   #sentinel { height: 1px; }
 
-  /* ============================================================
-     抽屉
-     ============================================================ */
-  .drawer-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 70;
-    background: rgba(0,0,0,.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .25s;
-  }
+  /* 抽屉 */
+  .drawer-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
   body.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
-  .drawer {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 80;
-    background: #ffffff;
-    border-bottom: 1px solid #e0e0e0;
-    transform: translateY(-100%);
-    transition: transform .3s cubic-bezier(.2,.8,.2,1);
-    display: flex;
-    flex-direction: column;
-    padding: 12px 24px 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
-  }
+  .drawer { position: fixed; top: 0; left: 0; right: 0; z-index: 80; background: #fff; border-bottom: 1px solid #e0e0e0; transform: translateY(-100%); transition: transform .3s; display: flex; flex-direction: column; padding: 12px 24px 16px; }
   body.drawer-open .drawer { transform: translateY(0); }
-  
-  .drawer-head {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 4px;
-  }
-  .drawer-close {
-    width: 32px; height: 32px;
-    border: none; border-radius: 8px;
-    background: transparent; color: #666;
-    font-size: 22px; line-height: 1; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .drawer-close:hover { background: #f0f0f0; color: #000; }
-  
-  .drawer nav { display: flex; flex-direction: column; width: 100%; }
-  .drawer nav a {
-    display: block;
-    padding: 16px 0;
-    color: #444;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    text-align: center;
-    border-bottom: 1px solid #e0e0e0;
-    transition: background .15s, color .15s;
-  }
-  .drawer nav a:last-child { border-bottom: none; }
-  .drawer nav a:hover { background: #f5f5f5; color: #000; }
+  .drawer-head { display: flex; justify-content: flex-end; }
+  .drawer-close { width: 32px; height: 32px; border: none; background: transparent; font-size: 22px; cursor: pointer; }
+  .drawer nav { display: flex; flex-direction: column; }
+  .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  /* ============================================================
-     灯箱
-     ============================================================ */
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(0, 0, 0, .9);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 40px 20px;
-    overflow-y: auto;
-  }
+  /* 灯箱 */
+  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
   .lightbox.open { display: flex; }
-  
-  .lightbox-inner {
-    position: relative;
-    max-width: 1000px;
-    width: 100%;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 24px 80px rgba(0,0,0,.6);
-    overflow: hidden;
-  }
-  
-  .lb-gallery { display: flex; flex-direction: column; }
-  .lb-gallery img {
-    display: block;
-    width: 100%;
-    height: auto;
-    background: #f0f0f0;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .lb-content { padding: 24px 32px 32px; }
-  .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 700; color: #111; }
+  .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
+  .lb-gallery { display: flex; flex-direction: column; background: #f0f0f0; }
+  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; }
+  .lb-content { padding: 24px 32px; }
+  .lb-title { margin: 0 0 8px; font-size: 24px; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
-  
-  .lb-meta-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid #eee;
-  }
-  .lb-meta-item { display: flex; flex-direction: column; gap: 4px; }
-  .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .lb-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+  .lb-meta-item { display: flex; flex-direction: column; }
+  .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; }
-
-  .lb-details { font-size: 14px; color: #444; line-height: 1.6; }
-  .lb-details strong { color: #111; }
-
-  .lightbox-close {
-    position: fixed;
-    top: 20px;
-    right: 24px;
-    width: 44px; height: 44px;
-    border: none; border-radius: 50%;
-    background: rgba(255,255,255,.2);
-    color: #fff;
-    font-size: 28px; line-height: 1; cursor: pointer;
-    z-index: 101;
-    transition: background .15s;
-  }
-  .lightbox-close:hover { background: rgba(255,255,255,.4); }
-  body.lightbox-open { overflow: hidden; }
-
-  @media (max-width: 640px) {
-    .lightbox { padding: 0; }
-    .lightbox-inner { border-radius: 0; min-height: 100vh; }
-    .lb-content { padding: 20px; }
-    .lightbox-close { top: 12px; right: 12px; background: rgba(0,0,0,.5); }
-  }
+  .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
+  
+  .search-overlay { position: fixed; inset: 0; z-index: 50; display: none; background: transparent; }
 </style>
 </head>
 <body>
@@ -327,43 +106,29 @@
 <div class="topbar">
   <div class="topbar-inner">
     <a href="#" class="nav-cell logo-cell" aria-label="首页">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-      </svg>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
     </a>
     <div class="nav-cell center-cell">
       <div class="search-wrap" id="searchWrap">
         <input type="search" class="search-input" id="searchInput" placeholder="搜索标题、设计师、客户…" autocomplete="off">
       </div>
     </div>
-    <button class="nav-cell icon-cell" id="searchBtn" aria-label="搜索">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>
-      </svg>
-    </button>
-    <button class="nav-cell icon-cell" id="hamburger" aria-label="菜单">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
+    <button class="nav-cell icon-cell" id="searchBtn" aria-label="搜索"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></button>
+    <button class="nav-cell icon-cell" id="hamburger" aria-label="菜单"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   </div>
 </div>
 
-<div class="search-overlay" id="searchOverlay" style="position:fixed;inset:0;z-index:50;display:none;background:transparent;"></div>
-
+<div class="search-overlay" id="searchOverlay"></div>
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-head"><button class="drawer-close" id="drawerClose" aria-label="关闭菜单">×</button></div>
+  <div class="drawer-head"><button class="drawer-close" id="drawerClose">×</button></div>
   <nav>
-    <a href="#" data-nav="home">首页</a>
-    <a href="#" data-nav="explore">发现</a>
-    <a href="#" data-nav="collections">收藏夹</a>
-    <a href="#" data-nav="about">关于</a>
+    <a href="#">首页</a><a href="#">发现</a><a href="#">收藏夹</a><a href="#">关于</a>
   </nav>
 </aside>
 
 <main id="gallery" class="gallery"></main>
-<div id="status" class="status">正在从 data.json 加载数据，请稍候…</div>
+<div id="status" class="status">正在下载 data.json…</div>
 <div id="sentinel"></div>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
@@ -383,53 +148,43 @@
 (function () {
   'use strict';
 
-  // ==========================================
-  // 基础配置
-  // ==========================================
-  // 如果你在 data.json 中把域名去掉了，这里配置你的图床基础 URL。
-  // 如果已经是完整 http 开头，resolveUrl 会自动识别并跳过拼接。
   const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
-
+  
   function resolveUrl(url) {
     if (!url) return '';
-    return url.startsWith('http') ? url : (IMAGE_BASE_URL + url);
+    let fullUrl = url.startsWith('http') ? url : (IMAGE_BASE_URL + url);
+    return encodeURI(fullUrl);
   }
 
-  const MIN_COL             = 230;
-  const MAX_COLS            = 6;
-  const PHONE_PORTRAIT_MAX  = 640;
-  const PHONE_LANDSCAPE_MAX = 900;
-  const HEADER_EST          = 70; 
+  const MIN_COL = 230, MAX_COLS = 6;
+  const PHONE_PORTRAIT_MAX = 640, PHONE_LANDSCAPE_MAX = 900;
+  const HEADER_EST = 70; 
+  const CHUNK_SIZE = 15;
+  const MAX_SEARCH_RESULTS = 90;
 
-  // 因为要渲染的数据很多，每次向 DOM 追加 15 个
-  const CHUNK_SIZE          = 15;
-  const MAX_SEARCH_RESULTS  = 90;
-
-  const gallery       = document.getElementById('gallery');
-  const sentinel      = document.getElementById('sentinel');
-  const statusEl      = document.getElementById('status');
-  const lightbox      = document.getElementById('lightbox');
-  const lbGallery     = document.getElementById('lb-gallery');
-  const lbTitle       = document.getElementById('lb-title');
-  const lbDesigner    = document.getElementById('lb-designer');
-  const lbMetaGrid    = document.getElementById('lb-meta-grid');
-  const lbDetails     = document.getElementById('lb-details');
-
-  const searchBtn     = document.getElementById('searchBtn');
-  const searchInput   = document.getElementById('searchInput');
+  const gallery = document.getElementById('gallery');
+  const sentinel = document.getElementById('sentinel');
+  const statusEl = document.getElementById('status');
+  const lightbox = document.getElementById('lightbox');
+  const lbGallery = document.getElementById('lb-gallery');
+  const lbTitle = document.getElementById('lb-title');
+  const lbDesigner = document.getElementById('lb-designer');
+  const lbMetaGrid = document.getElementById('lb-meta-grid');
+  const lbDetails = document.getElementById('lb-details');
+  const searchBtn = document.getElementById('searchBtn');
+  const searchInput = document.getElementById('searchInput');
   const searchOverlay = document.getElementById('searchOverlay');
-
-  const hamburger     = document.getElementById('hamburger');
-  const drawer        = document.getElementById('drawer');
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('drawer');
   const drawerOverlay = document.getElementById('drawerOverlay');
-  const drawerClose   = document.getElementById('drawerClose');
+  const drawerClose = document.getElementById('drawerClose');
 
   const state = {
-    allProjects: [], // 缓存所有请求回来的原始数据
-    currentIndex: 0, // 当前渲染到哪一条了
+    allProjects: [],
+    currentIndex: 0,
     chunksPerBatch: 1,
     rootMargin: 800,
-    maxCards: 120,
+    maxCards: 300,
     loading: false,
     finished: false,
     searching: false,
@@ -444,58 +199,60 @@
     io: null,
     searchTimer: null,
     searchIndex: [],
+    currentColCount: 0
   };
 
-  /* ============================================================
-     1. 真实数据请求 (直接 fetch 本地 data.json)
-     ============================================================ */
   async function initData() {
     try {
-      // 请确保 index.html 和 data.json 在同一级目录，或者修改路径
+      statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
       const res = await fetch('./data.json');
       if (!res.ok) throw new Error('HTTP ' + res.status);
       
-      const json = await res.json();
+      const text = await res.text();
+      statusEl.textContent = '正在解析并构建搜索索引…';
       
-      // 兼容：如果有 projects 字段则取之，否则视作直接返回的数组
-      state.allProjects = json.projects ? json.projects : json;
+      await new Promise(r => setTimeout(r, 50));
       
-      statusEl.textContent = `成功加载 ${state.allProjects.length} 条数据，开始渲染…`;
-
-      // 构建搜索索引
+      const json = JSON.parse(text);
+      
+      if (Array.isArray(json)) {
+        state.allProjects = json;
+      } else if (json.projects) {
+        state.allProjects = json.projects;
+      } else {
+        state.allProjects = Object.values(json);
+      }
+      
       buildSearchIndex();
-
-      // 启动瀑布流
+      statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
+      
       loadNextBatch();
     } catch (err) {
-      console.error('加载 data.json 失败:', err);
-      statusEl.textContent = '加载 data.json 失败，请通过本地服务器（如 Live Server）访问，并确认 data.json 路径正确。';
+      console.error(err);
+      statusEl.textContent = '加载失败，请检查 data.json 路径或使用本地服务器。';
     }
   }
 
   function buildSearchIndex() {
     state.searchIndex = state.allProjects.map(rec => {
-      const types = Array.isArray(rec.type) ? rec.type : [rec.type || ''];
-      const details = Array.isArray(rec.details) ? rec.details : [rec.details || ''];
-      const sectors = Array.isArray(rec.sector) ? rec.sector : [rec.sector || ''];
+      const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
+      const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
+      const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
 
-      const hay = [
+      const haystack = [
         rec.title || '',
         rec.designer || '',
         rec.client || '',
         rec.year || '',
-        ...details,
-        ...sectors,
-        ...types
+        details,
+        sectors,
+        types
       ].join(' ').toLowerCase();
       
-      return { id: rec.id, haystack: hay, record: rec };
+      return { id: rec.id, haystack, record: rec };
     });
   }
 
-  /* ============================================================
-     2. 列数与布局计算
-     ============================================================ */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -507,10 +264,8 @@
   }
 
   function computeLoadConfig(cols, isPhonePortrait) {
-    if (cols <= 3) {
-      return { chunksPerBatch: 1, rootMargin: isPhonePortrait ? 600 : 800, maxCards: 120 };
-    }
-    return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 240 };
+    if (cols <= 3) return { chunksPerBatch: 1, rootMargin: isPhonePortrait ? 600 : 800, maxCards: 200 };
+    return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 400 };
   }
 
   function layoutCards(cards) {
@@ -530,6 +285,7 @@
     const isPhonePortrait = isPortrait && vw <= PHONE_PORTRAIT_MAX;
 
     const count = computeColumnCount(innerWidth, gap);
+    state.currentColCount = count;
     state.gap = gap;
     state.colWidth = (innerWidth - gap * (count - 1)) / count;
 
@@ -543,21 +299,12 @@
 
     cards.forEach(card => appendCardToColumn(card));
 
-    return { count, isPhonePortrait };
-  }
-
-  function buildColumns(cards) {
-    const info = layoutCards(cards);
-    if (!info) return;
-
-    const config = computeLoadConfig(info.count, info.isPhonePortrait);
-    const marginChanged = state.rootMargin !== config.rootMargin;
+    const config = computeLoadConfig(count, isPhonePortrait);
     state.chunksPerBatch = config.chunksPerBatch;
     state.maxCards = config.maxCards;
     state.rootMargin = config.rootMargin;
 
-    if (!state.searching && (marginChanged || !state.io)) setupObserver();
-    updateStatus();
+    return true;
   }
 
   function appendCardToColumn(card) {
@@ -570,66 +317,53 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  function recalcHeights() {
-    state.columnHeights = state.columns.map(col => {
-      let h = 0;
-      col.querySelectorAll('.card').forEach(card => {
-        const ratio = parseFloat(card.dataset.ratio) || 1;
-        h += state.colWidth * ratio + HEADER_EST + state.gap;
-      });
-      return h;
-    });
-  }
-
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
     article.dataset.id = record.id;
 
-    // 如果图片字段缺失，给个默认防崩溃
     if (!record.images || !record.images.length) {
-      record.images = [{
-        width: "2000", height: "1500", 
-        small: "https://via.placeholder.com/500x375?text=No+Image",
-        medium: "https://via.placeholder.com/1600x1200?text=No+Image",
-        large: "https://via.placeholder.com/2000x1500?text=No+Image"
-      }];
+      record.images = [{ width: "2000", height: "1500", small: "", medium: "", large: "" }];
     }
 
     const firstImg = record.images[0];
     const w = parseInt(firstImg.width, 10) || 2000;
     const h = parseInt(firstImg.height, 10) || 1500;
-    const ratio = h / w;
-    article.dataset.ratio = ratio.toFixed(4);
+    const ratio = (h / w) * 100;
+    article.dataset.ratio = (h / w).toFixed(4);
 
     const urlSmall = resolveUrl(firstImg.small);
     const urlMedium = resolveUrl(firstImg.medium);
     const urlLarge = resolveUrl(firstImg.large);
 
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'card-img-wrap';
+    imgWrap.style.setProperty('--ratio', ratio + '%');
+
     const img = document.createElement('img');
     img.src = urlSmall;
     img.srcset = `${urlSmall} 500w, ${urlMedium} 1600w, ${urlLarge} 2000w`;
     img.sizes = '(max-width: 640px) 50vw, (max-width: 900px) 33vw, (max-width: 1280px) 25vw, 20vw';
-    img.width = w;
-    img.height = h;
     img.loading = 'lazy';
     img.decoding = 'async';
-    img.alt = record.title || '项目图片';
+    img.alt = record.title || '图片';
+    
+    img.onload = () => img.classList.add('loaded');
+    if (img.complete) img.classList.add('loaded');
+
+    imgWrap.appendChild(img);
 
     const body = document.createElement('div');
     body.className = 'card-body';
+    body.innerHTML = `
+      <h2>${record.title || '无标题'}</h2>
+      <div class="card-meta">
+        <span>${record.designer || 'Unknown'}</span>
+        <span>${record.year || ''}</span>
+      </div>
+    `;
 
-    const h2 = document.createElement('h2');
-    h2.textContent = record.title || '无标题';
-    
-    const meta = document.createElement('div');
-    meta.className = 'card-meta';
-    meta.innerHTML = `<span>${record.designer || 'Unknown'}</span><span>${record.year || ''}</span>`;
-
-    body.appendChild(h2);
-    body.appendChild(meta);
-
-    article.appendChild(img);
+    article.appendChild(imgWrap);
     article.appendChild(body);
     article.addEventListener('click', e => {
       if (state.searching) e.stopPropagation();
@@ -638,13 +372,9 @@
     return article;
   }
 
-  /* ============================================================
-     3. 滚动加载 (从内存中取数据)
-     ============================================================ */
   async function loadNextBatch() {
     if (state.searching || state.loading || state.finished) return;
 
-    // 从全量数据中判断是否已经取完
     if (state.currentIndex >= state.allProjects.length) {
       state.finished = true;
       updateStatus();
@@ -653,32 +383,24 @@
 
     state.loading = true;
     updateStatus('渲染中…');
-
-    // 模拟微小的延迟以防阻塞主线程
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => setTimeout(r, 20)); 
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
     const nextRecords = state.allProjects.slice(state.currentIndex, state.currentIndex + batchSize);
     state.currentIndex += nextRecords.length;
 
-    try {
-      nextRecords.forEach(rec => {
-        state.records.set(rec.id, rec);
-        const card = createCard(rec);
-        state.cardQueue.push(card);
-        appendCardToColumn(card);
-      });
+    nextRecords.forEach(rec => {
+      state.records.set(rec.id, rec);
+      const card = createCard(rec);
+      state.cardQueue.push(card);
+      appendCardToColumn(card);
+    });
 
-      state.totalLoaded += nextRecords.length;
-      trimOldCards();
-      updateStatus();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      state.loading = false;
-    }
+    state.totalLoaded += nextRecords.length;
+    trimOldCards();
+    updateStatus();
+    state.loading = false;
 
-    // 如果还没填满视口，继续加载
     if (!state.finished) {
       requestAnimationFrame(() => {
         const rect = sentinel.getBoundingClientRect();
@@ -689,27 +411,33 @@
 
   function trimOldCards() {
     let removed = false;
-    // 防止 DOM 无限膨胀，超过上限时销毁最前面的卡片
     while (state.cardQueue.length > state.maxCards) {
       const old = state.cardQueue.shift();
       state.records.delete(Number(old.dataset.id));
       old.remove();
       removed = true;
     }
-    if (removed) recalcHeights();
+
+    if (removed) {
+      state.columnHeights = state.columns.map(() => 0);
+      state.cardQueue.forEach(card => {
+        const ratio = parseFloat(card.dataset.ratio) || 1;
+        let minIdx = 0;
+        for (let i = 1; i < state.columnHeights.length; i++) {
+          if (state.columnHeights[i] < state.columnHeights[minIdx]) minIdx = i;
+        }
+        state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
+      });
+    }
   }
 
   function updateStatus(text) {
-    if (text) {
-      statusEl.textContent = text;
-      return;
-    }
+    if (text) { statusEl.textContent = text; return; }
     if (state.searching) return;
     if (state.finished) {
-      statusEl.textContent = '已加载全部 ' + state.totalLoaded + ' 个项目';
+      statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
     } else {
-      statusEl.textContent =
-        '已渲染 ' + state.totalLoaded + ' 个项目 · 滚动加载更多';
+      statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
     }
   }
 
@@ -721,22 +449,16 @@
     state.io.observe(sentinel);
   }
 
-  /* ============================================================
-     4. 搜索功能
-     ============================================================ */
   function enterSearch() {
     if (state.searching) return;
     closeDrawer();
-
     state.searching = true;
     state.savedCards = state.cardQueue.slice();
     document.body.classList.add('searching');
-
     gallery.innerHTML = '';
     gallery.classList.remove('js-ready');
     state.columns = [];
     state.columnHeights = [];
-
     statusEl.textContent = '输入关键词，搜索项目信息';
     searchInput.value = '';
     setTimeout(() => searchInput.focus(), 100);
@@ -744,14 +466,12 @@
 
   function exitSearch() {
     if (!state.searching) return;
-
     state.searching = false;
     document.body.classList.remove('searching');
     searchInput.value = '';
     searchInput.blur();
     clearTimeout(state.searchTimer);
-
-    buildColumns(state.savedCards);
+    layoutCards(state.savedCards);
   }
 
   function doSearch(keyword) {
@@ -759,24 +479,24 @@
     if (!q) {
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
-      state.columns = [];
-      state.columnHeights = [];
       statusEl.textContent = '输入关键词，搜索项目信息';
       return;
     }
 
+    const terms = q.split(/\s+/).filter(Boolean);
     const matched = [];
+    
     for (let i = 0; i < state.searchIndex.length && matched.length < MAX_SEARCH_RESULTS; i++) {
       const item = state.searchIndex[i];
-      if (item.haystack.indexOf(q) !== -1) matched.push(item);
+      if (terms.every(term => item.haystack.includes(term))) {
+        matched.push(item);
+      }
     }
 
     if (!matched.length) {
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
-      state.columns = [];
-      state.columnHeights = [];
-      statusEl.textContent = '未找到匹配「' + keyword.trim() + '」的项目';
+      statusEl.textContent = `未找到匹配「${keyword.trim()}」的项目`;
       return;
     }
 
@@ -786,151 +506,9 @@
     });
 
     layoutCards(cards);
-    statusEl.textContent = '找到 ' + matched.length + ' 个匹配「' + keyword.trim() + '」的项目';
+    statusEl.textContent = `找到 ${matched.length} 个匹配「${keyword.trim()}」的项目`;
   }
 
-  searchBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    if (state.searching) exitSearch();
-    else enterSearch();
-  });
-
-  searchInput.addEventListener('input', () => {
-    clearTimeout(state.searchTimer);
-    const value = searchInput.value;
-    state.searchTimer = setTimeout(() => {
-      if (state.searching) doSearch(value);
-    }, 220);
-  });
-
-  searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      exitSearch();
-    }
-  });
-
-  document.addEventListener('click', e => {
-    if (!state.searching) return;
-    if (e.target.closest('.search-wrap')) return;
-    if (e.target.closest('#hamburger')) return;
-    if (e.target.closest('.card')) return;
-    if (e.target.closest('.lightbox')) return;
-    exitSearch();
-  });
-
-  searchOverlay.addEventListener('click', () => {
-    if (state.searching) exitSearch();
-  });
-
-  /* ============================================================
-     5. 抽屉逻辑
-     ============================================================ */
-  function openDrawer() {
-    if (state.searching) exitSearch();
-    document.body.classList.add('drawer-open');
-    drawer.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeDrawer() {
-    document.body.classList.remove('drawer-open');
-    drawer.setAttribute('aria-hidden', 'true');
-  }
-
-  hamburger.addEventListener('click', e => {
-    e.stopPropagation();
-    if (document.body.classList.contains('drawer-open')) closeDrawer();
-    else openDrawer();
-  });
-  drawerClose.addEventListener('click', closeDrawer);
-  drawerOverlay.addEventListener('click', closeDrawer);
-
-  drawer.querySelectorAll('nav a').forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      closeDrawer();
-    });
-  });
-
-  document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    if (document.body.classList.contains('drawer-open')) {
-      closeDrawer();
-    } else if (state.searching) {
-      exitSearch();
-    } else if (lightbox.classList.contains('open')) {
-      closeLightbox();
-    }
-  });
-
-  /* ============================================================
-     6. 灯箱逻辑
-     ============================================================ */
-  function openLightbox(record) {
-    lightbox.classList.add('open');
-    document.body.classList.add('lightbox-open');
-
-    lbGallery.innerHTML = '';
-    record.images.forEach(imgData => {
-      const urlMedium = resolveUrl(imgData.medium);
-      const urlLarge = resolveUrl(imgData.large);
-
-      const img = document.createElement('img');
-      img.src = urlLarge;
-      img.srcset = `${urlMedium} 1600w, ${urlLarge} 2000w`;
-      img.sizes = '(max-width: 1000px) 100vw, 1000px';
-      img.width = parseInt(imgData.width, 10) || 2000;
-      img.height = parseInt(imgData.height, 10) || 1500;
-      img.alt = record.title;
-      img.loading = 'lazy';
-      lbGallery.appendChild(img);
-    });
-
-    lbTitle.textContent = record.title || '无标题';
-    lbDesigner.textContent = `设计师: ${record.designer || '未知'}`;
-
-    const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
-    const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
-    const details = Array.isArray(record.details) ? record.details.join('<br>') : (record.details || '-');
-
-    lbMetaGrid.innerHTML = `
-      <div class="lb-meta-item">
-        <span class="lb-meta-label">年份 (Year)</span>
-        <span class="lb-meta-value">${record.year || '-'}</span>
-      </div>
-      <div class="lb-meta-item">
-        <span class="lb-meta-label">客户 (Client)</span>
-        <span class="lb-meta-value">${record.client || '-'}</span>
-      </div>
-      <div class="lb-meta-item">
-        <span class="lb-meta-label">类型 (Type)</span>
-        <span class="lb-meta-value">${types}</span>
-      </div>
-      <div class="lb-meta-item">
-        <span class="lb-meta-label">领域 (Sector)</span>
-        <span class="lb-meta-value">${sectors}</span>
-      </div>
-    `;
-
-    lbDetails.innerHTML = `<strong>详细分类 (Details):</strong><br>${details}`;
-
-    lightbox.scrollTop = 0;
-  }
-
-  function closeLightbox() {
-    lightbox.classList.remove('open');
-    document.body.classList.remove('lightbox-open');
-  }
-
-  lightbox.addEventListener('click', e => {
-    if (e.target === lightbox || e.target.closest('.lightbox-close')) {
-      closeLightbox();
-    }
-  });
-
-  /* ============================================================
-     7. 窗口尺寸变化与自适应
-     ============================================================ */
   let resizeTimer;
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
@@ -943,31 +521,97 @@
 
       const cards = state.cardQueue.slice();
       if (!cards.length) return;
-      buildColumns(cards);
 
-      if (!state.finished && !state.loading) {
-        requestAnimationFrame(() => {
-          const rect = sentinel.getBoundingClientRect();
-          if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
-        });
+      const style = getComputedStyle(gallery);
+      const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
+      const innerWidth = gallery.clientWidth - paddingX;
+      const newColCount = computeColumnCount(innerWidth, gap);
+
+      if (newColCount !== state.currentColCount) {
+        layoutCards(cards);
+        if (!state.finished && !state.loading) {
+          requestAnimationFrame(() => {
+            const rect = sentinel.getBoundingClientRect();
+            if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+          });
+        }
       }
-    }, 150);
+    }, 200);
   }
+
+  searchBtn.addEventListener('click', e => { e.stopPropagation(); state.searching ? exitSearch() : enterSearch(); });
+  searchInput.addEventListener('input', () => {
+    clearTimeout(state.searchTimer);
+    state.searchTimer = setTimeout(() => { if (state.searching) doSearch(searchInput.value); }, 300);
+  });
+  searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); exitSearch(); } });
+
+  document.addEventListener('click', e => {
+    if (!state.searching) return;
+    if (e.target.closest('.search-wrap') || e.target.closest('#hamburger') || e.target.closest('.card') || e.target.closest('.lightbox')) return;
+    exitSearch();
+  });
+  searchOverlay.addEventListener('click', () => { if (state.searching) exitSearch(); });
+
+  function openDrawer() { if (state.searching) exitSearch(); document.body.classList.add('drawer-open'); }
+  function closeDrawer() { document.body.classList.remove('drawer-open'); }
+  hamburger.addEventListener('click', e => { e.stopPropagation(); document.body.classList.contains('drawer-open') ? closeDrawer() : openDrawer(); });
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.body.classList.contains('drawer-open')) closeDrawer();
+      else if (state.searching) exitSearch();
+      else if (lightbox.classList.contains('open')) closeLightbox();
+    }
+  });
+
+  function openLightbox(record) {
+    lightbox.classList.add('open');
+    document.body.classList.add('lightbox-open');
+    lbGallery.innerHTML = '';
+    
+    record.images.forEach(imgData => {
+      const urlMedium = resolveUrl(imgData.medium);
+      const urlLarge = resolveUrl(imgData.large);
+      const img = document.createElement('img');
+      img.src = urlLarge;
+      img.srcset = `${urlMedium} 1600w, ${urlLarge} 2000w`;
+      img.sizes = '(max-width: 1000px) 100vw, 1000px';
+      img.loading = 'lazy';
+      lbGallery.appendChild(img);
+    });
+
+    lbTitle.textContent = record.title || '无标题';
+    lbDesigner.textContent = `设计师: ${record.designer || '未知'}`;
+
+    const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
+    const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
+    const details = Array.isArray(record.details) ? record.details.join('<br>') : (record.details || '-');
+
+    lbMetaGrid.innerHTML = `
+      <div class="lb-meta-item"><span class="lb-meta-label">年份</span><span class="lb-meta-value">${record.year || '-'}</span></div>
+      <div class="lb-meta-item"><span class="lb-meta-label">客户</span><span class="lb-meta-value">${record.client || '-'}</span></div>
+      <div class="lb-meta-item"><span class="lb-meta-label">类型</span><span class="lb-meta-value">${types}</span></div>
+      <div class="lb-meta-item"><span class="lb-meta-label">领域</span><span class="lb-meta-value">${sectors}</span></div>
+    `;
+    lbDetails.innerHTML = `<strong>详细分类:</strong><br>${details}`;
+    lightbox.scrollTop = 0;
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.classList.remove('lightbox-open');
+  }
+  lightbox.addEventListener('click', e => { if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox(); });
 
   window.addEventListener('resize', scheduleRelayout);
-
   const orientationMQ = window.matchMedia('(orientation: portrait)');
-  if (orientationMQ.addEventListener) {
-    orientationMQ.addEventListener('change', scheduleRelayout);
-  } else if (orientationMQ.addListener) {
-    orientationMQ.addListener(scheduleRelayout);
-  }
+  if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
 
-  // ==========================================
-  // 启动
-  // ==========================================
   initData();
-
 })();
 </script>
 </body>
