@@ -10,16 +10,12 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
-    padding-top: 65px;
-    transition: padding-top .25s ease;
+    padding-top: 65px; transition: padding-top .25s ease;
   }
   body.searching { padding-top: 124px; }
   body.lightbox-open { overflow: hidden; }
 
-  .topbar {
-    position: fixed; top: 0; left: 0; right: 0; width: 100%;
-    z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0;
-  }
+  .topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0; }
   .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
   .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
   .logo-cell { width: 64px; border-right: 1px solid #e0e0e0; text-decoration: none; color: #000; }
@@ -36,20 +32,10 @@
   body.searching .search-wrap { width: 100%; }
   .search-input { width: 100%; min-width: 200px; height: 100%; border: none; background: transparent; padding: 0 24px; font-size: 15px; outline: none; }
 
-  .search-filter-bar {
-    position: fixed; top: 64px; left: 0; right: 0; z-index: 55;
-    background: #fff; border-bottom: 1px solid #e0e0e0;
-    display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap;
-  }
+  .search-filter-bar { position: fixed; top: 64px; left: 0; right: 0; z-index: 55; background: #fff; border-bottom: 1px solid #e0e0e0; display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap; }
   body.searching .search-filter-bar { display: flex; }
-  .search-filter-bar select {
-    padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px;
-    background: #fff; font-size: 13px; color: #333; max-width: 200px; outline: none;
-  }
-  .search-filter-bar button {
-    padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px;
-    background: #f5f5f5; font-size: 13px; cursor: pointer; color: #333;
-  }
+  .search-filter-bar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-size: 13px; color: #333; max-width: 200px; outline: none; }
+  .search-filter-bar button { padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 13px; cursor: pointer; color: #333; }
   .search-filter-bar button:hover { background: #eee; }
 
   .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding: 16px; align-items: start; max-width: 1600px; margin: 0 auto; }
@@ -74,9 +60,9 @@
   .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
   .card-img-wrap img.loaded { opacity: 1; }
   .card-img-wrap.img-error::after {
-    content: '⚠'; position: absolute; inset: 0;
+    content: '⚠ 图片加载失败'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 28px; color: #c0c0c0; pointer-events: none;
+    font-size: 13px; color: #b0b0b0; pointer-events: none;
   }
 
   .card-body { padding: 12px 14px; }
@@ -84,14 +70,7 @@
   .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
   .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
 
-  .card-fav {
-    position: absolute; top: 8px; right: 8px; z-index: 2;
-    width: 34px; height: 34px; border-radius: 50%;
-    border: none; background: rgba(255,255,255,.9); color: #9a9a9a;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: transform .15s, color .15s, background .15s;
-    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-  }
+  .card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); color: #9a9a9a; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, color .15s, background .15s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
   .card-fav.active { color: #e0245e; }
   .card-fav.active svg { fill: currentColor; }
@@ -102,11 +81,7 @@
   #sentinel { height: 1px; }
 
   .load-more-wrap { text-align: center; padding: 8px 16px 24px; display: none; }
-  .load-more-btn {
-    padding: 10px 28px; border: 1px solid #ddd; border-radius: 24px;
-    background: #fff; font-size: 14px; cursor: pointer; color: #333;
-    transition: background .15s, border-color .15s;
-  }
+  .load-more-btn { padding: 10px 28px; border: 1px solid #ddd; border-radius: 24px; background: #fff; font-size: 14px; cursor: pointer; color: #333; transition: background .15s, border-color .15s; }
   .load-more-btn:hover { background: #f5f5f5; }
   .load-more-btn:disabled { opacity: .5; cursor: default; }
 
@@ -123,7 +98,7 @@
   .lightbox.open { display: flex; }
   .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
   .lb-gallery { display: flex; flex-direction: column; background: #f0f0f0; }
-  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; }
+  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
@@ -134,32 +109,14 @@
   .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
   .lightbox-close:hover { background: rgba(255,255,255,.35); }
 
-  .lb-nav {
-    position: fixed; top: 50%; transform: translateY(-50%);
-    width: 48px; height: 48px; border-radius: 50%;
-    border: none; background: rgba(255,255,255,.15); color: #fff;
-    font-size: 26px; cursor: pointer; z-index: 101;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .15s;
-  }
+  .lb-nav { position: fixed; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,255,255,.15); color: #fff; font-size: 26px; cursor: pointer; z-index: 101; display: flex; align-items: center; justify-content: center; transition: background .15s; }
   .lb-nav:hover { background: rgba(255,255,255,.35); }
   .lb-prev { left: 16px; }
   .lb-next { right: 16px; }
   .lb-nav:disabled { opacity: .25; cursor: default; }
-  .lb-counter {
-    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,.85); font-size: 14px; z-index: 101;
-    background: rgba(0,0,0,.3); padding: 4px 14px; border-radius: 14px;
-  }
+  .lb-counter { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.85); font-size: 14px; z-index: 101; background: rgba(0,0,0,.3); padding: 4px 14px; border-radius: 14px; }
 
-  .toast {
-    position: fixed; bottom: 32px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: rgba(0,0,0,.82); color: #fff;
-    padding: 10px 20px; border-radius: 8px; font-size: 14px;
-    z-index: 200; opacity: 0; pointer-events: none;
-    transition: opacity .25s, transform .25s;
-  }
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   .search-overlay { position: fixed; inset: 0; z-index: 50; display: none; background: transparent; }
@@ -232,29 +189,20 @@
   const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
   const FAV_KEY = 'gallery_favorites_v1';
 
-  /* 修复：简化 URL 解析，避免 new URL/encodeURI 对已编码 %xx 二次编码；
-     同时确保相对路径拼接时有斜杠 */
+  /* 修复：直接拼接相对路径，不做编码，避免破坏已编码字符；兼容绝对 URL */
   function resolveUrl(url) {
     if (!url) return '';
     if (/^https?:\/\//i.test(url)) return url;
-    const path = url.charAt(0) === '/' ? url : '/' + url;
-    return (IMAGE_BASE_URL + path).replace(/ /g, '%20');
+    return IMAGE_BASE_URL + (url.charAt(0) === '/' ? '' : '/') + url;
   }
 
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
-
-  function escapeRegExp(s) {
-    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
+  function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
   function highlightHtml(text, terms) {
     const safe = escapeHtml(text || '');
     if (!terms || !terms.length) return safe;
@@ -262,17 +210,14 @@
     const uniq = [...new Set(terms.filter(Boolean).map(t => escapeHtml(t)))];
     uniq.sort((a, b) => b.length - a.length);
     uniq.forEach(t => {
-      const re = new RegExp('(' + escapeRegExp(t) + ')', 'gi');
-      out = out.replace(re, '<mark>$1</mark>');
+      out = out.replace(new RegExp('(' + escapeRegExp(t) + ')', 'gi'), '<mark>$1</mark>');
     });
     return out;
   }
 
   const MIN_COL = 230, MAX_COLS = 6;
   const PHONE_PORTRAIT_MAX = 640, PHONE_LANDSCAPE_MAX = 900;
-  const HEADER_EST = 70;
-  const CHUNK_SIZE = 15;
-  const MAX_SEARCH_RESULTS = 90;
+  const HEADER_EST = 70, CHUNK_SIZE = 15, MAX_SEARCH_RESULTS = 90;
 
   const gallery = document.getElementById('gallery');
   const sentinel = document.getElementById('sentinel');
@@ -300,59 +245,30 @@
   const toastEl = document.getElementById('toast');
 
   const state = {
-    allProjects: [],
-    currentIndex: 0,
-    chunksPerBatch: 1,
-    rootMargin: 800,
-    maxCards: 300,
-    loading: false,
-    finished: false,
-    view: 'all',
-    savedCards: [],
-    columns: [],
-    columnHeights: [],
-    colWidth: 0,
-    gap: 16,
-    totalLoaded: 0,
-    records: new Map(),
-    recordById: new Map(),
-    cardQueue: [],
-    io: null,
-    searchTimer: null,
-    searchIndex: [],
-    currentColCount: 0,
-    favorites: new Set(),
-    currentTerms: [],
-    lastSearchResults: [],
-    lightboxList: [],
-    lightboxIndex: -1,
-    layoutRetry: 0
+    allProjects: [], currentIndex: 0, chunksPerBatch: 1, rootMargin: 800,
+    maxCards: 300, loading: false, finished: false, view: 'all',
+    savedCards: [], columns: [], columnHeights: [], colWidth: 0, gap: 16,
+    totalLoaded: 0, records: new Map(), recordById: new Map(),
+    cardQueue: [], io: null, searchTimer: null, searchIndex: [],
+    currentColCount: 0, favorites: new Set(), currentTerms: [],
+    lastSearchResults: [], lightboxList: [], lightboxIndex: -1
   };
 
+  /* ===== 收藏 ===== */
   function loadFavorites() {
     try {
       const raw = localStorage.getItem(FAV_KEY);
       if (raw) state.favorites = new Set(JSON.parse(raw).map(String));
-    } catch (e) {
-      console.warn('读取收藏失败', e);
-    }
+    } catch (e) { console.warn('读取收藏失败', e); }
   }
   function saveFavorites() {
-    try {
-      localStorage.setItem(FAV_KEY, JSON.stringify([...state.favorites]));
-    } catch (e) {
-      console.warn('保存收藏失败', e);
-    }
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...state.favorites])); }
+    catch (e) { console.warn('保存收藏失败', e); }
   }
   function toggleFavorite(id) {
     const key = String(id);
-    if (state.favorites.has(key)) {
-      state.favorites.delete(key);
-      showToast('已取消收藏');
-    } else {
-      state.favorites.add(key);
-      showToast('已加入收藏');
-    }
+    if (state.favorites.has(key)) { state.favorites.delete(key); showToast('已取消收藏'); }
+    else { state.favorites.add(key); showToast('已加入收藏'); }
     saveFavorites();
     updateFavoriteButtons(key);
     if (state.view === 'favorites') renderFavorites();
@@ -362,10 +278,7 @@
     document.querySelectorAll('.card').forEach(card => {
       if (String(card.dataset.id) === String(id)) {
         const btn = card.querySelector('.card-fav');
-        if (btn) {
-          btn.classList.toggle('active', active);
-          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        }
+        if (btn) { btn.classList.toggle('active', active); btn.setAttribute('aria-pressed', active ? 'true' : 'false'); }
       }
     });
   }
@@ -378,6 +291,7 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
   }
 
+  /* ===== 数据加载 ===== */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
@@ -389,12 +303,17 @@
       await new Promise(r => setTimeout(r, 30));
 
       const json = JSON.parse(text);
+      /* 修复：明确兼容三种结构，并过滤无效项 */
       if (Array.isArray(json)) {
         state.allProjects = json;
-      } else if (json.projects) {
+      } else if (json && Array.isArray(json.projects)) {
         state.allProjects = json.projects;
+      } else if (json && typeof json === 'object') {
+        state.allProjects = Object.values(json).filter(
+          v => v && typeof v === 'object' && v.id != null
+        );
       } else {
-        state.allProjects = Object.values(json);
+        state.allProjects = [];
       }
 
       state.recordById = new Map();
@@ -404,19 +323,17 @@
 
       await buildSearchIndexChunked();
       statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
-      loadNextBatch();
+      /* 修复：等一帧确保布局完成后再加载首批卡片 */
+      requestAnimationFrame(() => loadNextBatch());
     } catch (err) {
       console.error(err);
       statusEl.textContent = '';
-      statusEl.append('加载失败，请检查 data.json 路径或使用本地服务器。 ');
+      statusEl.append('加载失败：' + (err && err.message ? err.message : err) + '。');
       const btn = document.createElement('button');
       btn.className = 'load-more-btn';
       btn.style.cssText = 'margin-left:8px;padding:4px 14px;font-size:13px;';
       btn.textContent = '重试';
-      btn.addEventListener('click', () => {
-        statusEl.textContent = '正在重试…';
-        initData();
-      });
+      btn.addEventListener('click', () => { statusEl.textContent = '正在重试…'; initData(); });
       statusEl.appendChild(btn);
     }
   }
@@ -432,10 +349,8 @@
         const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
         const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
         const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
-        const haystack = [
-          rec.title || '', rec.designer || '', rec.client || '', rec.year || '',
-          details, sectors, types
-        ].join(' ').toLowerCase();
+        const haystack = [rec.title||'', rec.designer||'', rec.client||'', rec.year||'', details, sectors, types]
+          .join(' ').toLowerCase();
         state.searchIndex[j] = { id: rec.id, haystack, record: rec };
       }
       statusEl.textContent = `正在构建搜索索引… ${end}/${total}`;
@@ -444,39 +359,35 @@
   }
 
   function populateFilters() {
-    const years = new Set();
-    const types = new Set();
+    const years = new Set(), types = new Set();
     state.allProjects.forEach(rec => {
       if (rec.year) years.add(String(rec.year).trim());
       const t = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
       t.forEach(x => { if (x) types.add(String(x).trim()); });
     });
-    [...years].sort((a, b) => String(b).localeCompare(String(a), 'zh')).forEach(y => {
+    [...years].sort((a,b) => String(b).localeCompare(String(a),'zh')).forEach(y => {
       const o = document.createElement('option'); o.value = y; o.textContent = y; filterYear.appendChild(o);
     });
-    [...types].sort((a, b) => String(a).localeCompare(String(b), 'zh')).forEach(t => {
+    [...types].sort((a,b) => String(a).localeCompare(String(b),'zh')).forEach(t => {
       const o = document.createElement('option'); o.value = t; o.textContent = t; filterType.appendChild(o);
     });
   }
 
+  /* ===== URL 同步 ===== */
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
       const q = searchInput.value.trim();
-      const year = filterYear.value;
-      const type = filterType.value;
       if (q) params.set('q', q);
-      if (year) params.set('year', year);
-      if (type) params.set('type', type);
+      if (filterYear.value) params.set('year', filterYear.value);
+      if (filterType.value) params.set('type', filterType.value);
     }
     const qs = params.toString();
     history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
   }
   function restoreFromUrl() {
     const params = new URLSearchParams(location.search);
-    const q = params.get('q');
-    const year = params.get('year');
-    const type = params.get('type');
+    const q = params.get('q'), year = params.get('year'), type = params.get('type');
     if (year) filterYear.value = year;
     if (type) filterType.value = type;
     if (q || year || type) {
@@ -486,6 +397,7 @@
     }
   }
 
+  /* ===== 布局 ===== */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -501,7 +413,6 @@
     return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 400 };
   }
 
-  /* 修复：布局失败时返回 false，便于调用方重试 */
   function layoutCards(cards) {
     gallery.classList.add('js-ready');
     gallery.innerHTML = '';
@@ -511,10 +422,10 @@
     const style = getComputedStyle(gallery);
     const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
-    const innerWidth = gallery.clientWidth - paddingX;
-
-    /* 修复：容器宽度为 0 时不建立列，返回 false 让调用方重试 */
-    if (innerWidth <= 0) return false;
+    /* 修复：clientWidth 为 0 时用视口宽度兜底，避免首次布局失败 */
+    let innerWidth = gallery.clientWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) return false;
 
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -544,11 +455,10 @@
     return true;
   }
 
-  /* 修复：列未建立时先建立列，避免 appendChild undefined 报错 */
   function appendCardToColumn(card) {
     if (!state.columns.length) {
-      if (!layoutCards([])) return;
-      if (!state.columns.length) return;
+      /* 修复：列未建立时先建立，失败则丢弃卡片避免报错中断后续 */
+      if (!layoutCards([]) || !state.columns.length) return;
     }
     const ratio = parseFloat(card.dataset.ratio) || 1;
     let minIdx = 0;
@@ -568,14 +478,11 @@
       });
       return list;
     }
-    if (state.view === 'search') {
-      return state.lastSearchResults || [];
-    }
-    return state.cardQueue
-      .map(card => state.recordById.get(String(card.dataset.id)))
-      .filter(Boolean);
+    if (state.view === 'search') return state.lastSearchResults || [];
+    return state.cardQueue.map(card => state.recordById.get(String(card.dataset.id))).filter(Boolean);
   }
 
+  /* ===== 卡片：图片墙只加载 small ===== */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
@@ -584,50 +491,46 @@
     article.setAttribute('role', 'button');
     article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
 
-    if (!record.images || !record.images.length) {
-      record.images = [{ width: "2000", height: "1500", small: "", medium: "", large: "" }];
-    }
+    const images = Array.isArray(record.images) ? record.images : [];
+    const firstImg = images[0] || {};
 
-    const firstImg = record.images[0] || {};
     const w = parseInt(firstImg.width, 10) || 2000;
     const h = parseInt(firstImg.height, 10) || 1500;
-    const ratio = (h / w) * 100;
     article.dataset.ratio = (h / w).toFixed(4);
-
-    /* 修复：优先使用非空 URL，避免 small 为空导致图片不显示 */
-    const imgSmall = firstImg.small || '';
-    const imgMedium = firstImg.medium || '';
-    const imgLarge = firstImg.large || '';
-    const fallback = imgSmall || imgMedium || imgLarge;
-    const urlSmall = resolveUrl(imgSmall || fallback);
-    const urlMedium = resolveUrl(imgMedium || fallback);
-    const urlLarge = resolveUrl(imgLarge || fallback);
 
     const imgWrap = document.createElement('div');
     imgWrap.className = 'card-img-wrap';
-    imgWrap.style.setProperty('--ratio', ratio + '%');
+    imgWrap.style.setProperty('--ratio', (h / w) * 100 + '%');
 
-    /* 修复：过滤 srcset 中的空 URL */
-    const srcsetParts = [];
-    if (urlSmall) srcsetParts.push(urlSmall + ' 500w');
-    if (urlMedium) srcsetParts.push(urlMedium + ' 1600w');
-    if (urlLarge) srcsetParts.push(urlLarge + ' 2000w');
+    /* 修复：图片墙只加载最小图 small，失败时才回退 medium/large */
+    const urlSmall = resolveUrl(firstImg.small);
+    const urlMedium = resolveUrl(firstImg.medium);
+    const urlLarge = resolveUrl(firstImg.large);
+    const primaryUrl = urlSmall || urlMedium || urlLarge;
 
-    if (srcsetParts.length) {
+    if (primaryUrl) {
       const img = document.createElement('img');
-      img.src = urlSmall || urlMedium || urlLarge;
-      img.srcset = srcsetParts.join(', ');
-      img.sizes = '(max-width: 640px) 50vw, (max-width: 900px) 33vw, (max-width: 1280px) 25vw, 20vw';
+      img.src = primaryUrl;
       img.loading = 'lazy';
       img.decoding = 'async';
       img.alt = record.title || '图片';
 
       img.onload = () => img.classList.add('loaded');
       img.onerror = () => {
-        img.classList.add('error');
-        imgWrap.classList.add('img-error');
+        /* 修复：small 失败时尝试 medium，再失败显示占位 */
+        if (img.dataset.fallback) {
+          imgWrap.classList.add('img-error');
+        } else if (urlMedium && img.src !== urlMedium) {
+          img.dataset.fallback = '1';
+          img.src = urlMedium;
+        } else if (urlLarge && img.src !== urlLarge) {
+          img.dataset.fallback = '1';
+          img.src = urlLarge;
+        } else {
+          imgWrap.classList.add('img-error');
+        }
       };
-      if (img.complete) img.classList.add('loaded');
+      if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
 
       imgWrap.appendChild(img);
     } else {
@@ -647,12 +550,9 @@
 
     const meta = document.createElement('div');
     meta.className = 'card-meta';
-    const sp1 = document.createElement('span');
-    sp1.textContent = record.designer || 'Unknown';
-    const sp2 = document.createElement('span');
-    sp2.textContent = record.year || '';
-    meta.appendChild(sp1);
-    meta.appendChild(sp2);
+    const sp1 = document.createElement('span'); sp1.textContent = record.designer || 'Unknown';
+    const sp2 = document.createElement('span'); sp2.textContent = record.year || '';
+    meta.appendChild(sp1); meta.appendChild(sp2);
     body.appendChild(meta);
 
     article.appendChild(imgWrap);
@@ -664,61 +564,36 @@
     favBtn.setAttribute('aria-label', '收藏');
     favBtn.setAttribute('aria-pressed', state.favorites.has(String(record.id)) ? 'true' : 'false');
     favBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-    favBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      toggleFavorite(record.id);
-    });
+    favBtn.addEventListener('click', e => { e.stopPropagation(); toggleFavorite(record.id); });
     article.appendChild(favBtn);
 
-    article.addEventListener('click', () => {
-      openLightbox(record, getCurrentLightboxList());
-    });
+    article.addEventListener('click', () => openLightbox(record, getCurrentLightboxList()));
     article.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openLightbox(record, getCurrentLightboxList());
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(record, getCurrentLightboxList()); }
     });
     return article;
   }
 
-  /* 修复：首次加载前确保列结构已建立；await 后再次校验视图，避免与搜索竞态 */
+  /* ===== 加载 ===== */
   async function loadNextBatch() {
     if (state.view !== 'all' || state.loading || state.finished) return;
-
-    if (state.currentIndex >= state.allProjects.length) {
-      state.finished = true;
-      updateStatus();
-      return;
-    }
+    if (state.currentIndex >= state.allProjects.length) { state.finished = true; updateStatus(); return; }
 
     state.loading = true;
     updateStatus('渲染中…');
     updateLoadMore();
     await new Promise(r => setTimeout(r, 20));
 
-    if (state.view !== 'all') {
-      state.loading = false;
-      updateLoadMore();
-      return;
-    }
+    if (state.view !== 'all') { state.loading = false; updateLoadMore(); return; }
 
-    /* 修复：关键——首次加载时必须先建立瀑布流列，否则卡片无处挂载 */
+    /* 修复：首次加载确保列已建立 */
     if (!state.columns.length) {
-      const ok = layoutCards([]);
-      if (!ok || !state.columns.length) {
+      if (!layoutCards([]) || !state.columns.length) {
         state.loading = false;
-        updateStatus('等待布局…');
-        state.layoutRetry++;
-        if (state.layoutRetry < 30) {
-          setTimeout(loadNextBatch, 120);
-        } else {
-          updateStatus('布局失败，请刷新页面重试');
-        }
+        updateStatus('布局初始化失败，请刷新页面');
         return;
       }
     }
-    state.layoutRetry = 0;
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
     const nextRecords = state.allProjects.slice(state.currentIndex, state.currentIndex + batchSize);
@@ -752,7 +627,6 @@
       old.remove();
       removed = true;
     }
-
     if (removed) {
       state.columnHeights = state.columns.map(() => 0);
       state.cardQueue.forEach(card => {
@@ -768,13 +642,9 @@
 
   function updateStatus(text) {
     if (text) { statusEl.textContent = text; updateLoadMore(); return; }
-    if (state.view === 'search') { updateLoadMore(); return; }
-    if (state.view === 'favorites') { updateLoadMore(); return; }
-    if (state.finished) {
-      statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
-    } else {
-      statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
-    }
+    if (state.view === 'search' || state.view === 'favorites') { updateLoadMore(); return; }
+    if (state.finished) statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
+    else statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
     updateLoadMore();
   }
 
@@ -793,14 +663,11 @@
     state.io.observe(sentinel);
   }
 
+  /* ===== 搜索 ===== */
   function enterSearch() {
     if (state.view === 'search') return;
     closeDrawer();
-    if (state.view === 'all') {
-      state.savedCards = state.cardQueue.slice();
-    } else {
-      state.savedCards = [];
-    }
+    state.savedCards = state.view === 'all' ? state.cardQueue.slice() : [];
     state.view = 'search';
     state.currentTerms = [];
     document.body.classList.add('searching');
@@ -839,7 +706,6 @@
     const q = (keyword || '').trim().toLowerCase();
     const yearFilter = filterYear.value;
     const typeFilter = filterType.value;
-
     const hasQuery = q.length > 0;
     const hasFilter = !!yearFilter || !!typeFilter;
 
@@ -899,6 +765,7 @@
     syncUrl();
   }
 
+  /* ===== 收藏夹 ===== */
   function enterFavorites() {
     closeDrawer();
     if (state.view === 'favorites') return;
@@ -963,24 +830,15 @@
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (state.view === 'search') {
-        doSearch(searchInput.value);
-        return;
-      }
-      if (state.view === 'favorites') {
-        renderFavorites();
-        return;
-      }
-
+      if (state.view === 'search') { doSearch(searchInput.value); return; }
+      if (state.view === 'favorites') { renderFavorites(); return; }
       const cards = state.cardQueue.slice();
       if (!cards.length) return;
-
       const style = getComputedStyle(gallery);
       const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
       const innerWidth = gallery.clientWidth - paddingX;
       const newColCount = computeColumnCount(innerWidth, gap);
-
       if (newColCount !== state.currentColCount) {
         layoutCards(cards);
         if (!state.finished && !state.loading) {
@@ -993,12 +851,11 @@
     }, 200);
   }
 
-  function openDrawer() {
-    if (state.view === 'search') exitSearch();
-    document.body.classList.add('drawer-open');
-  }
+  /* ===== 抽屉 ===== */
+  function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
+  /* ===== 灯箱：只加载 large ===== */
   function openLightbox(record, list) {
     state.lightboxList = (list && list.length) ? list : [record];
     state.lightboxIndex = state.lightboxList.findIndex(r => String(r.id) === String(record.id));
@@ -1013,20 +870,27 @@
     if (!record) return;
 
     lbGallery.innerHTML = '';
-    (record.images || []).forEach(imgData => {
-      const urlMedium = resolveUrl(imgData.medium || imgData.large || imgData.small);
-      const urlLarge = resolveUrl(imgData.large || imgData.medium || imgData.small);
-      if (!urlLarge && !urlMedium) return;
+    const images = Array.isArray(record.images) ? record.images : [];
+    images.forEach(imgData => {
+      /* 修复：灯箱只加载大图 large，失败时回退 medium，再回退 small */
+      const urlLarge = resolveUrl(imgData.large);
+      const urlMedium = resolveUrl(imgData.medium);
+      const urlSmall = resolveUrl(imgData.small);
+      const primary = urlLarge || urlMedium || urlSmall;
+      if (!primary) return;
+
       const img = document.createElement('img');
-      img.src = urlLarge || urlMedium;
-      const parts = [];
-      if (urlMedium) parts.push(urlMedium + ' 1600w');
-      if (urlLarge) parts.push(urlLarge + ' 2000w');
-      if (parts.length) img.srcset = parts.join(', ');
-      img.sizes = '(max-width: 1000px) 100vw, 1000px';
+      img.src = primary;
       img.loading = 'lazy';
+      img.decoding = 'async';
       img.alt = record.title || '';
-      img.onerror = () => { img.style.display = 'none'; };
+      img.onerror = () => {
+        if (img.dataset.fallback) { img.style.display = 'none'; return; }
+        img.dataset.fallback = '1';
+        if (urlMedium && img.src !== urlMedium) img.src = urlMedium;
+        else if (urlSmall && img.src !== urlSmall) img.src = urlSmall;
+        else img.style.display = 'none';
+      };
       lbGallery.appendChild(img);
     });
 
@@ -1038,17 +902,10 @@
 
     lbMetaGrid.innerHTML = '';
     const addMeta = (label, value) => {
-      const item = document.createElement('div');
-      item.className = 'lb-meta-item';
-      const l = document.createElement('span');
-      l.className = 'lb-meta-label';
-      l.textContent = label;
-      const v = document.createElement('span');
-      v.className = 'lb-meta-value';
-      v.textContent = value;
-      item.appendChild(l);
-      item.appendChild(v);
-      lbMetaGrid.appendChild(item);
+      const item = document.createElement('div'); item.className = 'lb-meta-item';
+      const l = document.createElement('span'); l.className = 'lb-meta-label'; l.textContent = label;
+      const v = document.createElement('span'); v.className = 'lb-meta-value'; v.textContent = value;
+      item.appendChild(l); item.appendChild(v); lbMetaGrid.appendChild(item);
     };
     addMeta('年份', record.year || '-');
     addMeta('客户', record.client || '-');
@@ -1056,13 +913,10 @@
     addMeta('领域', sectors);
 
     lbDetails.innerHTML = '';
-    const strong = document.createElement('strong');
-    strong.textContent = '详细分类:';
+    const strong = document.createElement('strong'); strong.textContent = '详细分类:';
     lbDetails.appendChild(strong);
     lbDetails.appendChild(document.createElement('br'));
-    const detailsText = Array.isArray(record.details)
-      ? record.details.join('\n')
-      : (record.details || '-');
+    const detailsText = Array.isArray(record.details) ? record.details.join('\n') : (record.details || '-');
     const detailSpan = document.createElement('span');
     detailSpan.style.whiteSpace = 'pre-line';
     detailSpan.textContent = detailsText;
@@ -1075,11 +929,7 @@
     lightbox.scrollTop = 0;
   }
 
-  function closeLightbox() {
-    lightbox.classList.remove('open');
-    document.body.classList.remove('lightbox-open');
-  }
-
+  function closeLightbox() { lightbox.classList.remove('open'); document.body.classList.remove('lightbox-open'); }
   function navLightbox(delta) {
     const next = state.lightboxIndex + delta;
     if (next < 0 || next >= state.lightboxList.length) return;
@@ -1087,44 +937,31 @@
     renderLightbox();
   }
 
+  /* ===== 事件 ===== */
   searchBtn.addEventListener('click', e => {
     e.stopPropagation();
-    if (state.view === 'search') exitSearch();
-    else enterSearch();
+    if (state.view === 'search') exitSearch(); else enterSearch();
   });
   searchInput.addEventListener('input', () => {
     clearTimeout(state.searchTimer);
-    state.searchTimer = setTimeout(() => {
-      if (state.view === 'search') doSearch(searchInput.value);
-    }, 300);
+    state.searchTimer = setTimeout(() => { if (state.view === 'search') doSearch(searchInput.value); }, 300);
   });
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.preventDefault(); exitSearch(); }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      clearTimeout(state.searchTimer);
-      if (state.view === 'search') doSearch(searchInput.value);
-    }
+    if (e.key === 'Enter') { e.preventDefault(); clearTimeout(state.searchTimer); if (state.view === 'search') doSearch(searchInput.value); }
   });
 
-  filterYear.addEventListener('change', () => {
-    if (state.view === 'search') doSearch(searchInput.value);
-  });
-  filterType.addEventListener('change', () => {
-    if (state.view === 'search') doSearch(searchInput.value);
-  });
+  filterYear.addEventListener('change', () => { if (state.view === 'search') doSearch(searchInput.value); });
+  filterType.addEventListener('change', () => { if (state.view === 'search') doSearch(searchInput.value); });
   document.getElementById('clearFilters').addEventListener('click', () => {
-    filterYear.value = '';
-    filterType.value = '';
+    filterYear.value = ''; filterType.value = '';
     if (state.view === 'search') doSearch(searchInput.value);
   });
 
   document.addEventListener('click', e => {
     if (state.view !== 'search') return;
-    if (e.target.closest('.search-wrap') ||
-        e.target.closest('#hamburger') ||
-        e.target.closest('.card') ||
-        e.target.closest('.lightbox') ||
+    if (e.target.closest('.search-wrap') || e.target.closest('#hamburger') ||
+        e.target.closest('.card') || e.target.closest('.lightbox') ||
         e.target.closest('.search-filter-bar')) return;
     exitSearch();
   });
@@ -1132,8 +969,7 @@
 
   hamburger.addEventListener('click', e => {
     e.stopPropagation();
-    if (document.body.classList.contains('drawer-open')) closeDrawer();
-    else openDrawer();
+    if (document.body.classList.contains('drawer-open')) closeDrawer(); else openDrawer();
   });
   drawerClose.addEventListener('click', closeDrawer);
   drawerOverlay.addEventListener('click', closeDrawer);
@@ -1166,10 +1002,7 @@
   lbPrev.addEventListener('click', e => { e.stopPropagation(); navLightbox(-1); });
   lbNext.addEventListener('click', e => { e.stopPropagation(); navLightbox(1); });
 
-  loadMoreBtn.addEventListener('click', () => {
-    if (state.view !== 'all') return;
-    loadNextBatch();
-  });
+  loadMoreBtn.addEventListener('click', () => { if (state.view === 'all') loadNextBatch(); });
 
   window.addEventListener('resize', scheduleRelayout);
   const orientationMQ = window.matchMedia('(orientation: portrait)');
