@@ -3,28 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>瀑布流图片墙 · 导航固定</title>
+<title>瀑布流图片墙</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
-    /* 【重要修改】为固定导航栏留出 65px 的高度空间（64px高 + 1px边框） */
-    padding-top: 65px; 
+    padding-top: 65px;
+    transition: padding-top .25s ease; /* 新增：搜索模式内容下移动画 */
   }
+  /* 搜索模式下为筛选栏留出空间 */
+  body.searching { padding-top: 124px; }
+  /* 灯箱打开时锁定背景滚动（新增） */
+  body.lightbox-open { overflow: hidden; }
 
   /* 顶栏与搜索 */
-  .topbar { 
-    /* 【重要修改】从 sticky 改为 fixed，绝对固定 */
-    position: fixed; 
-    top: 0; 
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 60; 
-    background: #fff; 
-    border-bottom: 1px solid #e0e0e0; 
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; width: 100%;
+    z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0;
   }
   .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
   .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
@@ -42,6 +39,23 @@
   body.searching .search-wrap { width: 100%; }
   .search-input { width: 100%; min-width: 200px; height: 100%; border: none; background: transparent; padding: 0 24px; font-size: 15px; outline: none; }
 
+  /* 新增：搜索筛选栏 */
+  .search-filter-bar {
+    position: fixed; top: 64px; left: 0; right: 0; z-index: 55;
+    background: #fff; border-bottom: 1px solid #e0e0e0;
+    display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  body.searching .search-filter-bar { display: flex; }
+  .search-filter-bar select {
+    padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px;
+    background: #fff; font-size: 13px; color: #333; max-width: 200px; outline: none;
+  }
+  .search-filter-bar button {
+    padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px;
+    background: #f5f5f5; font-size: 13px; cursor: pointer; color: #333;
+  }
+  .search-filter-bar button:hover { background: #eee; }
+
   /* 瀑布流 */
   .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding: 16px; align-items: start; max-width: 1600px; margin: 0 auto; }
   .gallery.js-ready { display: flex; align-items: flex-start; gap: 16px; }
@@ -57,21 +71,54 @@
   }
 
   /* 卡片与骨架屏占位 */
-  .card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
+  .card { position: relative; /* 新增：为收藏按钮定位 */ background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
   .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  
+  .card:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; } /* 新增：键盘焦点可见 */
+
   .card-img-wrap { width: 100%; background: #f0f0f0; position: relative; overflow: hidden; }
   .card-img-wrap::before { content: ''; display: block; padding-bottom: var(--ratio, 75%); }
   .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
   .card-img-wrap img.loaded { opacity: 1; }
+  /* 新增：图片加载失败占位 */
+  .card-img-wrap.img-error::after {
+    content: '⚠'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #c0c0c0; pointer-events: none;
+  }
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
   .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
 
+  /* 新增：收藏按钮 */
+  .card-fav {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,.9); color: #9a9a9a;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, color .15s, background .15s;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  }
+  .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
+  .card-fav.active { color: #e0245e; }
+  .card-fav.active svg { fill: currentColor; }
+
+  /* 新增：搜索结果高亮 */
+  mark { background: #fff3a3; color: inherit; padding: 0 1px; border-radius: 2px; }
+
   .status { text-align: center; padding: 20px; color: #888; font-size: 13px; }
   #sentinel { height: 1px; }
+
+  /* 新增：加载更多按钮 */
+  .load-more-wrap { text-align: center; padding: 8px 16px 24px; display: none; }
+  .load-more-btn {
+    padding: 10px 28px; border: 1px solid #ddd; border-radius: 24px;
+    background: #fff; font-size: 14px; cursor: pointer; color: #333;
+    transition: background .15s, border-color .15s;
+  }
+  .load-more-btn:hover { background: #f5f5f5; }
+  .load-more-btn:disabled { opacity: .5; cursor: default; }
 
   /* 抽屉 */
   .drawer-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
@@ -97,7 +144,38 @@
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; }
   .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
-  
+  .lightbox-close:hover { background: rgba(255,255,255,.35); }
+
+  /* 新增：灯箱导航与序号 */
+  .lb-nav {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    width: 48px; height: 48px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,.15); color: #fff;
+    font-size: 26px; cursor: pointer; z-index: 101;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .lb-nav:hover { background: rgba(255,255,255,.35); }
+  .lb-prev { left: 16px; }
+  .lb-next { right: 16px; }
+  .lb-nav:disabled { opacity: .25; cursor: default; }
+  .lb-counter {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,.85); font-size: 14px; z-index: 101;
+    background: rgba(0,0,0,.3); padding: 4px 14px; border-radius: 14px;
+  }
+
+  /* 新增：Toast 提示 */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,.82); color: #fff;
+    padding: 10px 20px; border-radius: 8px; font-size: 14px;
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   .search-overlay { position: fixed; inset: 0; z-index: 50; display: none; background: transparent; }
 </style>
 </head>
@@ -118,20 +196,39 @@
   </div>
 </div>
 
+<!-- 新增：搜索筛选栏 -->
+<div class="search-filter-bar" id="searchFilterBar">
+  <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
+  <select id="filterType" aria-label="按类型筛选"><option value="">全部类型</option></select>
+  <button id="clearFilters" type="button">清除筛选</button>
+</div>
+
 <div class="search-overlay" id="searchOverlay"></div>
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-head"><button class="drawer-close" id="drawerClose">×</button></div>
+  <div class="drawer-head"><button class="drawer-close" id="drawerClose" aria-label="关闭菜单">×</button></div>
+  <!-- 修改：菜单项支持 data-view，用于收藏夹/首页视图切换 -->
   <nav>
-    <a href="#">首页</a><a href="#">发现</a><a href="#">收藏夹</a><a href="#">关于</a>
+    <a href="#" data-view="home">首页</a>
+    <a href="#" data-view="discover">发现</a>
+    <a href="#" data-view="favorites">收藏夹</a>
+    <a href="#" data-view="about">关于</a>
   </nav>
 </aside>
 
 <main id="gallery" class="gallery"></main>
 <div id="status" class="status">正在下载 data.json…</div>
+<!-- 新增：加载更多按钮 -->
+<div class="load-more-wrap" id="loadMoreWrap">
+  <button class="load-more-btn" id="loadMoreBtn" type="button">加载更多</button>
+</div>
 <div id="sentinel"></div>
 
-<div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
+  <!-- 新增：灯箱导航与序号 -->
+  <div class="lb-counter" id="lbCounter"></div>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="上一张">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="下一张">›</button>
   <button class="lightbox-close" aria-label="关闭">×</button>
   <div class="lightbox-inner">
     <div class="lb-gallery" id="lb-gallery"></div>
@@ -144,21 +241,62 @@
   </div>
 </div>
 
+<!-- 新增：Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
 (function () {
   'use strict';
 
   const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
-  
+  const FAV_KEY = 'gallery_favorites_v1'; /* 新增：收藏 localStorage key */
+
+  /* 修改：URL 规范化，使用 new URL 自动编码空格/中文，同时保护已编码的 %xx，避免二次编码 */
   function resolveUrl(url) {
     if (!url) return '';
-    let fullUrl = url.startsWith('http') ? url : (IMAGE_BASE_URL + url);
-    return encodeURI(fullUrl);
+    const full = /^https?:\/\//i.test(url)
+      ? url
+      : IMAGE_BASE_URL + (url.startsWith('/') ? url : '/' + url);
+    try {
+      return new URL(full).href;
+    } catch {
+      return full.replace(/ /g, '%20');
+    }
+  }
+
+  /* 新增：HTML 转义，防止 XSS */
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* 新增：正则转义 */
+  function escapeRegExp(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /* 新增：安全高亮（先转义再插入 mark） */
+  function highlightHtml(text, terms) {
+    const safe = escapeHtml(text || '');
+    if (!terms || !terms.length) return safe;
+    let out = safe;
+    const uniq = [...new Set(terms.filter(Boolean).map(t => escapeHtml(t)))];
+    uniq.sort((a, b) => b.length - a.length);
+    uniq.forEach(t => {
+      const re = new RegExp('(' + escapeRegExp(t) + ')', 'gi');
+      out = out.replace(re, '<mark>$1</mark>');
+    });
+    return out;
   }
 
   const MIN_COL = 230, MAX_COLS = 6;
   const PHONE_PORTRAIT_MAX = 640, PHONE_LANDSCAPE_MAX = 900;
-  const HEADER_EST = 70; 
+  const HEADER_EST = 70;
   const CHUNK_SIZE = 15;
   const MAX_SEARCH_RESULTS = 90;
 
@@ -171,6 +309,9 @@
   const lbDesigner = document.getElementById('lb-designer');
   const lbMetaGrid = document.getElementById('lb-meta-grid');
   const lbDetails = document.getElementById('lb-details');
+  const lbCounter = document.getElementById('lbCounter');
+  const lbPrev = document.getElementById('lbPrev');
+  const lbNext = document.getElementById('lbNext');
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
   const searchOverlay = document.getElementById('searchOverlay');
@@ -178,6 +319,11 @@
   const drawer = document.getElementById('drawer');
   const drawerOverlay = document.getElementById('drawerOverlay');
   const drawerClose = document.getElementById('drawerClose');
+  const filterYear = document.getElementById('filterYear');
+  const filterType = document.getElementById('filterType');
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  const toastEl = document.getElementById('toast');
 
   const state = {
     allProjects: [],
@@ -187,7 +333,8 @@
     maxCards: 300,
     loading: false,
     finished: false,
-    searching: false,
+    /* 修改：用 view 统一管理视图状态，替代原 searching 布尔 */
+    view: 'all', // 'all' | 'search' | 'favorites'
     savedCards: [],
     columns: [],
     columnHeights: [],
@@ -195,26 +342,82 @@
     gap: 16,
     totalLoaded: 0,
     records: new Map(),
+    recordById: new Map(), /* 新增：id -> record 全量索引 */
     cardQueue: [],
     io: null,
     searchTimer: null,
     searchIndex: [],
-    currentColCount: 0
+    currentColCount: 0,
+    favorites: new Set(), /* 新增：收藏集合 */
+    currentTerms: [],     /* 新增：当前搜索词，用于高亮 */
+    lastSearchResults: [],/* 新增：上次搜索结果，供灯箱导航 */
+    lightboxList: [],     /* 新增：灯箱当前列表 */
+    lightboxIndex: -1     /* 新增：灯箱当前索引 */
   };
 
+  /* ============ 新增：收藏相关 ============ */
+  function loadFavorites() {
+    try {
+      const raw = localStorage.getItem(FAV_KEY);
+      if (raw) state.favorites = new Set(JSON.parse(raw).map(String));
+    } catch (e) {
+      console.warn('读取收藏失败', e);
+    }
+  }
+  function saveFavorites() {
+    try {
+      localStorage.setItem(FAV_KEY, JSON.stringify([...state.favorites]));
+    } catch (e) {
+      console.warn('保存收藏失败', e);
+    }
+  }
+  function toggleFavorite(id) {
+    const key = String(id);
+    if (state.favorites.has(key)) {
+      state.favorites.delete(key);
+      showToast('已取消收藏');
+    } else {
+      state.favorites.add(key);
+      showToast('已加入收藏');
+    }
+    saveFavorites();
+    updateFavoriteButtons(key);
+    if (state.view === 'favorites') renderFavorites();
+  }
+  function updateFavoriteButtons(id) {
+    const active = state.favorites.has(String(id));
+    document.querySelectorAll('.card').forEach(card => {
+      if (String(card.dataset.id) === String(id)) {
+        const btn = card.querySelector('.card-fav');
+        if (btn) {
+          btn.classList.toggle('active', active);
+          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        }
+      }
+    });
+  }
+
+  /* ============ 新增：Toast ============ */
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  }
+
+  /* ============ 数据加载 ============ */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
       const res = await fetch('./data.json');
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      
+
       const text = await res.text();
-      statusEl.textContent = '正在解析并构建搜索索引…';
-      
-      await new Promise(r => setTimeout(r, 50));
-      
+      statusEl.textContent = '正在解析数据…';
+      await new Promise(r => setTimeout(r, 30));
+
       const json = JSON.parse(text);
-      
       if (Array.isArray(json)) {
         state.allProjects = json;
       } else if (json.projects) {
@@ -222,37 +425,103 @@
       } else {
         state.allProjects = Object.values(json);
       }
-      
-      buildSearchIndex();
+
+      /* 新增：建立 id -> record 映射，供收藏/灯箱使用 */
+      state.recordById = new Map();
+      state.allProjects.forEach(rec => {
+        if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
+      });
+
+      /* 修改：分块构建搜索索引，避免大 JSON 阻塞主线程 */
+      await buildSearchIndexChunked();
       statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
-      
       loadNextBatch();
     } catch (err) {
       console.error(err);
-      statusEl.textContent = '加载失败，请检查 data.json 路径或使用本地服务器。';
+      /* 修改：加载失败提供重试按钮 */
+      statusEl.textContent = '';
+      statusEl.append('加载失败，请检查 data.json 路径或使用本地服务器。 ');
+      const btn = document.createElement('button');
+      btn.className = 'load-more-btn';
+      btn.style.cssText = 'margin-left:8px;padding:4px 14px;font-size:13px;';
+      btn.textContent = '重试';
+      btn.addEventListener('click', () => {
+        statusEl.textContent = '正在重试…';
+        initData();
+      });
+      statusEl.appendChild(btn);
     }
   }
 
-  function buildSearchIndex() {
-    state.searchIndex = state.allProjects.map(rec => {
-      const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
-      const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
-      const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
+  /* 修改：分块构建索引，每块让出主线程 */
+  async function buildSearchIndexChunked() {
+    const total = state.allProjects.length;
+    state.searchIndex = new Array(total);
+    const CHUNK = 800;
+    for (let i = 0; i < total; i += CHUNK) {
+      const end = Math.min(i + CHUNK, total);
+      for (let j = i; j < end; j++) {
+        const rec = state.allProjects[j] || {};
+        const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
+        const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
+        const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
+        const haystack = [
+          rec.title || '', rec.designer || '', rec.client || '', rec.year || '',
+          details, sectors, types
+        ].join(' ').toLowerCase();
+        state.searchIndex[j] = { id: rec.id, haystack, record: rec };
+      }
+      statusEl.textContent = `正在构建搜索索引… ${end}/${total}`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
 
-      const haystack = [
-        rec.title || '',
-        rec.designer || '',
-        rec.client || '',
-        rec.year || '',
-        details,
-        sectors,
-        types
-      ].join(' ').toLowerCase();
-      
-      return { id: rec.id, haystack, record: rec };
+  /* ============ 新增：筛选下拉填充 ============ */
+  function populateFilters() {
+    const years = new Set();
+    const types = new Set();
+    state.allProjects.forEach(rec => {
+      if (rec.year) years.add(String(rec.year).trim());
+      const t = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
+      t.forEach(x => { if (x) types.add(String(x).trim()); });
+    });
+    [...years].sort((a, b) => String(b).localeCompare(String(a), 'zh')).forEach(y => {
+      const o = document.createElement('option'); o.value = y; o.textContent = y; filterYear.appendChild(o);
+    });
+    [...types].sort((a, b) => String(a).localeCompare(String(b), 'zh')).forEach(t => {
+      const o = document.createElement('option'); o.value = t; o.textContent = t; filterType.appendChild(o);
     });
   }
 
+  /* ============ 新增：URL 同步 ============ */
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.view === 'search') {
+      const q = searchInput.value.trim();
+      const year = filterYear.value;
+      const type = filterType.value;
+      if (q) params.set('q', q);
+      if (year) params.set('year', year);
+      if (type) params.set('type', type);
+    }
+    const qs = params.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+  }
+  function restoreFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    const year = params.get('year');
+    const type = params.get('type');
+    if (year) filterYear.value = year;
+    if (type) filterType.value = type;
+    if (q || year || type) {
+      enterSearch();
+      searchInput.value = q || '';
+      doSearch(q || '');
+    }
+  }
+
+  /* ============ 布局 ============ */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -304,6 +573,7 @@
     state.maxCards = config.maxCards;
     state.rootMargin = config.rootMargin;
 
+    updateLoadMore(); /* 新增：布局后同步加载按钮状态 */
     return true;
   }
 
@@ -317,10 +587,33 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
+  /* ============ 新增：获取当前灯箱应使用的记录列表 ============ */
+  function getCurrentLightboxList() {
+    if (state.view === 'favorites') {
+      const list = [];
+      state.favorites.forEach(id => {
+        const r = state.recordById.get(String(id));
+        if (r) list.push(r);
+      });
+      return list;
+    }
+    if (state.view === 'search') {
+      return state.lastSearchResults || [];
+    }
+    return state.cardQueue
+      .map(card => state.recordById.get(String(card.dataset.id)))
+      .filter(Boolean);
+  }
+
+  /* ============ 卡片 ============ */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
     article.dataset.id = record.id;
+    /* 新增：可访问性 */
+    article.setAttribute('tabindex', '0');
+    article.setAttribute('role', 'button');
+    article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
 
     if (!record.images || !record.images.length) {
       record.images = [{ width: "2000", height: "1500", small: "", medium: "", large: "" }];
@@ -347,33 +640,72 @@
     img.loading = 'lazy';
     img.decoding = 'async';
     img.alt = record.title || '图片';
-    
+
     img.onload = () => img.classList.add('loaded');
+    /* 新增：图片加载失败占位 */
+    img.onerror = () => {
+      img.classList.add('error');
+      imgWrap.classList.add('img-error');
+    };
     if (img.complete) img.classList.add('loaded');
 
     imgWrap.appendChild(img);
 
     const body = document.createElement('div');
     body.className = 'card-body';
-    body.innerHTML = `
-      <h2>${record.title || '无标题'}</h2>
-      <div class="card-meta">
-        <span>${record.designer || 'Unknown'}</span>
-        <span>${record.year || ''}</span>
-      </div>
-    `;
+
+    const h2 = document.createElement('h2');
+    /* 修改：搜索时安全高亮标题，其余用 textContent 防 XSS */
+    if (state.currentTerms && state.currentTerms.length) {
+      h2.innerHTML = highlightHtml(record.title || '无标题', state.currentTerms);
+    } else {
+      h2.textContent = record.title || '无标题';
+    }
+    body.appendChild(h2);
+
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    const sp1 = document.createElement('span');
+    sp1.textContent = record.designer || 'Unknown';
+    const sp2 = document.createElement('span');
+    sp2.textContent = record.year || '';
+    meta.appendChild(sp1);
+    meta.appendChild(sp2);
+    body.appendChild(meta);
 
     article.appendChild(imgWrap);
     article.appendChild(body);
-    article.addEventListener('click', e => {
-      if (state.searching) e.stopPropagation();
-      openLightbox(record);
+
+    /* 新增：收藏按钮 */
+    const favBtn = document.createElement('button');
+    favBtn.className = 'card-fav' + (state.favorites.has(String(record.id)) ? ' active' : '');
+    favBtn.type = 'button';
+    favBtn.setAttribute('aria-label', '收藏');
+    favBtn.setAttribute('aria-pressed', state.favorites.has(String(record.id)) ? 'true' : 'false');
+    favBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    favBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavorite(record.id);
+    });
+    article.appendChild(favBtn);
+
+    article.addEventListener('click', () => {
+      openLightbox(record, getCurrentLightboxList());
+    });
+    /* 新增：键盘打开 */
+    article.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(record, getCurrentLightboxList());
+      }
     });
     return article;
   }
 
+  /* ============ 加载 ============ */
   async function loadNextBatch() {
-    if (state.searching || state.loading || state.finished) return;
+    /* 修改：仅在 all 视图自动加载 */
+    if (state.view !== 'all' || state.loading || state.finished) return;
 
     if (state.currentIndex >= state.allProjects.length) {
       state.finished = true;
@@ -383,14 +715,15 @@
 
     state.loading = true;
     updateStatus('渲染中…');
-    await new Promise(r => setTimeout(r, 20)); 
+    updateLoadMore();
+    await new Promise(r => setTimeout(r, 20));
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
     const nextRecords = state.allProjects.slice(state.currentIndex, state.currentIndex + batchSize);
     state.currentIndex += nextRecords.length;
 
     nextRecords.forEach(rec => {
-      state.records.set(rec.id, rec);
+      state.records.set(String(rec.id), rec);
       const card = createCard(rec);
       state.cardQueue.push(card);
       appendCardToColumn(card);
@@ -398,8 +731,8 @@
 
     state.totalLoaded += nextRecords.length;
     trimOldCards();
-    updateStatus();
     state.loading = false;
+    updateStatus();
 
     if (!state.finished) {
       requestAnimationFrame(() => {
@@ -413,7 +746,8 @@
     let removed = false;
     while (state.cardQueue.length > state.maxCards) {
       const old = state.cardQueue.shift();
-      state.records.delete(Number(old.dataset.id));
+      /* 修改：统一 String 删除，避免数字/字符串不匹配 */
+      state.records.delete(String(old.dataset.id));
       old.remove();
       removed = true;
     }
@@ -432,13 +766,23 @@
   }
 
   function updateStatus(text) {
-    if (text) { statusEl.textContent = text; return; }
-    if (state.searching) return;
+    if (text) { statusEl.textContent = text; updateLoadMore(); return; }
+    if (state.view === 'search') { updateLoadMore(); return; }
+    if (state.view === 'favorites') { updateLoadMore(); return; }
     if (state.finished) {
       statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
     } else {
       statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
     }
+    updateLoadMore();
+  }
+
+  /* 新增：加载更多按钮状态 */
+  function updateLoadMore() {
+    const show = state.view === 'all' && !state.finished;
+    loadMoreWrap.style.display = show ? 'block' : 'none';
+    loadMoreBtn.disabled = state.loading;
+    loadMoreBtn.textContent = state.loading ? '加载中…' : '加载更多';
   }
 
   function setupObserver() {
@@ -449,73 +793,186 @@
     state.io.observe(sentinel);
   }
 
+  /* ============ 搜索 ============ */
   function enterSearch() {
-    if (state.searching) return;
+    if (state.view === 'search') return;
     closeDrawer();
-    state.searching = true;
-    state.savedCards = state.cardQueue.slice();
+    /* 修改：保存当前 all 视图卡片，退出搜索时恢复 */
+    if (state.view === 'all') state.savedCards = state.cardQueue.slice();
+    else state.savedCards = state.cardQueue.slice();
+    state.view = 'search';
+    state.currentTerms = [];
     document.body.classList.add('searching');
     gallery.innerHTML = '';
     gallery.classList.remove('js-ready');
     state.columns = [];
     state.columnHeights = [];
-    statusEl.textContent = '输入关键词，搜索项目信息';
-    searchInput.value = '';
+    statusEl.textContent = '输入关键词或选择筛选条件';
     setTimeout(() => searchInput.focus(), 100);
+    updateLoadMore();
   }
 
   function exitSearch() {
-    if (!state.searching) return;
-    state.searching = false;
+    if (state.view !== 'search') return;
+    state.view = 'all';
     document.body.classList.remove('searching');
     searchInput.value = '';
     searchInput.blur();
     clearTimeout(state.searchTimer);
-    layoutCards(state.savedCards);
+    filterYear.value = '';
+    filterType.value = '';
+    state.currentTerms = [];
+    state.lastSearchResults = [];
+    const cards = state.savedCards.length ? state.savedCards : state.cardQueue.slice();
+    state.savedCards = [];
+    layoutCards(cards);
+    updateStatus();
+    history.replaceState(null, '', location.pathname);
+    requestAnimationFrame(() => {
+      const rect = sentinel.getBoundingClientRect();
+      if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+    });
   }
 
   function doSearch(keyword) {
-    const q = keyword.trim().toLowerCase();
-    if (!q) {
+    const q = (keyword || '').trim().toLowerCase();
+    const yearFilter = filterYear.value;
+    const typeFilter = filterType.value;
+
+    const hasQuery = q.length > 0;
+    const hasFilter = !!yearFilter || !!typeFilter;
+
+    if (!hasQuery && !hasFilter) {
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
-      statusEl.textContent = '输入关键词，搜索项目信息';
+      state.currentTerms = [];
+      state.lastSearchResults = [];
+      statusEl.textContent = '输入关键词或选择筛选条件';
+      syncUrl();
       return;
     }
 
     const terms = q.split(/\s+/).filter(Boolean);
+    state.currentTerms = terms;
     const matched = [];
-    
-    for (let i = 0; i < state.searchIndex.length && matched.length < MAX_SEARCH_RESULTS; i++) {
+    let totalMatched = 0;
+
+    for (let i = 0; i < state.searchIndex.length; i++) {
       const item = state.searchIndex[i];
-      if (terms.every(term => item.haystack.includes(term))) {
-        matched.push(item);
+      if (!item) continue;
+      if (terms.length && !terms.every(term => item.haystack.includes(term))) continue;
+      const rec = item.record;
+      if (yearFilter && String(rec.year || '').trim() !== yearFilter) continue;
+      if (typeFilter) {
+        const t = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
+        if (!t.map(String).includes(typeFilter)) continue;
       }
+      totalMatched++;
+      /* 修改：限制渲染数量，但统计总数 */
+      if (matched.length < MAX_SEARCH_RESULTS) matched.push(item);
     }
 
     if (!matched.length) {
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
-      statusEl.textContent = `未找到匹配「${keyword.trim()}」的项目`;
+      state.lastSearchResults = [];
+      statusEl.textContent = `未找到匹配的项目`;
+      syncUrl();
       return;
     }
 
-    const cards = matched.map(item => {
-      state.records.set(item.record.id, item.record);
-      return createCard(item.record);
+    const records = matched.map(item => item.record);
+    state.lastSearchResults = records;
+    const cards = records.map(rec => {
+      state.records.set(String(rec.id), rec);
+      return createCard(rec);
     });
 
     layoutCards(cards);
-    statusEl.textContent = `找到 ${matched.length} 个匹配「${keyword.trim()}」的项目`;
+
+    const filterDesc = [q, yearFilter, typeFilter].filter(Boolean).join(' · ');
+    /* 修改：明确告知总匹配数与实际显示数 */
+    if (totalMatched > MAX_SEARCH_RESULTS) {
+      statusEl.textContent = `共 ${totalMatched} 个匹配「${filterDesc}」，显示前 ${MAX_SEARCH_RESULTS} 个`;
+    } else {
+      statusEl.textContent = `找到 ${totalMatched} 个匹配「${filterDesc}」的项目`;
+    }
+    syncUrl();
   }
 
+  /* ============ 新增：收藏夹视图 ============ */
+  function enterFavorites() {
+    closeDrawer();
+    if (state.view === 'favorites') return;
+    if (state.view === 'search') {
+      document.body.classList.remove('searching');
+      searchInput.value = '';
+      filterYear.value = '';
+      filterType.value = '';
+      state.currentTerms = [];
+      state.lastSearchResults = [];
+      clearTimeout(state.searchTimer);
+    }
+    state.view = 'favorites';
+    state.currentTerms = [];
+    history.replaceState(null, '', location.pathname);
+    renderFavorites();
+  }
+
+  function renderFavorites() {
+    const favRecords = [];
+    state.favorites.forEach(id => {
+      const rec = state.recordById.get(String(id));
+      if (rec) favRecords.push(rec);
+    });
+
+    if (!favRecords.length) {
+      gallery.innerHTML = '';
+      gallery.classList.remove('js-ready');
+      state.columns = [];
+      state.columnHeights = [];
+      statusEl.textContent = '暂无收藏，点击卡片右上角 ♥ 收藏';
+      updateLoadMore();
+      return;
+    }
+
+    const cards = favRecords.map(rec => {
+      state.records.set(String(rec.id), rec);
+      return createCard(rec);
+    });
+    layoutCards(cards);
+    statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
+  }
+
+  /* 新增：回到首页（all 视图） */
+  function goHome() {
+    closeDrawer();
+    if (state.view === 'search') { exitSearch(); return; }
+    if (state.view === 'favorites') {
+      state.view = 'all';
+      state.currentTerms = [];
+      const cards = state.savedCards.length ? state.savedCards : state.cardQueue.slice();
+      state.savedCards = [];
+      layoutCards(cards);
+      updateStatus();
+      requestAnimationFrame(() => {
+        const rect = sentinel.getBoundingClientRect();
+        if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+      });
+    }
+  }
+
+  /* ============ 响应式 ============ */
   let resizeTimer;
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (state.searching) {
-        const q = searchInput.value.trim();
-        if (q) doSearch(q);
+      if (state.view === 'search') {
+        doSearch(searchInput.value);
+        return;
+      }
+      if (state.view === 'favorites') {
+        renderFavorites();
         return;
       }
 
@@ -540,40 +997,29 @@
     }, 200);
   }
 
-  searchBtn.addEventListener('click', e => { e.stopPropagation(); state.searching ? exitSearch() : enterSearch(); });
-  searchInput.addEventListener('input', () => {
-    clearTimeout(state.searchTimer);
-    state.searchTimer = setTimeout(() => { if (state.searching) doSearch(searchInput.value); }, 300);
-  });
-  searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); exitSearch(); } });
-
-  document.addEventListener('click', e => {
-    if (!state.searching) return;
-    if (e.target.closest('.search-wrap') || e.target.closest('#hamburger') || e.target.closest('.card') || e.target.closest('.lightbox')) return;
-    exitSearch();
-  });
-  searchOverlay.addEventListener('click', () => { if (state.searching) exitSearch(); });
-
-  function openDrawer() { if (state.searching) exitSearch(); document.body.classList.add('drawer-open'); }
+  /* ============ 抽屉 ============ */
+  function openDrawer() {
+    if (state.view === 'search') exitSearch();
+    document.body.classList.add('drawer-open');
+  }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
-  hamburger.addEventListener('click', e => { e.stopPropagation(); document.body.classList.contains('drawer-open') ? closeDrawer() : openDrawer(); });
-  drawerClose.addEventListener('click', closeDrawer);
-  drawerOverlay.addEventListener('click', closeDrawer);
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      if (document.body.classList.contains('drawer-open')) closeDrawer();
-      else if (state.searching) exitSearch();
-      else if (lightbox.classList.contains('open')) closeLightbox();
-    }
-  });
-
-  function openLightbox(record) {
+  /* ============ 灯箱 ============ */
+  function openLightbox(record, list) {
+    state.lightboxList = (list && list.length) ? list : [record];
+    state.lightboxIndex = state.lightboxList.findIndex(r => String(r.id) === String(record.id));
+    if (state.lightboxIndex < 0) state.lightboxIndex = 0;
+    renderLightbox();
     lightbox.classList.add('open');
     document.body.classList.add('lightbox-open');
+  }
+
+  function renderLightbox() {
+    const record = state.lightboxList[state.lightboxIndex];
+    if (!record) return;
+
     lbGallery.innerHTML = '';
-    
-    record.images.forEach(imgData => {
+    (record.images || []).forEach(imgData => {
       const urlMedium = resolveUrl(imgData.medium);
       const urlLarge = resolveUrl(imgData.large);
       const img = document.createElement('img');
@@ -581,23 +1027,55 @@
       img.srcset = `${urlMedium} 1600w, ${urlLarge} 2000w`;
       img.sizes = '(max-width: 1000px) 100vw, 1000px';
       img.loading = 'lazy';
+      img.alt = record.title || '';
+      img.onerror = () => { img.style.display = 'none'; };
       lbGallery.appendChild(img);
     });
 
+    /* 修改：全部使用 textContent 构建，避免 XSS */
     lbTitle.textContent = record.title || '无标题';
     lbDesigner.textContent = `设计师: ${record.designer || '未知'}`;
 
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
-    const details = Array.isArray(record.details) ? record.details.join('<br>') : (record.details || '-');
 
-    lbMetaGrid.innerHTML = `
-      <div class="lb-meta-item"><span class="lb-meta-label">年份</span><span class="lb-meta-value">${record.year || '-'}</span></div>
-      <div class="lb-meta-item"><span class="lb-meta-label">客户</span><span class="lb-meta-value">${record.client || '-'}</span></div>
-      <div class="lb-meta-item"><span class="lb-meta-label">类型</span><span class="lb-meta-value">${types}</span></div>
-      <div class="lb-meta-item"><span class="lb-meta-label">领域</span><span class="lb-meta-value">${sectors}</span></div>
-    `;
-    lbDetails.innerHTML = `<strong>详细分类:</strong><br>${details}`;
+    lbMetaGrid.innerHTML = '';
+    const addMeta = (label, value) => {
+      const item = document.createElement('div');
+      item.className = 'lb-meta-item';
+      const l = document.createElement('span');
+      l.className = 'lb-meta-label';
+      l.textContent = label;
+      const v = document.createElement('span');
+      v.className = 'lb-meta-value';
+      v.textContent = value;
+      item.appendChild(l);
+      item.appendChild(v);
+      lbMetaGrid.appendChild(item);
+    };
+    addMeta('年份', record.year || '-');
+    addMeta('客户', record.client || '-');
+    addMeta('类型', types);
+    addMeta('领域', sectors);
+
+    lbDetails.innerHTML = '';
+    const strong = document.createElement('strong');
+    strong.textContent = '详细分类:';
+    lbDetails.appendChild(strong);
+    lbDetails.appendChild(document.createElement('br'));
+    const detailsText = Array.isArray(record.details)
+      ? record.details.join('\n')
+      : (record.details || '-');
+    const detailSpan = document.createElement('span');
+    detailSpan.style.whiteSpace = 'pre-line';
+    detailSpan.textContent = detailsText;
+    lbDetails.appendChild(detailSpan);
+
+    /* 新增：序号与导航按钮状态 */
+    lbCounter.textContent = `${state.lightboxIndex + 1} / ${state.lightboxList.length}`;
+    lbPrev.disabled = state.lightboxIndex <= 0;
+    lbNext.disabled = state.lightboxIndex >= state.lightboxList.length - 1;
+
     lightbox.scrollTop = 0;
   }
 
@@ -605,13 +1083,120 @@
     lightbox.classList.remove('open');
     document.body.classList.remove('lightbox-open');
   }
-  lightbox.addEventListener('click', e => { if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox(); });
+
+  /* 新增：灯箱左右切换 */
+  function navLightbox(delta) {
+    const next = state.lightboxIndex + delta;
+    if (next < 0 || next >= state.lightboxList.length) return;
+    state.lightboxIndex = next;
+    renderLightbox();
+  }
+
+  /* ============ 事件绑定 ============ */
+  searchBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (state.view === 'search') exitSearch();
+    else enterSearch();
+  });
+  searchInput.addEventListener('input', () => {
+    clearTimeout(state.searchTimer);
+    state.searchTimer = setTimeout(() => {
+      if (state.view === 'search') doSearch(searchInput.value);
+    }, 300);
+  });
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); exitSearch(); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(state.searchTimer);
+      if (state.view === 'search') doSearch(searchInput.value);
+    }
+  });
+
+  /* 新增：筛选变化重新搜索 */
+  filterYear.addEventListener('change', () => {
+    if (state.view === 'search') doSearch(searchInput.value);
+  });
+  filterType.addEventListener('change', () => {
+    if (state.view === 'search') doSearch(searchInput.value);
+  });
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    filterYear.value = '';
+    filterType.value = '';
+    if (state.view === 'search') doSearch(searchInput.value);
+  });
+
+  document.addEventListener('click', e => {
+    if (state.view !== 'search') return;
+    if (e.target.closest('.search-wrap') ||
+        e.target.closest('#hamburger') ||
+        e.target.closest('.card') ||
+        e.target.closest('.lightbox') ||
+        e.target.closest('.search-filter-bar')) return;
+    exitSearch();
+  });
+  searchOverlay.addEventListener('click', () => { if (state.view === 'search') exitSearch(); });
+
+  hamburger.addEventListener('click', e => {
+    e.stopPropagation();
+    if (document.body.classList.contains('drawer-open')) closeDrawer();
+    else openDrawer();
+  });
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+
+  /* 新增：抽屉视图切换 */
+  drawer.querySelectorAll('a[data-view]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const v = a.dataset.view;
+      if (v === 'favorites') enterFavorites();
+      else if (v === 'home') goHome();
+      else { closeDrawer(); showToast('该功能暂未开放'); }
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    /* 新增：灯箱优先级最高 */
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); navLightbox(-1); return; }
+      if (e.key === 'ArrowRight') { e.preventDefault(); navLightbox(1); return; }
+    }
+    if (e.key === 'Escape') {
+      if (document.body.classList.contains('drawer-open')) closeDrawer();
+      else if (state.view === 'search') exitSearch();
+    }
+  });
+
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox();
+  });
+  /* 新增：灯箱导航按钮 */
+  lbPrev.addEventListener('click', e => { e.stopPropagation(); navLightbox(-1); });
+  lbNext.addEventListener('click', e => { e.stopPropagation(); navLightbox(1); });
+
+  /* 新增：加载更多按钮 */
+  loadMoreBtn.addEventListener('click', () => {
+    if (state.view !== 'all') return;
+    loadNextBatch();
+  });
 
   window.addEventListener('resize', scheduleRelayout);
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
 
-  initData();
+  /* ============ 初始化 ============ */
+  async function init() {
+    loadFavorites();
+    await initData();
+    populateFilters();
+    restoreFromUrl();
+    setupObserver();
+    updateLoadMore();
+  }
+
+  init();
 })();
 </script>
 </body>
