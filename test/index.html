@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>瀑布流图片墙 · 导航固定</title>
+<title>瀑布流图片墙</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
-    /* 【重要修改】为固定导航栏留出 65px 的高度空间（64px高 + 1px边框） */
     padding-top: 65px; 
   }
 
   /* 顶栏与搜索 */
   .topbar { 
-    /* 【重要修改】从 sticky 改为 fixed，绝对固定 */
     position: fixed; 
     top: 0; 
     left: 0;
