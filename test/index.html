@@ -203,7 +203,7 @@
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
-      const res = await fetch('./data.json');
+      const res = await fetch('https://a-g-i.org/data.json');
       if (!res.ok) throw new Error('HTTP ' + res.status);
       
       const text = await res.text();
