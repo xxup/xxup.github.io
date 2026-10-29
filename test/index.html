@@ -11,14 +11,11 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
     padding-top: 65px;
-    transition: padding-top .25s ease; /* 新增：搜索模式内容下移动画 */
+    transition: padding-top .25s ease;
   }
-  /* 搜索模式下为筛选栏留出空间 */
   body.searching { padding-top: 124px; }
-  /* 灯箱打开时锁定背景滚动（新增） */
   body.lightbox-open { overflow: hidden; }
 
-  /* 顶栏与搜索 */
   .topbar {
     position: fixed; top: 0; left: 0; right: 0; width: 100%;
     z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0;
@@ -39,7 +36,6 @@
   body.searching .search-wrap { width: 100%; }
   .search-input { width: 100%; min-width: 200px; height: 100%; border: none; background: transparent; padding: 0 24px; font-size: 15px; outline: none; }
 
-  /* 新增：搜索筛选栏 */
   .search-filter-bar {
     position: fixed; top: 64px; left: 0; right: 0; z-index: 55;
     background: #fff; border-bottom: 1px solid #e0e0e0;
@@ -56,7 +52,6 @@
   }
   .search-filter-bar button:hover { background: #eee; }
 
-  /* 瀑布流 */
   .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding: 16px; align-items: start; max-width: 1600px; margin: 0 auto; }
   .gallery.js-ready { display: flex; align-items: flex-start; gap: 16px; }
   .gallery.js-ready .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
@@ -70,16 +65,14 @@
     .gallery.js-ready .col { gap: 12px; }
   }
 
-  /* 卡片与骨架屏占位 */
-  .card { position: relative; /* 新增：为收藏按钮定位 */ background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
+  .card { position: relative; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
   .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-  .card:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; } /* 新增：键盘焦点可见 */
+  .card:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
 
   .card-img-wrap { width: 100%; background: #f0f0f0; position: relative; overflow: hidden; }
   .card-img-wrap::before { content: ''; display: block; padding-bottom: var(--ratio, 75%); }
   .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
   .card-img-wrap img.loaded { opacity: 1; }
-  /* 新增：图片加载失败占位 */
   .card-img-wrap.img-error::after {
     content: '⚠'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -91,7 +84,6 @@
   .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; }
   .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
 
-  /* 新增：收藏按钮 */
   .card-fav {
     position: absolute; top: 8px; right: 8px; z-index: 2;
     width: 34px; height: 34px; border-radius: 50%;
@@ -104,13 +96,11 @@
   .card-fav.active { color: #e0245e; }
   .card-fav.active svg { fill: currentColor; }
 
-  /* 新增：搜索结果高亮 */
   mark { background: #fff3a3; color: inherit; padding: 0 1px; border-radius: 2px; }
 
   .status { text-align: center; padding: 20px; color: #888; font-size: 13px; }
   #sentinel { height: 1px; }
 
-  /* 新增：加载更多按钮 */
   .load-more-wrap { text-align: center; padding: 8px 16px 24px; display: none; }
   .load-more-btn {
     padding: 10px 28px; border: 1px solid #ddd; border-radius: 24px;
@@ -120,7 +110,6 @@
   .load-more-btn:hover { background: #f5f5f5; }
   .load-more-btn:disabled { opacity: .5; cursor: default; }
 
-  /* 抽屉 */
   .drawer-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
   body.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
   .drawer { position: fixed; top: 0; left: 0; right: 0; z-index: 80; background: #fff; border-bottom: 1px solid #e0e0e0; transform: translateY(-100%); transition: transform .3s; display: flex; flex-direction: column; padding: 12px 24px 16px; }
@@ -130,7 +119,6 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  /* 灯箱 */
   .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
   .lightbox.open { display: flex; }
   .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
@@ -146,7 +134,6 @@
   .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
   .lightbox-close:hover { background: rgba(255,255,255,.35); }
 
-  /* 新增：灯箱导航与序号 */
   .lb-nav {
     position: fixed; top: 50%; transform: translateY(-50%);
     width: 48px; height: 48px; border-radius: 50%;
@@ -165,7 +152,6 @@
     background: rgba(0,0,0,.3); padding: 4px 14px; border-radius: 14px;
   }
 
-  /* 新增：Toast 提示 */
   .toast {
     position: fixed; bottom: 32px; left: 50%;
     transform: translateX(-50%) translateY(20px);
@@ -196,7 +182,6 @@
   </div>
 </div>
 
-<!-- 新增：搜索筛选栏 -->
 <div class="search-filter-bar" id="searchFilterBar">
   <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
   <select id="filterType" aria-label="按类型筛选"><option value="">全部类型</option></select>
@@ -207,7 +192,6 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawer-head"><button class="drawer-close" id="drawerClose" aria-label="关闭菜单">×</button></div>
-  <!-- 修改：菜单项支持 data-view，用于收藏夹/首页视图切换 -->
   <nav>
     <a href="#" data-view="home">首页</a>
     <a href="#" data-view="discover">发现</a>
@@ -218,14 +202,12 @@
 
 <main id="gallery" class="gallery"></main>
 <div id="status" class="status">正在下载 data.json…</div>
-<!-- 新增：加载更多按钮 -->
 <div class="load-more-wrap" id="loadMoreWrap">
   <button class="load-more-btn" id="loadMoreBtn" type="button">加载更多</button>
 </div>
 <div id="sentinel"></div>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
-  <!-- 新增：灯箱导航与序号 -->
   <div class="lb-counter" id="lbCounter"></div>
   <button class="lb-nav lb-prev" id="lbPrev" aria-label="上一张">‹</button>
   <button class="lb-nav lb-next" id="lbNext" aria-label="下一张">›</button>
@@ -241,7 +223,6 @@
   </div>
 </div>
 
-<!-- 新增：Toast -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -249,22 +230,17 @@
   'use strict';
 
   const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
-  const FAV_KEY = 'gallery_favorites_v1'; /* 新增：收藏 localStorage key */
+  const FAV_KEY = 'gallery_favorites_v1';
 
-  /* 修改：URL 规范化，使用 new URL 自动编码空格/中文，同时保护已编码的 %xx，避免二次编码 */
+  /* 修复：简化 URL 解析，避免 new URL/encodeURI 对已编码 %xx 二次编码；
+     同时确保相对路径拼接时有斜杠 */
   function resolveUrl(url) {
     if (!url) return '';
-    const full = /^https?:\/\//i.test(url)
-      ? url
-      : IMAGE_BASE_URL + (url.startsWith('/') ? url : '/' + url);
-    try {
-      return new URL(full).href;
-    } catch {
-      return full.replace(/ /g, '%20');
-    }
+    if (/^https?:\/\//i.test(url)) return url;
+    const path = url.charAt(0) === '/' ? url : '/' + url;
+    return (IMAGE_BASE_URL + path).replace(/ /g, '%20');
   }
 
-  /* 新增：HTML 转义，防止 XSS */
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
@@ -275,12 +251,10 @@
       .replace(/'/g, '&#39;');
   }
 
-  /* 新增：正则转义 */
   function escapeRegExp(s) {
     return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  /* 新增：安全高亮（先转义再插入 mark） */
   function highlightHtml(text, terms) {
     const safe = escapeHtml(text || '');
     if (!terms || !terms.length) return safe;
@@ -333,8 +307,7 @@
     maxCards: 300,
     loading: false,
     finished: false,
-    /* 修改：用 view 统一管理视图状态，替代原 searching 布尔 */
-    view: 'all', // 'all' | 'search' | 'favorites'
+    view: 'all',
     savedCards: [],
     columns: [],
     columnHeights: [],
@@ -342,20 +315,20 @@
     gap: 16,
     totalLoaded: 0,
     records: new Map(),
-    recordById: new Map(), /* 新增：id -> record 全量索引 */
+    recordById: new Map(),
     cardQueue: [],
     io: null,
     searchTimer: null,
     searchIndex: [],
     currentColCount: 0,
-    favorites: new Set(), /* 新增：收藏集合 */
-    currentTerms: [],     /* 新增：当前搜索词，用于高亮 */
-    lastSearchResults: [],/* 新增：上次搜索结果，供灯箱导航 */
-    lightboxList: [],     /* 新增：灯箱当前列表 */
-    lightboxIndex: -1     /* 新增：灯箱当前索引 */
+    favorites: new Set(),
+    currentTerms: [],
+    lastSearchResults: [],
+    lightboxList: [],
+    lightboxIndex: -1,
+    layoutRetry: 0
   };
 
-  /* ============ 新增：收藏相关 ============ */
   function loadFavorites() {
     try {
       const raw = localStorage.getItem(FAV_KEY);
@@ -397,7 +370,6 @@
     });
   }
 
-  /* ============ 新增：Toast ============ */
   let toastTimer;
   function showToast(msg) {
     toastEl.textContent = msg;
@@ -406,7 +378,6 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
   }
 
-  /* ============ 数据加载 ============ */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
@@ -426,19 +397,16 @@
         state.allProjects = Object.values(json);
       }
 
-      /* 新增：建立 id -> record 映射，供收藏/灯箱使用 */
       state.recordById = new Map();
       state.allProjects.forEach(rec => {
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
 
-      /* 修改：分块构建搜索索引，避免大 JSON 阻塞主线程 */
       await buildSearchIndexChunked();
       statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
       loadNextBatch();
     } catch (err) {
       console.error(err);
-      /* 修改：加载失败提供重试按钮 */
       statusEl.textContent = '';
       statusEl.append('加载失败，请检查 data.json 路径或使用本地服务器。 ');
       const btn = document.createElement('button');
@@ -453,7 +421,6 @@
     }
   }
 
-  /* 修改：分块构建索引，每块让出主线程 */
   async function buildSearchIndexChunked() {
     const total = state.allProjects.length;
     state.searchIndex = new Array(total);
@@ -476,7 +443,6 @@
     }
   }
 
-  /* ============ 新增：筛选下拉填充 ============ */
   function populateFilters() {
     const years = new Set();
     const types = new Set();
@@ -493,7 +459,6 @@
     });
   }
 
-  /* ============ 新增：URL 同步 ============ */
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
@@ -521,7 +486,6 @@
     }
   }
 
-  /* ============ 布局 ============ */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -537,6 +501,7 @@
     return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 400 };
   }
 
+  /* 修复：布局失败时返回 false，便于调用方重试 */
   function layoutCards(cards) {
     gallery.classList.add('js-ready');
     gallery.innerHTML = '';
@@ -547,7 +512,9 @@
     const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
     const innerWidth = gallery.clientWidth - paddingX;
-    if (innerWidth <= 0) return null;
+
+    /* 修复：容器宽度为 0 时不建立列，返回 false 让调用方重试 */
+    if (innerWidth <= 0) return false;
 
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -573,11 +540,16 @@
     state.maxCards = config.maxCards;
     state.rootMargin = config.rootMargin;
 
-    updateLoadMore(); /* 新增：布局后同步加载按钮状态 */
+    updateLoadMore();
     return true;
   }
 
+  /* 修复：列未建立时先建立列，避免 appendChild undefined 报错 */
   function appendCardToColumn(card) {
+    if (!state.columns.length) {
+      if (!layoutCards([])) return;
+      if (!state.columns.length) return;
+    }
     const ratio = parseFloat(card.dataset.ratio) || 1;
     let minIdx = 0;
     for (let i = 1; i < state.columnHeights.length; i++) {
@@ -587,7 +559,6 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ============ 新增：获取当前灯箱应使用的记录列表 ============ */
   function getCurrentLightboxList() {
     if (state.view === 'favorites') {
       const list = [];
@@ -605,12 +576,10 @@
       .filter(Boolean);
   }
 
-  /* ============ 卡片 ============ */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
     article.dataset.id = record.id;
-    /* 新增：可访问性 */
     article.setAttribute('tabindex', '0');
     article.setAttribute('role', 'button');
     article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
@@ -619,43 +588,56 @@
       record.images = [{ width: "2000", height: "1500", small: "", medium: "", large: "" }];
     }
 
-    const firstImg = record.images[0];
+    const firstImg = record.images[0] || {};
     const w = parseInt(firstImg.width, 10) || 2000;
     const h = parseInt(firstImg.height, 10) || 1500;
     const ratio = (h / w) * 100;
     article.dataset.ratio = (h / w).toFixed(4);
 
-    const urlSmall = resolveUrl(firstImg.small);
-    const urlMedium = resolveUrl(firstImg.medium);
-    const urlLarge = resolveUrl(firstImg.large);
+    /* 修复：优先使用非空 URL，避免 small 为空导致图片不显示 */
+    const imgSmall = firstImg.small || '';
+    const imgMedium = firstImg.medium || '';
+    const imgLarge = firstImg.large || '';
+    const fallback = imgSmall || imgMedium || imgLarge;
+    const urlSmall = resolveUrl(imgSmall || fallback);
+    const urlMedium = resolveUrl(imgMedium || fallback);
+    const urlLarge = resolveUrl(imgLarge || fallback);
 
     const imgWrap = document.createElement('div');
     imgWrap.className = 'card-img-wrap';
     imgWrap.style.setProperty('--ratio', ratio + '%');
 
-    const img = document.createElement('img');
-    img.src = urlSmall;
-    img.srcset = `${urlSmall} 500w, ${urlMedium} 1600w, ${urlLarge} 2000w`;
-    img.sizes = '(max-width: 640px) 50vw, (max-width: 900px) 33vw, (max-width: 1280px) 25vw, 20vw';
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.alt = record.title || '图片';
+    /* 修复：过滤 srcset 中的空 URL */
+    const srcsetParts = [];
+    if (urlSmall) srcsetParts.push(urlSmall + ' 500w');
+    if (urlMedium) srcsetParts.push(urlMedium + ' 1600w');
+    if (urlLarge) srcsetParts.push(urlLarge + ' 2000w');
 
-    img.onload = () => img.classList.add('loaded');
-    /* 新增：图片加载失败占位 */
-    img.onerror = () => {
-      img.classList.add('error');
+    if (srcsetParts.length) {
+      const img = document.createElement('img');
+      img.src = urlSmall || urlMedium || urlLarge;
+      img.srcset = srcsetParts.join(', ');
+      img.sizes = '(max-width: 640px) 50vw, (max-width: 900px) 33vw, (max-width: 1280px) 25vw, 20vw';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = record.title || '图片';
+
+      img.onload = () => img.classList.add('loaded');
+      img.onerror = () => {
+        img.classList.add('error');
+        imgWrap.classList.add('img-error');
+      };
+      if (img.complete) img.classList.add('loaded');
+
+      imgWrap.appendChild(img);
+    } else {
       imgWrap.classList.add('img-error');
-    };
-    if (img.complete) img.classList.add('loaded');
-
-    imgWrap.appendChild(img);
+    }
 
     const body = document.createElement('div');
     body.className = 'card-body';
 
     const h2 = document.createElement('h2');
-    /* 修改：搜索时安全高亮标题，其余用 textContent 防 XSS */
     if (state.currentTerms && state.currentTerms.length) {
       h2.innerHTML = highlightHtml(record.title || '无标题', state.currentTerms);
     } else {
@@ -676,7 +658,6 @@
     article.appendChild(imgWrap);
     article.appendChild(body);
 
-    /* 新增：收藏按钮 */
     const favBtn = document.createElement('button');
     favBtn.className = 'card-fav' + (state.favorites.has(String(record.id)) ? ' active' : '');
     favBtn.type = 'button';
@@ -692,7 +673,6 @@
     article.addEventListener('click', () => {
       openLightbox(record, getCurrentLightboxList());
     });
-    /* 新增：键盘打开 */
     article.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -702,9 +682,8 @@
     return article;
   }
 
-  /* ============ 加载 ============ */
+  /* 修复：首次加载前确保列结构已建立；await 后再次校验视图，避免与搜索竞态 */
   async function loadNextBatch() {
-    /* 修改：仅在 all 视图自动加载 */
     if (state.view !== 'all' || state.loading || state.finished) return;
 
     if (state.currentIndex >= state.allProjects.length) {
@@ -717,6 +696,29 @@
     updateStatus('渲染中…');
     updateLoadMore();
     await new Promise(r => setTimeout(r, 20));
+
+    if (state.view !== 'all') {
+      state.loading = false;
+      updateLoadMore();
+      return;
+    }
+
+    /* 修复：关键——首次加载时必须先建立瀑布流列，否则卡片无处挂载 */
+    if (!state.columns.length) {
+      const ok = layoutCards([]);
+      if (!ok || !state.columns.length) {
+        state.loading = false;
+        updateStatus('等待布局…');
+        state.layoutRetry++;
+        if (state.layoutRetry < 30) {
+          setTimeout(loadNextBatch, 120);
+        } else {
+          updateStatus('布局失败，请刷新页面重试');
+        }
+        return;
+      }
+    }
+    state.layoutRetry = 0;
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
     const nextRecords = state.allProjects.slice(state.currentIndex, state.currentIndex + batchSize);
@@ -746,7 +748,6 @@
     let removed = false;
     while (state.cardQueue.length > state.maxCards) {
       const old = state.cardQueue.shift();
-      /* 修改：统一 String 删除，避免数字/字符串不匹配 */
       state.records.delete(String(old.dataset.id));
       old.remove();
       removed = true;
@@ -777,7 +778,6 @@
     updateLoadMore();
   }
 
-  /* 新增：加载更多按钮状态 */
   function updateLoadMore() {
     const show = state.view === 'all' && !state.finished;
     loadMoreWrap.style.display = show ? 'block' : 'none';
@@ -793,13 +793,14 @@
     state.io.observe(sentinel);
   }
 
-  /* ============ 搜索 ============ */
   function enterSearch() {
     if (state.view === 'search') return;
     closeDrawer();
-    /* 修改：保存当前 all 视图卡片，退出搜索时恢复 */
-    if (state.view === 'all') state.savedCards = state.cardQueue.slice();
-    else state.savedCards = state.cardQueue.slice();
+    if (state.view === 'all') {
+      state.savedCards = state.cardQueue.slice();
+    } else {
+      state.savedCards = [];
+    }
     state.view = 'search';
     state.currentTerms = [];
     document.body.classList.add('searching');
@@ -868,7 +869,6 @@
         if (!t.map(String).includes(typeFilter)) continue;
       }
       totalMatched++;
-      /* 修改：限制渲染数量，但统计总数 */
       if (matched.length < MAX_SEARCH_RESULTS) matched.push(item);
     }
 
@@ -891,7 +891,6 @@
     layoutCards(cards);
 
     const filterDesc = [q, yearFilter, typeFilter].filter(Boolean).join(' · ');
-    /* 修改：明确告知总匹配数与实际显示数 */
     if (totalMatched > MAX_SEARCH_RESULTS) {
       statusEl.textContent = `共 ${totalMatched} 个匹配「${filterDesc}」，显示前 ${MAX_SEARCH_RESULTS} 个`;
     } else {
@@ -900,7 +899,6 @@
     syncUrl();
   }
 
-  /* ============ 新增：收藏夹视图 ============ */
   function enterFavorites() {
     closeDrawer();
     if (state.view === 'favorites') return;
@@ -944,7 +942,6 @@
     statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
   }
 
-  /* 新增：回到首页（all 视图） */
   function goHome() {
     closeDrawer();
     if (state.view === 'search') { exitSearch(); return; }
@@ -962,7 +959,6 @@
     }
   }
 
-  /* ============ 响应式 ============ */
   let resizeTimer;
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
@@ -997,14 +993,12 @@
     }, 200);
   }
 
-  /* ============ 抽屉 ============ */
   function openDrawer() {
     if (state.view === 'search') exitSearch();
     document.body.classList.add('drawer-open');
   }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ============ 灯箱 ============ */
   function openLightbox(record, list) {
     state.lightboxList = (list && list.length) ? list : [record];
     state.lightboxIndex = state.lightboxList.findIndex(r => String(r.id) === String(record.id));
@@ -1020,11 +1014,15 @@
 
     lbGallery.innerHTML = '';
     (record.images || []).forEach(imgData => {
-      const urlMedium = resolveUrl(imgData.medium);
-      const urlLarge = resolveUrl(imgData.large);
+      const urlMedium = resolveUrl(imgData.medium || imgData.large || imgData.small);
+      const urlLarge = resolveUrl(imgData.large || imgData.medium || imgData.small);
+      if (!urlLarge && !urlMedium) return;
       const img = document.createElement('img');
-      img.src = urlLarge;
-      img.srcset = `${urlMedium} 1600w, ${urlLarge} 2000w`;
+      img.src = urlLarge || urlMedium;
+      const parts = [];
+      if (urlMedium) parts.push(urlMedium + ' 1600w');
+      if (urlLarge) parts.push(urlLarge + ' 2000w');
+      if (parts.length) img.srcset = parts.join(', ');
       img.sizes = '(max-width: 1000px) 100vw, 1000px';
       img.loading = 'lazy';
       img.alt = record.title || '';
@@ -1032,7 +1030,6 @@
       lbGallery.appendChild(img);
     });
 
-    /* 修改：全部使用 textContent 构建，避免 XSS */
     lbTitle.textContent = record.title || '无标题';
     lbDesigner.textContent = `设计师: ${record.designer || '未知'}`;
 
@@ -1071,7 +1068,6 @@
     detailSpan.textContent = detailsText;
     lbDetails.appendChild(detailSpan);
 
-    /* 新增：序号与导航按钮状态 */
     lbCounter.textContent = `${state.lightboxIndex + 1} / ${state.lightboxList.length}`;
     lbPrev.disabled = state.lightboxIndex <= 0;
     lbNext.disabled = state.lightboxIndex >= state.lightboxList.length - 1;
@@ -1084,7 +1080,6 @@
     document.body.classList.remove('lightbox-open');
   }
 
-  /* 新增：灯箱左右切换 */
   function navLightbox(delta) {
     const next = state.lightboxIndex + delta;
     if (next < 0 || next >= state.lightboxList.length) return;
@@ -1092,7 +1087,6 @@
     renderLightbox();
   }
 
-  /* ============ 事件绑定 ============ */
   searchBtn.addEventListener('click', e => {
     e.stopPropagation();
     if (state.view === 'search') exitSearch();
@@ -1113,7 +1107,6 @@
     }
   });
 
-  /* 新增：筛选变化重新搜索 */
   filterYear.addEventListener('change', () => {
     if (state.view === 'search') doSearch(searchInput.value);
   });
@@ -1145,7 +1138,6 @@
   drawerClose.addEventListener('click', closeDrawer);
   drawerOverlay.addEventListener('click', closeDrawer);
 
-  /* 新增：抽屉视图切换 */
   drawer.querySelectorAll('a[data-view]').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -1157,7 +1149,6 @@
   });
 
   document.addEventListener('keydown', e => {
-    /* 新增：灯箱优先级最高 */
     if (lightbox.classList.contains('open')) {
       if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
       if (e.key === 'ArrowLeft') { e.preventDefault(); navLightbox(-1); return; }
@@ -1172,11 +1163,9 @@
   lightbox.addEventListener('click', e => {
     if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox();
   });
-  /* 新增：灯箱导航按钮 */
   lbPrev.addEventListener('click', e => { e.stopPropagation(); navLightbox(-1); });
   lbNext.addEventListener('click', e => { e.stopPropagation(); navLightbox(1); });
 
-  /* 新增：加载更多按钮 */
   loadMoreBtn.addEventListener('click', () => {
     if (state.view !== 'all') return;
     loadNextBatch();
@@ -1186,7 +1175,6 @@
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
 
-  /* ============ 初始化 ============ */
   async function init() {
     loadFavorites();
     await initData();
