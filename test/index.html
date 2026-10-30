@@ -67,7 +67,7 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* 修改：卡片只显示设计师，单行省略 */
+  /* 卡片只显示设计师，单行省略 */
   .card-meta { font-size: 12px; color: #666; }
   .card-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -103,7 +103,7 @@
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
-  /* 修改：两列布局，年份|客户 一行，类型|领域 一行 */
+  /* 两列布局：年份|客户 一行，类型|领域 一行 */
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
   @media (max-width: 480px) {
     .lb-meta-grid { grid-template-columns: 1fr; }
@@ -111,7 +111,7 @@
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; }
-  /* 修改：关闭按钮无底色，仅保留白色 × */
+  /* 关闭按钮无底色，白色 × */
   .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; z-index: 101; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .15s; }
   .lightbox-close:hover { opacity: .7; background: transparent; }
 
@@ -193,6 +193,16 @@
     return IMAGE_BASE_URL + (url.charAt(0) === '/' ? '' : '/') + url;
   }
 
+  /* 新增：Fisher-Yates 洗牌，返回新数组，不修改原数组 */
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
@@ -240,6 +250,7 @@
 
   const state = {
     allProjects: [],
+    loadQueue: [], /* 新增：打乱后的加载队列，供瀑布流使用 */
     currentIndex: 0,
     chunksPerBatch: 1,
     rootMargin: 800,
@@ -328,6 +339,12 @@
       state.allProjects.forEach(rec => {
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
+
+      /* 新增：生成随机加载队列；搜索索引仍基于 allProjects 原始顺序 */
+      state.loadQueue = shuffleArray(state.allProjects);
+      state.currentIndex = 0;
+      state.totalLoaded = 0;
+      state.finished = false;
 
       await buildSearchIndexChunked();
       statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
@@ -538,7 +555,7 @@
     }
     body.appendChild(h2);
 
-    /* 修改：卡片只显示设计师，无年份 */
+    /* 卡片只显示设计师，无年份 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
@@ -566,10 +583,12 @@
     return article;
   }
 
-  /* ===== 加载 ===== */
+  /* ===== 加载：从随机队列 loadQueue 取数据 ===== */
   async function loadNextBatch() {
     if (state.view !== 'all' || state.loading || state.finished) return;
-    if (state.currentIndex >= state.allProjects.length) { state.finished = true; updateStatus(); return; }
+
+    /* 修改：随机队列加载 */
+    if (state.currentIndex >= state.loadQueue.length) { state.finished = true; updateStatus(); return; }
 
     state.loading = true;
     updateStatus('渲染中…');
@@ -587,7 +606,8 @@
     }
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
-    const nextRecords = state.allProjects.slice(state.currentIndex, state.currentIndex + batchSize);
+    /* 修改：从 loadQueue 取，而不是 allProjects */
+    const nextRecords = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
     state.currentIndex += nextRecords.length;
 
     nextRecords.forEach(rec => {
