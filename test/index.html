@@ -67,10 +67,9 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 8px; }
-  .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .card-meta span:first-child { flex: 1; min-width: 0; }
-  .card-meta span:last-child { flex-shrink: 0; }
+  /* 修改：卡片只显示设计师，单行省略 */
+  .card-meta { font-size: 12px; color: #666; }
+  .card-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); color: #9a9a9a; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, color .15s, background .15s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
@@ -104,12 +103,17 @@
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
-  .lb-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+  /* 修改：两列布局，年份|客户 一行，类型|领域 一行 */
+  .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+  @media (max-width: 480px) {
+    .lb-meta-grid { grid-template-columns: 1fr; }
+  }
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; }
-  .lightbox-close { position: fixed; top: 20px; right: 24px; width: 28px; height: 28px; border-radius: 5%; border: none; background: rgba(255,255,255,.2); color: #fff; font-size: 28px; cursor: pointer; z-index: 101; }
-  .lightbox-close:hover { background: rgba(255,255,255,.35); }
+  /* 修改：关闭按钮无底色，仅保留白色 × */
+  .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; z-index: 101; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .15s; }
+  .lightbox-close:hover { opacity: .7; background: transparent; }
 
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -470,7 +474,7 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ===== 卡片：图片墙只加载 small ===== */
+  /* ===== 卡片：图片墙只加载 small，只显示设计师 ===== */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
@@ -534,15 +538,13 @@
     }
     body.appendChild(h2);
 
+    /* 修改：卡片只显示设计师，无年份 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
     sp1.textContent = record.designer || 'Unknown';
     sp1.title = sp1.textContent;
-    const sp2 = document.createElement('span');
-    sp2.textContent = record.year || '';
     meta.appendChild(sp1);
-    meta.appendChild(sp2);
     body.appendChild(meta);
 
     article.appendChild(imgWrap);
@@ -883,11 +885,13 @@
       const v = document.createElement('span'); v.className = 'lb-meta-value'; v.textContent = value;
       item.appendChild(l); item.appendChild(v); lbMetaGrid.appendChild(item);
     };
+    /* 两列布局下顺序：年份|客户 一行，类型|领域 一行 */
     addMeta('年份', record.year || '-');
     addMeta('客户', record.client || '-');
     addMeta('类型', types);
     addMeta('领域', sectors);
 
+    /* 详细分类保留 */
     lbDetails.innerHTML = '';
     const strong = document.createElement('strong'); strong.textContent = '详细分类:';
     lbDetails.appendChild(strong);
