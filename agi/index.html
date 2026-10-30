@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瀑布流图片墙</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f5f5; color: #111; -webkit-font-smoothing: antialiased;
+    padding-top: 65px; transition: padding-top .25s ease;
+  }
+  body.searching { padding-top: 124px; }
+  body.lightbox-open { overflow: hidden; }
+
+  .topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0; }
+  .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
+  .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .logo-cell { width: 64px; border-right: 1px solid #e0e0e0; text-decoration: none; color: #000; }
+  .center-cell { flex: 1; position: relative; overflow: hidden; }
+  .icon-cell { width: 64px; background: transparent; border: none; cursor: pointer; color: #111; transition: background 0.15s; }
+  .icon-cell:hover { background: #f9f9f9; }
+  #searchBtn { border-left: none; }
+  #hamburger { border-left: 1px solid #e0e0e0; }
+
+  body.searching #searchBtn svg { animation: searchBloom 0.3s forwards; pointer-events: none; }
+  @keyframes searchBloom { 0% { transform: scale(1); } 100% { transform: scale(0.5); opacity: 0; } }
+
+  .search-wrap { position: absolute; top: 0; right: 0; bottom: 0; width: 0; background: #fff; display: flex; align-items: center; transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); overflow: hidden; }
+  body.searching .search-wrap { width: 100%; }
+  .search-input { width: 100%; min-width: 200px; height: 100%; border: none; background: transparent; padding: 0 24px; font-size: 15px; outline: none; }
+
+  .search-filter-bar { position: fixed; top: 64px; left: 0; right: 0; z-index: 55; background: #fff; border-bottom: 1px solid #e0e0e0; display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap; }
+  body.searching .search-filter-bar { display: flex; }
+  .search-filter-bar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-size: 13px; color: #333; max-width: 200px; outline: none; }
+  .search-filter-bar button { padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; background: #f5f5f5; font-size: 13px; cursor: pointer; color: #333; }
+  .search-filter-bar button:hover { background: #eee; }
+
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; padding: 16px; align-items: start; max-width: 1600px; margin: 0 auto; }
+  .gallery.js-ready { display: flex; align-items: flex-start; gap: 16px; }
+  .gallery.js-ready .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+  @media (orientation: portrait) and (max-width: 640px) {
+    .gallery, .gallery.js-ready { gap: 10px; padding: 10px; }
+    .gallery.js-ready .col { gap: 10px; }
+  }
+  @media (orientation: landscape) and (max-width: 900px) {
+    .gallery, .gallery.js-ready { gap: 12px; padding: 12px; }
+    .gallery.js-ready .col { gap: 12px; }
+  }
+
+  .card { position: relative; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout paint style; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+  .card:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+  .card-img-wrap { width: 100%; background: #f0f0f0; position: relative; overflow: hidden; }
+  .card-img-wrap::before { content: ''; display: block; padding-bottom: var(--ratio, 75%); }
+  .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
+  .card-img-wrap img.loaded { opacity: 1; }
+  .card-img-wrap.img-error::after {
+    content: '⚠ 图片加载失败'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #b0b0b0; pointer-events: none;
+  }
+
+  .card-body { padding: 12px 14px; }
+  .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 8px; }
+  .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-meta span:first-child { flex: 1; min-width: 0; }
+  .card-meta span:last-child { flex-shrink: 0; }
+
+  .card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); color: #9a9a9a; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, color .15s, background .15s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
+  .card-fav.active { color: #e0245e; }
+  .card-fav.active svg { fill: currentColor; }
+
+  mark { background: #fff3a3; color: inherit; padding: 0 1px; border-radius: 2px; }
+
+  .status { text-align: center; padding: 20px; color: #888; font-size: 13px; }
+  #sentinel { height: 1px; }
+
+  .load-more-wrap { text-align: center; padding: 8px 16px 24px; display: none; }
+  .load-more-btn { padding: 10px 28px; border: 1px solid #ddd; border-radius: 24px; background: #fff; font-size: 14px; cursor: pointer; color: #333; transition: background .15s, border-color .15s; }
+  .load-more-btn:hover { background: #f5f5f5; }
+  .load-more-btn:disabled { opacity: .5; cursor: default; }
+
+  .drawer-overlay { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  body.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; left: 0; right: 0; z-index: 80; background: #fff; border-bottom: 1px solid #e0e0e0; transform: translateY(-100%); transition: transform .3s; display: flex; flex-direction: column; padding: 12px 24px 16px; }
+  body.drawer-open .drawer { transform: translateY(0); }
+  .drawer-head { display: flex; justify-content: flex-end; }
+  .drawer-close { width: 32px; height: 32px; border: none; background: transparent; font-size: 22px; cursor: pointer; }
+  .drawer nav { display: flex; flex-direction: column; }
+  .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
+
+  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+  .lightbox.open { display: flex; }
+  .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
+
+  /* 图片区：相对定位容器，用于放置「共 N 张」小字 */
+  .lb-gallery-wrap { position: relative; background: #f0f0f0; }
+  .lb-gallery { display: flex; flex-direction: column; }
+  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
+  /* 新增：图片区右上角「共 N 张」 */
+  .lb-count {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    background: rgba(0,0,0,.55); color: #fff;
+    font-size: 12px; line-height: 1; padding: 6px 10px;
+    border-radius: 12px; pointer-events: none;
+  }
+  .lb-count:empty { display: none; }
+
+  .lb-content { padding: 24px 32px; }
+  .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
+  .lb-designer { font-size: 15px; color: #555; margin-bottom: 16px; }
+  /* 灯箱简介：全文显示，保留换行 */
+  .lb-overview {
+    font-size: 14px; color: #444; line-height: 1.7;
+    margin: 0 0 24px; padding: 14px 16px;
+    background: #f7f7f7; border-left: 3px solid #d0d0d0;
+    border-radius: 4px; white-space: pre-line;
+    max-height: none; overflow: visible;
+  }
+  .lb-overview:empty { display: none; }
+  /* 元信息两列：年份|客户 一行，类型|领域 一行；窄屏也保持 2 列 */
+  .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+  .lb-meta-item { display: flex; flex-direction: column; }
+  .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
+  .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; overflow-wrap: anywhere; }
+  /* 详细分类 */
+  .lb-details { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 24px; }
+  /* 新增：标签 chip */
+  .lb-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .lb-tags:empty { display: none; }
+  .lb-tag {
+    display: inline-block; padding: 4px 10px;
+    background: #f0f0f0; color: #444;
+    font-size: 12px; line-height: 1.4; border-radius: 12px;
+  }
+
+  /* 关闭按钮无底色，白色 × */
+  .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; z-index: 101; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .15s; }
+  .lightbox-close:hover { opacity: .7; background: transparent; }
+
+  /* 窄屏：保持 2 列，仅缩小间距与内边距 */
+  @media (max-width: 480px) {
+    .lb-meta-grid { gap: 12px 16px; }
+    .lb-content { padding: 20px 18px; }
+    .lb-meta-value { font-size: 13px; }
+    .lb-title { font-size: 20px; }
+    .lb-designer { font-size: 14px; }
+  }
+
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .search-overlay { position: fixed; inset: 0; z-index: 50; display: none; background: transparent; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="#" class="nav-cell logo-cell" aria-label="首页">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+    </a>
+    <div class="nav-cell center-cell">
+      <div class="search-wrap" id="searchWrap">
+        <input type="search" class="search-input" id="searchInput" placeholder="搜索标题、设计师、客户…" autocomplete="off">
+      </div>
+    </div>
+    <button class="nav-cell icon-cell" id="searchBtn" aria-label="搜索"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg></button>
+    <button class="nav-cell icon-cell" id="hamburger" aria-label="菜单"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  </div>
+</div>
+
+<div class="search-filter-bar" id="searchFilterBar">
+  <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
+  <select id="filterType" aria-label="按类型筛选"><option value="">全部类型</option></select>
+  <button id="clearFilters" type="button">清除筛选</button>
+</div>
+
+<div class="search-overlay" id="searchOverlay"></div>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head"><button class="drawer-close" id="drawerClose" aria-label="关闭菜单">×</button></div>
+  <nav>
+    <a href="#" data-view="home">首页</a>
+    <a href="#" data-view="discover">发现</a>
+    <a href="#" data-view="favorites">收藏夹</a>
+    <a href="#" data-view="about">关于</a>
+  </nav>
+</aside>
+
+<main id="gallery" class="gallery"></main>
+<div id="status" class="status">正在下载 data.json…</div>
+<div class="load-more-wrap" id="loadMoreWrap">
+  <button class="load-more-btn" id="loadMoreBtn" type="button">加载更多</button>
+</div>
+<div id="sentinel"></div>
+
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
+  <button class="lightbox-close" aria-label="关闭">×</button>
+  <div class="lightbox-inner">
+    <div class="lb-gallery-wrap">
+      <div class="lb-count" id="lb-count"></div>
+      <div class="lb-gallery" id="lb-gallery"></div>
+    </div>
+    <div class="lb-content">
+      <h2 class="lb-title" id="lb-title"></h2>
+      <div class="lb-designer" id="lb-designer"></div>
+      <div class="lb-overview" id="lb-overview"></div>
+      <div class="lb-meta-grid" id="lb-meta-grid"></div>
+      <div class="lb-details" id="lb-details"></div>
+      <div class="lb-tags" id="lb-tags"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
+  const DATA_URL = './data.json';
+  const FAV_KEY = 'gallery_favorites_v1';
+
+  /* 图片 URL：相对路径直接拼接，兼容绝对 URL */
+  function resolveUrl(url) {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+    return IMAGE_BASE_URL + (url.charAt(0) === '/' ? '' : '/') + url;
+  }
+
+  /* Fisher-Yates 洗牌，返回新数组，不修改原数组 */
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function highlightHtml(text, terms) {
+    const safe = escapeHtml(text || '');
+    if (!terms || !terms.length) return safe;
+    let out = safe;
+    const uniq = [...new Set(terms.filter(Boolean).map(t => escapeHtml(t)))];
+    uniq.sort((a, b) => b.length - a.length);
+    uniq.forEach(t => {
+      out = out.replace(new RegExp('(' + escapeRegExp(t) + ')', 'gi'), '<mark>$1</mark>');
+    });
+    return out;
+  }
+
+  const MIN_COL = 230, MAX_COLS = 6;
+  const PHONE_PORTRAIT_MAX = 640, PHONE_LANDSCAPE_MAX = 900;
+  const HEADER_EST = 70, CHUNK_SIZE = 15, MAX_SEARCH_RESULTS = 90;
+
+  const gallery = document.getElementById('gallery');
+  const sentinel = document.getElementById('sentinel');
+  const statusEl = document.getElementById('status');
+  const lightbox = document.getElementById('lightbox');
+  const lbGallery = document.getElementById('lb-gallery');
+  const lbCount = document.getElementById('lb-count');
+  const lbTitle = document.getElementById('lb-title');
+  const lbDesigner = document.getElementById('lb-designer');
+  const lbOverview = document.getElementById('lb-overview');
+  const lbMetaGrid = document.getElementById('lb-meta-grid');
+  const lbDetails = document.getElementById('lb-details');
+  const lbTags = document.getElementById('lb-tags');
+  const searchBtn = document.getElementById('searchBtn');
+  const searchInput = document.getElementById('searchInput');
+  const searchOverlay = document.getElementById('searchOverlay');
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('drawer');
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const drawerClose = document.getElementById('drawerClose');
+  const filterYear = document.getElementById('filterYear');
+  const filterType = document.getElementById('filterType');
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  const toastEl = document.getElementById('toast');
+
+  const state = {
+    allProjects: [],
+    loadQueue: [],
+    currentIndex: 0,
+    chunksPerBatch: 1,
+    rootMargin: 800,
+    maxCards: 300,
+    loading: false,
+    finished: false,
+    view: 'all',
+    savedCards: [],
+    columns: [],
+    columnHeights: [],
+    colWidth: 0,
+    gap: 16,
+    totalLoaded: 0,
+    records: new Map(),
+    recordById: new Map(),
+    cardQueue: [],
+    io: null,
+    searchTimer: null,
+    searchIndex: [],
+    currentColCount: 0,
+    favorites: new Set(),
+    currentTerms: [],
+    lastSearchResults: []
+  };
+
+  /* ===== 收藏 ===== */
+  function loadFavorites() {
+    try {
+      const raw = localStorage.getItem(FAV_KEY);
+      if (raw) state.favorites = new Set(JSON.parse(raw).map(String));
+    } catch (e) { console.warn('读取收藏失败', e); }
+  }
+  function saveFavorites() {
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...state.favorites])); }
+    catch (e) { console.warn('保存收藏失败', e); }
+  }
+  function toggleFavorite(id) {
+    const key = String(id);
+    if (state.favorites.has(key)) { state.favorites.delete(key); showToast('已取消收藏'); }
+    else { state.favorites.add(key); showToast('已加入收藏'); }
+    saveFavorites();
+    updateFavoriteButtons(key);
+    if (state.view === 'favorites') renderFavorites();
+  }
+  function updateFavoriteButtons(id) {
+    const active = state.favorites.has(String(id));
+    document.querySelectorAll('.card').forEach(card => {
+      if (String(card.dataset.id) === String(id)) {
+        const btn = card.querySelector('.card-fav');
+        if (btn) { btn.classList.toggle('active', active); btn.setAttribute('aria-pressed', active ? 'true' : 'false'); }
+      }
+    });
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  }
+
+  /* ===== 数据加载：仅 data.json，顶层为数组 ===== */
+  async function initData() {
+    try {
+      statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
+      const res = await fetch(DATA_URL);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      const text = await res.text();
+      statusEl.textContent = '正在解析数据…';
+      await new Promise(r => setTimeout(r, 30));
+
+      const json = JSON.parse(text);
+      if (Array.isArray(json)) {
+        state.allProjects = json;
+      } else if (json && Array.isArray(json.projects)) {
+        state.allProjects = json.projects;
+      } else if (json && typeof json === 'object') {
+        state.allProjects = Object.values(json).filter(v => v && typeof v === 'object' && v.id != null);
+      } else {
+        state.allProjects = [];
+      }
+
+      state.recordById = new Map();
+      state.allProjects.forEach(rec => {
+        if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
+      });
+
+      /* 生成随机加载队列；搜索索引仍基于 allProjects 原始顺序 */
+      state.loadQueue = shuffleArray(state.allProjects);
+      state.currentIndex = 0;
+      state.totalLoaded = 0;
+      state.finished = false;
+
+      await buildSearchIndexChunked();
+      statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
+      requestAnimationFrame(() => loadNextBatch());
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = '';
+      statusEl.append('加载失败：' + (err && err.message ? err.message : err) + '。');
+      const btn = document.createElement('button');
+      btn.className = 'load-more-btn';
+      btn.style.cssText = 'margin-left:8px;padding:4px 14px;font-size:13px;';
+      btn.textContent = '重试';
+      btn.addEventListener('click', () => { statusEl.textContent = '正在重试…'; initData(); });
+      statusEl.appendChild(btn);
+    }
+  }
+
+  async function buildSearchIndexChunked() {
+    const total = state.allProjects.length;
+    state.searchIndex = new Array(total);
+    const CHUNK = 800;
+    for (let i = 0; i < total; i += CHUNK) {
+      const end = Math.min(i + CHUNK, total);
+      for (let j = i; j < end; j++) {
+        const rec = state.allProjects[j] || {};
+        const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
+        const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
+        const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
+        const tags = Array.isArray(rec.tags) ? rec.tags.join(' ') : '';
+        const haystack = [
+          rec.title || '', rec.designer || '', rec.client || '', rec.year || '',
+          rec.nationalGroup || '', rec.overview || '',
+          details, sectors, types, tags
+        ].join(' ').toLowerCase();
+        state.searchIndex[j] = { id: rec.id, haystack, record: rec };
+      }
+      statusEl.textContent = `正在构建搜索索引… ${end}/${total}`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+
+  function populateFilters() {
+    const years = new Set(), types = new Set();
+    state.allProjects.forEach(rec => {
+      if (rec.year) years.add(String(rec.year).trim());
+      const t = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
+      t.forEach(x => { if (x) types.add(String(x).trim()); });
+    });
+    [...years].sort((a,b) => String(b).localeCompare(String(a),'zh')).forEach(y => {
+      const o = document.createElement('option'); o.value = y; o.textContent = y; filterYear.appendChild(o);
+    });
+    [...types].sort((a,b) => String(a).localeCompare(String(b),'zh')).forEach(t => {
+      const o = document.createElement('option'); o.value = t; o.textContent = t; filterType.appendChild(o);
+    });
+  }
+
+  /* ===== URL 同步 ===== */
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.view === 'search') {
+      const q = searchInput.value.trim();
+      if (q) params.set('q', q);
+      if (filterYear.value) params.set('year', filterYear.value);
+      if (filterType.value) params.set('type', filterType.value);
+    }
+    const qs = params.toString();
+    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+  }
+  function restoreFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q'), year = params.get('year'), type = params.get('type');
+    if (year) filterYear.value = year;
+    if (type) filterType.value = type;
+    if (q || year || type) {
+      enterSearch();
+      searchInput.value = q || '';
+      doSearch(q || '');
+    }
+  }
+
+  /* ===== 布局 ===== */
+  function computeColumnCount(innerWidth, gap) {
+    const vw = window.innerWidth;
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    if (isPortrait && vw <= PHONE_PORTRAIT_MAX) return 2;
+    let n = Math.floor((innerWidth + gap) / (MIN_COL + gap));
+    n = Math.max(2, Math.min(n, MAX_COLS));
+    if (!isPortrait && vw <= PHONE_LANDSCAPE_MAX) n = Math.max(3, n);
+    return n;
+  }
+
+  function computeLoadConfig(cols, isPhonePortrait) {
+    if (cols <= 3) return { chunksPerBatch: 1, rootMargin: isPhonePortrait ? 600 : 800, maxCards: 200 };
+    return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 400 };
+  }
+
+  function layoutCards(cards) {
+    gallery.classList.add('js-ready');
+    gallery.innerHTML = '';
+    state.columns = [];
+    state.columnHeights = [];
+
+    const style = getComputedStyle(gallery);
+    const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
+    let innerWidth = gallery.clientWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) return false;
+
+    const vw = window.innerWidth;
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    const isPhonePortrait = isPortrait && vw <= PHONE_PORTRAIT_MAX;
+
+    const count = computeColumnCount(innerWidth, gap);
+    state.currentColCount = count;
+    state.gap = gap;
+    state.colWidth = (innerWidth - gap * (count - 1)) / count;
+
+    for (let i = 0; i < count; i++) {
+      const col = document.createElement('div');
+      col.className = 'col';
+      gallery.appendChild(col);
+      state.columns.push(col);
+      state.columnHeights.push(0);
+    }
+
+    cards.forEach(card => appendCardToColumn(card));
+
+    const config = computeLoadConfig(count, isPhonePortrait);
+    state.chunksPerBatch = config.chunksPerBatch;
+    state.maxCards = config.maxCards;
+    state.rootMargin = config.rootMargin;
+
+    updateLoadMore();
+    return true;
+  }
+
+  function appendCardToColumn(card) {
+    if (!state.columns.length) {
+      if (!layoutCards([]) || !state.columns.length) return;
+    }
+    const ratio = parseFloat(card.dataset.ratio) || 1;
+    let minIdx = 0;
+    for (let i = 1; i < state.columnHeights.length; i++) {
+      if (state.columnHeights[i] < state.columnHeights[minIdx]) minIdx = i;
+    }
+    state.columns[minIdx].appendChild(card);
+    state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
+  }
+
+  /* ===== 卡片：图片墙只加载 small，设计师左 / 年份右 ===== */
+  function createCard(record) {
+    const article = document.createElement('article');
+    article.className = 'card';
+    article.dataset.id = record.id;
+    article.setAttribute('tabindex', '0');
+    article.setAttribute('role', 'button');
+    article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
+
+    const images = Array.isArray(record.images) ? record.images : [];
+    const firstImg = images[0] || {};
+
+    const w = parseInt(firstImg.width, 10) || 2000;
+    const h = parseInt(firstImg.height, 10) || 1500;
+    article.dataset.ratio = (h / w).toFixed(4);
+
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'card-img-wrap';
+    imgWrap.style.setProperty('--ratio', (h / w) * 100 + '%');
+
+    const urlSmall = resolveUrl(firstImg.small);
+    const urlLarge = resolveUrl(firstImg.large);
+    const primaryUrl = urlSmall || urlLarge;
+
+    if (primaryUrl) {
+      const img = document.createElement('img');
+      img.src = primaryUrl;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = record.title || '图片';
+
+      img.onload = () => img.classList.add('loaded');
+      img.onerror = () => {
+        if (img.dataset.fallback) {
+          imgWrap.classList.add('img-error');
+        } else if (urlLarge && img.src !== urlLarge) {
+          img.dataset.fallback = '1';
+          img.src = urlLarge;
+        } else {
+          imgWrap.classList.add('img-error');
+        }
+      };
+      if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+
+      imgWrap.appendChild(img);
+    } else {
+      imgWrap.classList.add('img-error');
+    }
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const h2 = document.createElement('h2');
+    if (state.currentTerms && state.currentTerms.length) {
+      h2.innerHTML = highlightHtml(record.title || '无标题', state.currentTerms);
+    } else {
+      h2.textContent = record.title || '无标题';
+    }
+    body.appendChild(h2);
+
+    /* 卡片：设计师左、年份右，不显示国家 */
+    const meta = document.createElement('div');
+    meta.className = 'card-meta';
+    const sp1 = document.createElement('span');
+    sp1.textContent = record.designer || 'Unknown';
+    sp1.title = sp1.textContent;
+    const sp2 = document.createElement('span');
+    sp2.textContent = record.year || '';
+    meta.appendChild(sp1);
+    meta.appendChild(sp2);
+    body.appendChild(meta);
+
+    article.appendChild(imgWrap);
+    article.appendChild(body);
+
+    const favBtn = document.createElement('button');
+    favBtn.className = 'card-fav' + (state.favorites.has(String(record.id)) ? ' active' : '');
+    favBtn.type = 'button';
+    favBtn.setAttribute('aria-label', '收藏');
+    favBtn.setAttribute('aria-pressed', state.favorites.has(String(record.id)) ? 'true' : 'false');
+    favBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    favBtn.addEventListener('click', e => { e.stopPropagation(); toggleFavorite(record.id); });
+    article.appendChild(favBtn);
+
+    article.addEventListener('click', () => openLightbox(record));
+    article.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(record); }
+    });
+    return article;
+  }
+
+  /* ===== 加载：从随机队列 loadQueue 取数据 ===== */
+  async function loadNextBatch() {
+    if (state.view !== 'all' || state.loading || state.finished) return;
+
+    if (state.currentIndex >= state.loadQueue.length) { state.finished = true; updateStatus(); return; }
+
+    state.loading = true;
+    updateStatus('渲染中…');
+    updateLoadMore();
+    await new Promise(r => setTimeout(r, 20));
+
+    if (state.view !== 'all') { state.loading = false; updateLoadMore(); return; }
+
+    if (!state.columns.length) {
+      if (!layoutCards([]) || !state.columns.length) {
+        state.loading = false;
+        updateStatus('布局初始化失败，请刷新页面');
+        return;
+      }
+    }
+
+    const batchSize = state.chunksPerBatch * CHUNK_SIZE;
+    const nextRecords = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
+    state.currentIndex += nextRecords.length;
+
+    nextRecords.forEach(rec => {
+      state.records.set(String(rec.id), rec);
+      const card = createCard(rec);
+      state.cardQueue.push(card);
+      appendCardToColumn(card);
+    });
+
+    state.totalLoaded += nextRecords.length;
+    trimOldCards();
+    state.loading = false;
+    updateStatus();
+
+    if (!state.finished) {
+      requestAnimationFrame(() => {
+        const rect = sentinel.getBoundingClientRect();
+        if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+      });
+    }
+  }
+
+  function trimOldCards() {
+    let removed = false;
+    while (state.cardQueue.length > state.maxCards) {
+      const old = state.cardQueue.shift();
+      state.records.delete(String(old.dataset.id));
+      old.remove();
+      removed = true;
+    }
+    if (removed) {
+      state.columnHeights = state.columns.map(() => 0);
+      state.cardQueue.forEach(card => {
+        const ratio = parseFloat(card.dataset.ratio) || 1;
+        let minIdx = 0;
+        for (let i = 1; i < state.columnHeights.length; i++) {
+          if (state.columnHeights[i] < state.columnHeights[minIdx]) minIdx = i;
+        }
+        state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
+      });
+    }
+  }
+
+  function updateStatus(text) {
+    if (text) { statusEl.textContent = text; updateLoadMore(); return; }
+    if (state.view === 'search' || state.view === 'favorites') { updateLoadMore(); return; }
+    if (state.finished) statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
+    else statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
+    updateLoadMore();
+  }
+
+  function updateLoadMore() {
+    const show = state.view === 'all' && !state.finished;
+    loadMoreWrap.style.display = show ? 'block' : 'none';
+    loadMoreBtn.disabled = state.loading;
+    loadMoreBtn.textContent = state.loading ? '加载中…' : '加载更多';
+  }
+
+  function setupObserver() {
+    if (state.io) state.io.disconnect();
+    state.io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) loadNextBatch();
+    }, { rootMargin: state.rootMargin + 'px 0px' });
+    state.io.observe(sentinel);
+  }
+
+  /* ===== 搜索 ===== */
+  function enterSearch() {
+    if (state.view === 'search') return;
+    closeDrawer();
+    state.savedCards = state.view === 'all' ? state.cardQueue.slice() : [];
+    state.view = 'search';
+    state.currentTerms = [];
+    document.body.classList.add('searching');
+    gallery.innerHTML = '';
+    gallery.classList.remove('js-ready');
+    state.columns = [];
+    state.columnHeights = [];
+    statusEl.textContent = '输入关键词或选择筛选条件';
+    setTimeout(() => searchInput.focus(), 100);
+    updateLoadMore();
+  }
+
+  function exitSearch() {
+    if (state.view !== 'search') return;
+    state.view = 'all';
+    document.body.classList.remove('searching');
+    searchInput.value = '';
+    searchInput.blur();
+    clearTimeout(state.searchTimer);
+    filterYear.value = '';
+    filterType.value = '';
+    state.currentTerms = [];
+    state.lastSearchResults = [];
+    const cards = state.savedCards.length ? state.savedCards : state.cardQueue.slice();
+    state.savedCards = [];
+    layoutCards(cards);
+    updateStatus();
+    history.replaceState(null, '', location.pathname);
+    requestAnimationFrame(() => {
+      const rect = sentinel.getBoundingClientRect();
+      if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+    });
+  }
+
+  function doSearch(keyword) {
+    const q = (keyword || '').trim().toLowerCase();
+    const yearFilter = filterYear.value;
+    const typeFilter = filterType.value;
+    const hasQuery = q.length > 0;
+    const hasFilter = !!yearFilter || !!typeFilter;
+
+    if (!hasQuery && !hasFilter) {
+      gallery.innerHTML = '';
+      gallery.classList.remove('js-ready');
+      state.currentTerms = [];
+      state.lastSearchResults = [];
+      statusEl.textContent = '输入关键词或选择筛选条件';
+      syncUrl();
+      return;
+    }
+
+    const terms = q.split(/\s+/).filter(Boolean);
+    state.currentTerms = terms;
+    const matched = [];
+    let totalMatched = 0;
+
+    for (let i = 0; i < state.searchIndex.length; i++) {
+      const item = state.searchIndex[i];
+      if (!item) continue;
+      if (terms.length && !terms.every(term => item.haystack.includes(term))) continue;
+      const rec = item.record;
+      if (yearFilter && String(rec.year || '').trim() !== yearFilter) continue;
+      if (typeFilter) {
+        const t = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
+        if (!t.map(String).includes(typeFilter)) continue;
+      }
+      totalMatched++;
+      if (matched.length < MAX_SEARCH_RESULTS) matched.push(item);
+    }
+
+    if (!matched.length) {
+      gallery.innerHTML = '';
+      gallery.classList.remove('js-ready');
+      state.lastSearchResults = [];
+      statusEl.textContent = `未找到匹配的项目`;
+      syncUrl();
+      return;
+    }
+
+    const records = matched.map(item => item.record);
+    state.lastSearchResults = records;
+    const cards = records.map(rec => {
+      state.records.set(String(rec.id), rec);
+      return createCard(rec);
+    });
+
+    layoutCards(cards);
+
+    const filterDesc = [q, yearFilter, typeFilter].filter(Boolean).join(' · ');
+    if (totalMatched > MAX_SEARCH_RESULTS) {
+      statusEl.textContent = `共 ${totalMatched} 个匹配「${filterDesc}」，显示前 ${MAX_SEARCH_RESULTS} 个`;
+    } else {
+      statusEl.textContent = `找到 ${totalMatched} 个匹配「${filterDesc}」的项目`;
+    }
+    syncUrl();
+  }
+
+  /* ===== 收藏夹 ===== */
+  function enterFavorites() {
+    closeDrawer();
+    if (state.view === 'favorites') return;
+    if (state.view === 'search') {
+      document.body.classList.remove('searching');
+      searchInput.value = '';
+      filterYear.value = '';
+      filterType.value = '';
+      state.currentTerms = [];
+      state.lastSearchResults = [];
+      clearTimeout(state.searchTimer);
+    }
+    state.view = 'favorites';
+    state.currentTerms = [];
+    history.replaceState(null, '', location.pathname);
+    renderFavorites();
+  }
+
+  function renderFavorites() {
+    const favRecords = [];
+    state.favorites.forEach(id => {
+      const rec = state.recordById.get(String(id));
+      if (rec) favRecords.push(rec);
+    });
+
+    if (!favRecords.length) {
+      gallery.innerHTML = '';
+      gallery.classList.remove('js-ready');
+      state.columns = [];
+      state.columnHeights = [];
+      statusEl.textContent = '暂无收藏，点击卡片右上角 ♥ 收藏';
+      updateLoadMore();
+      return;
+    }
+
+    const cards = favRecords.map(rec => {
+      state.records.set(String(rec.id), rec);
+      return createCard(rec);
+    });
+    layoutCards(cards);
+    statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
+  }
+
+  function goHome() {
+    closeDrawer();
+    if (state.view === 'search') { exitSearch(); return; }
+    if (state.view === 'favorites') {
+      state.view = 'all';
+      state.currentTerms = [];
+      const cards = state.savedCards.length ? state.savedCards : state.cardQueue.slice();
+      state.savedCards = [];
+      layoutCards(cards);
+      updateStatus();
+      requestAnimationFrame(() => {
+        const rect = sentinel.getBoundingClientRect();
+        if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+      });
+    }
+  }
+
+  let resizeTimer;
+  function scheduleRelayout() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (state.view === 'search') { doSearch(searchInput.value); return; }
+      if (state.view === 'favorites') { renderFavorites(); return; }
+      const cards = state.cardQueue.slice();
+      if (!cards.length) return;
+      const style = getComputedStyle(gallery);
+      const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
+      const innerWidth = gallery.clientWidth - paddingX;
+      const newColCount = computeColumnCount(innerWidth, gap);
+      if (newColCount !== state.currentColCount) {
+        layoutCards(cards);
+        if (!state.finished && !state.loading) {
+          requestAnimationFrame(() => {
+            const rect = sentinel.getBoundingClientRect();
+            if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
+          });
+        }
+      }
+    }, 200);
+  }
+
+  /* ===== 抽屉 ===== */
+  function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
+  function closeDrawer() { document.body.classList.remove('drawer-open'); }
+
+  /* ===== 灯箱：large + 计数 + 设计师行增强 + overview + 2 列 meta + 详细分类 + 标签 ===== */
+  function openLightbox(record) {
+    lbGallery.innerHTML = '';
+    const images = Array.isArray(record.images) ? record.images : [];
+
+    /* 图片区：只加载 large，失败回退 small */
+    images.forEach(imgData => {
+      const urlLarge = resolveUrl(imgData.large);
+      const urlSmall = resolveUrl(imgData.small);
+      const primary = urlLarge || urlSmall;
+      if (!primary) return;
+
+      const img = document.createElement('img');
+      img.src = primary;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.alt = record.title || '';
+      img.onerror = () => {
+        if (img.dataset.fallback) { img.style.display = 'none'; return; }
+        img.dataset.fallback = '1';
+        if (urlSmall && img.src !== urlSmall) img.src = urlSmall;
+        else img.style.display = 'none';
+      };
+      lbGallery.appendChild(img);
+    });
+
+    /* ① 右上角「共 N 张」 */
+    lbCount.textContent = images.length > 0 ? `共 ${images.length} 张` : '';
+
+    /* ② 标题 */
+    lbTitle.textContent = record.title || '无标题';
+
+    /* ③ 设计师行增强：设计师 · 国家 · 生卒年 · AGI since */
+    const parts = [];
+    if (record.designer) parts.push(record.designer);
+    const country = String(record.nationalGroup || '').trim();
+    if (country) parts.push(country);
+    const yb = String(record.yearOfBirth || '').trim();
+    const yd = String(record.yearOfDeath || '').trim();
+    if (yb && yd) parts.push(`${yb}–${yd}`);
+    else if (yb) parts.push(`b. ${yb}`);
+    else if (yd) parts.push(`d. ${yd}`);
+    const memberSince = String(record.memberSince || '').trim();
+    if (memberSince) parts.push(`AGI since ${memberSince}`);
+    lbDesigner.textContent = parts.length ? `设计师: ${parts.join(' · ')}` : '设计师: 未知';
+
+    /* ④ overview 全文 */
+    lbOverview.textContent = String(record.overview || '').trim();
+
+    /* ⑤ 元信息 2 列：年份|客户 一行，类型|领域 一行 */
+    const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
+    const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
+
+    lbMetaGrid.innerHTML = '';
+    const addMeta = (label, value) => {
+      const item = document.createElement('div'); item.className = 'lb-meta-item';
+      const l = document.createElement('span'); l.className = 'lb-meta-label'; l.textContent = label;
+      const v = document.createElement('span'); v.className = 'lb-meta-value'; v.textContent = value;
+      item.appendChild(l); item.appendChild(v); lbMetaGrid.appendChild(item);
+    };
+    addMeta('年份', record.year || '-');
+    addMeta('客户', record.client || '-');
+    addMeta('类型', types);
+    addMeta('领域', sectors);
+
+    /* ⑥ 详细分类 */
+    lbDetails.innerHTML = '';
+    const detailsText = Array.isArray(record.details) ? record.details.join('\n') : (record.details || '');
+    if (detailsText) {
+      const strong = document.createElement('strong'); strong.textContent = '详细分类:';
+      lbDetails.appendChild(strong);
+      lbDetails.appendChild(document.createElement('br'));
+      const detailSpan = document.createElement('span');
+      detailSpan.style.whiteSpace = 'pre-line';
+      detailSpan.textContent = detailsText;
+      lbDetails.appendChild(detailSpan);
+      lbDetails.style.display = '';
+    } else {
+      lbDetails.style.display = 'none';
+    }
+
+    /* ⑦ 标签：有值才显示 */
+    lbTags.innerHTML = '';
+    const tags = Array.isArray(record.tags) ? record.tags.filter(Boolean) : [];
+    if (tags.length) {
+      tags.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'lb-tag';
+        span.textContent = String(t);
+        lbTags.appendChild(span);
+      });
+    }
+
+    lightbox.classList.add('open');
+    document.body.classList.add('lightbox-open');
+    lightbox.scrollTop = 0;
+  }
+
+  function closeLightbox() { lightbox.classList.remove('open'); document.body.classList.remove('lightbox-open'); }
+
+  /* ===== 事件 ===== */
+  searchBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (state.view === 'search') exitSearch(); else enterSearch();
+  });
+  searchInput.addEventListener('input', () => {
+    clearTimeout(state.searchTimer);
+    state.searchTimer = setTimeout(() => { if (state.view === 'search') doSearch(searchInput.value); }, 300);
+  });
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); exitSearch(); }
+    if (e.key === 'Enter') { e.preventDefault(); clearTimeout(state.searchTimer); if (state.view === 'search') doSearch(searchInput.value); }
+  });
+
+  filterYear.addEventListener('change', () => { if (state.view === 'search') doSearch(searchInput.value); });
+  filterType.addEventListener('change', () => { if (state.view === 'search') doSearch(searchInput.value); });
+  document.getElementById('clearFilters').addEventListener('click', () => {
+    filterYear.value = ''; filterType.value = '';
+    if (state.view === 'search') doSearch(searchInput.value);
+  });
+
+  document.addEventListener('click', e => {
+    if (state.view !== 'search') return;
+    if (e.target.closest('.search-wrap') || e.target.closest('#hamburger') ||
+        e.target.closest('.card') || e.target.closest('.lightbox') ||
+        e.target.closest('.search-filter-bar')) return;
+    exitSearch();
+  });
+  searchOverlay.addEventListener('click', () => { if (state.view === 'search') exitSearch(); });
+
+  hamburger.addEventListener('click', e => {
+    e.stopPropagation();
+    if (document.body.classList.contains('drawer-open')) closeDrawer(); else openDrawer();
+  });
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+
+  drawer.querySelectorAll('a[data-view]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const v = a.dataset.view;
+      if (v === 'favorites') enterFavorites();
+      else if (v === 'home') goHome();
+      else { closeDrawer(); showToast('该功能暂未开放'); }
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
+    }
+    if (e.key === 'Escape') {
+      if (document.body.classList.contains('drawer-open')) closeDrawer();
+      else if (state.view === 'search') exitSearch();
+    }
+  });
+
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox || e.target.closest('.lightbox-close')) closeLightbox();
+  });
+
+  loadMoreBtn.addEventListener('click', () => { if (state.view === 'all') loadNextBatch(); });
+
+  window.addEventListener('resize', scheduleRelayout);
+  const orientationMQ = window.matchMedia('(orientation: portrait)');
+  if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
+
+  async function init() {
+    loadFavorites();
+    await initData();
+    populateFilters();
+    restoreFromUrl();
+    setupObserver();
+    updateLoadMore();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
