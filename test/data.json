@@ -1,6 +1,5 @@
 {
   "id_38837": {
-    "id": 38837,
     "slug": "aa-2021-calendar",
     "designer": "Andrew Ashton (Aa)",
     "title": "AaGt 2021 Calendar",
@@ -15,19 +14,6 @@
     "sector": [
       "Commercial"
     ],
-    "firstName": "Andrew",
-    "lastName": "Ashton (Aa)",
-    "fullName": "Andrew Ashton (Aa)",
-    "nationalGroup": "Australia",
-    "nationalPresident": null,
-    "memberSince": "2004",
-    "overview": "Andrew is a designer, writer, image-maker, creative director and trouble maker who lives and works in Naarm (Melbourne), Australia. Andrew has practised design since 1989. He is interested in making work that...",
-    "agencies": [],
-    "projects": [],
-    "username": "Andrew",
-    "yearOfBirth": "1969",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 39091,
@@ -35,7 +21,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_10b.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_10b.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_10b.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_10b.jpg"
       },
       {
@@ -44,7 +29,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_01.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_01.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_01.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_01.jpg"
       },
       {
@@ -53,7 +37,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_02.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_02.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_02.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_02.jpg"
       },
       {
@@ -62,7 +45,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_04.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_04.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_04.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_04.jpg"
       },
       {
@@ -71,7 +53,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_05.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_05.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_05.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_05.jpg"
       },
       {
@@ -80,7 +61,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_03.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_03.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_03.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_03.jpg"
       },
       {
@@ -89,7 +69,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_07.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_07.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_07.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_07.jpg"
       },
       {
@@ -98,7 +77,6 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_2000px_06.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_06.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_06.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_2000px_06.jpg"
       },
       {
@@ -107,14 +85,14 @@
         "height": "1500",
         "url": "/Andrew/AaD_GTAa_21Cal_3000px_08.jpg",
         "small": "/Andrew/_500xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_3000px_08.jpg",
-        "medium": "/Andrew/_1600xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_3000px_08.jpg",
         "large": "/Andrew/_2000xAUTO_crop_center-center_75_none/AaD_GTAa_21Cal_3000px_08.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Australia",
+    "overview": "Andrew is a designer, writer, image-maker, creative director and trouble maker who lives and works in Naarm (Melbourne), Australia. Andrew has practised design since 1989. He is interested in making work that...",
+    "yearOfBirth": "1969"
   },
   "id_38741": {
-    "id": 38741,
     "slug": "tipoteca-italiana-butti",
     "designer": "Jianping He",
     "title": "Tipoteca italiana / Butti",
@@ -123,19 +101,6 @@
     "type": [],
     "details": [],
     "sector": [],
-    "firstName": "Jianping",
-    "lastName": "He",
-    "fullName": "Jianping He",
-    "nationalGroup": "Germany",
-    "nationalPresident": null,
-    "memberSince": "2005",
-    "overview": "Jianping He was born in 1973, China. He is now living in Berlin, working as a graphic designer, professor and publisher. He studied graphic design at the China Academy of Art (1991-1994)...",
-    "agencies": [],
-    "projects": [],
-    "username": "jianpinghe",
-    "yearOfBirth": "1973",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 38748,
@@ -143,14 +108,14 @@
         "height": "837",
         "url": "/jianpinghe/2020-Tipoteca-italiana_2021-08-25-082233.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/2020-Tipoteca-italiana_2021-08-25-082233.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/2020-Tipoteca-italiana_2021-08-25-082233.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/2020-Tipoteca-italiana_2021-08-25-082233.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Germany",
+    "overview": "Jianping He was born in 1973, China. He is now living in Berlin, working as a graphic designer, professor and publisher. He studied graphic design at the China Academy of Art (1991-1994)...",
+    "yearOfBirth": "1973"
   },
   "id_38700": {
-    "id": 38700,
     "slug": "deaydream",
     "designer": "Jianping He",
     "title": "Deaydream",
@@ -159,19 +124,6 @@
     "type": [],
     "details": [],
     "sector": [],
-    "firstName": "Jianping",
-    "lastName": "He",
-    "fullName": "Jianping He",
-    "nationalGroup": "Germany",
-    "nationalPresident": null,
-    "memberSince": "2005",
-    "overview": "Jianping He was born in 1973, China. He is now living in Berlin, working as a graphic designer, professor and publisher. He studied graphic design at the China Academy of Art (1991-1994)...",
-    "agencies": [],
-    "projects": [],
-    "username": "jianpinghe",
-    "yearOfBirth": "1973",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 38703,
@@ -179,7 +131,6 @@
         "height": "1560",
         "url": "/jianpinghe/Bildschirmfoto-2021-08-24-um-15.34.57.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.34.57.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.34.57.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.34.57.jpg"
       },
       {
@@ -188,7 +139,6 @@
         "height": "1568",
         "url": "/jianpinghe/Bildschirmfoto-2021-08-24-um-15.27.24.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.24.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.24.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.24.jpg"
       },
       {
@@ -197,7 +147,6 @@
         "height": "1538",
         "url": "/jianpinghe/Bildschirmfoto-2021-08-24-um-15.27.46_2021-08-24-135642.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.46_2021-08-24-135642.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.46_2021-08-24-135642.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.27.46_2021-08-24-135642.jpg"
       },
       {
@@ -206,7 +155,6 @@
         "height": "1562",
         "url": "/jianpinghe/Bildschirmfoto-2021-08-24-um-15.29.14.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.14.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.14.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.14.jpg"
       },
       {
@@ -215,14 +163,14 @@
         "height": "1568",
         "url": "/jianpinghe/Bildschirmfoto-2021-08-24-um-15.29.31_2021-08-24-135619.jpg",
         "small": "/jianpinghe/_500xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.31_2021-08-24-135619.jpg",
-        "medium": "/jianpinghe/_1600xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.31_2021-08-24-135619.jpg",
         "large": "/jianpinghe/_2000xAUTO_crop_center-center_75_none/Bildschirmfoto-2021-08-24-um-15.29.31_2021-08-24-135619.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Germany",
+    "overview": "Jianping He was born in 1973, China. He is now living in Berlin, working as a graphic designer, professor and publisher. He studied graphic design at the China Academy of Art (1991-1994)...",
+    "yearOfBirth": "1973"
   },
   "id_27943": {
-    "id": 27943,
     "slug": "letters-to-the-editor-full-page-magazine-illustration-1",
     "designer": "Jelle Van der Toorn Vrijthoff",
     "title": "Letters to the Editor, full page magazine illustration",
@@ -231,19 +179,6 @@
     "type": [],
     "details": [],
     "sector": [],
-    "firstName": "Jelle",
-    "lastName": "Van der Toorn Vrijthoff",
-    "fullName": "Jelle Van der Toorn Vrijthoff",
-    "nationalGroup": "Netherlands",
-    "nationalPresident": null,
-    "memberSince": "1978",
-    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
-    "agencies": [],
-    "projects": [],
-    "username": "jellevandertoornvrijthoff",
-    "yearOfBirth": "1946",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 27929,
@@ -251,14 +186,14 @@
         "height": "2000",
         "url": "/jellevandertoornvrijthoff/brieven-illustratie-voor-AGI.jpg",
         "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/brieven-illustratie-voor-AGI.jpg",
-        "medium": "/jellevandertoornvrijthoff/_1600xAUTO_crop_center-center_75_none/brieven-illustratie-voor-AGI.jpg",
         "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/brieven-illustratie-voor-AGI.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
   },
   "id_27940": {
-    "id": 27940,
     "slug": "thalys",
     "designer": "Jelle Van der Toorn Vrijthoff",
     "title": "Thalys",
@@ -273,19 +208,6 @@
     "sector": [
       "Commercial"
     ],
-    "firstName": "Jelle",
-    "lastName": "Van der Toorn Vrijthoff",
-    "fullName": "Jelle Van der Toorn Vrijthoff",
-    "nationalGroup": "Netherlands",
-    "nationalPresident": null,
-    "memberSince": "1978",
-    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
-    "agencies": [],
-    "projects": [],
-    "username": "jellevandertoornvrijthoff",
-    "yearOfBirth": "1946",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 27939,
@@ -293,14 +215,14 @@
         "height": "1434",
         "url": "/jellevandertoornvrijthoff/Thalys-voor-AGI.jpg",
         "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/Thalys-voor-AGI.jpg",
-        "medium": "/jellevandertoornvrijthoff/_1600xAUTO_crop_center-center_75_none/Thalys-voor-AGI.jpg",
         "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/Thalys-voor-AGI.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
   },
   "id_27923": {
-    "id": 27923,
     "slug": "de-ballade-van-de-beul",
     "designer": "Jelle Van der Toorn Vrijthoff",
     "title": "De Ballade van de Beul",
@@ -317,19 +239,6 @@
     "sector": [
       "Commercial"
     ],
-    "firstName": "Jelle",
-    "lastName": "Van der Toorn Vrijthoff",
-    "fullName": "Jelle Van der Toorn Vrijthoff",
-    "nationalGroup": "Netherlands",
-    "nationalPresident": null,
-    "memberSince": "1978",
-    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
-    "agencies": [],
-    "projects": [],
-    "username": "jellevandertoornvrijthoff",
-    "yearOfBirth": "1946",
-    "yearOfDeath": null,
-    "deceased": 0,
     "images": [
       {
         "id": 27705,
@@ -337,10 +246,167 @@
         "height": "2000",
         "url": "/jellevandertoornvrijthoff/Levende-Cargo-voor-AGI.jpg",
         "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/Levende-Cargo-voor-AGI.jpg",
-        "medium": "/jellevandertoornvrijthoff/_1600xAUTO_crop_center-center_75_none/Levende-Cargo-voor-AGI.jpg",
         "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/Levende-Cargo-voor-AGI.jpg"
       }
     ],
-    "tags": []
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
+  },
+  "id_27922": {
+    "slug": "stamps-to-validate-fishing-licences",
+    "designer": "Jelle Van der Toorn Vrijthoff",
+    "title": "Stamps to validate fishing licences.",
+    "year": "1982",
+    "client": "Ministry of Culture",
+    "type": [
+      "Illustration"
+    ],
+    "details": [
+      "Illustration",
+      "Print"
+    ],
+    "sector": [
+      "Government"
+    ],
+    "images": [
+      {
+        "id": 27684,
+        "width": "2000",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/Viszegels-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/Viszegels-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/Viszegels-voor-AGI.jpg"
+      }
+    ],
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
+  },
+  "id_27921": {
+    "slug": "dutch-edition-of-on-the-road-by-jack-kerouac",
+    "designer": "Jelle Van der Toorn Vrijthoff",
+    "title": "Dutch edition of On the Road by Jack Kerouac",
+    "year": "1979",
+    "client": "Bert Bakker publisher",
+    "type": [
+      "Illustration"
+    ],
+    "details": [
+      "Illustration"
+    ],
+    "sector": [
+      "Commercial"
+    ],
+    "images": [
+      {
+        "id": 27708,
+        "width": "1285",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/Op-weg-cropped-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/Op-weg-cropped-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/Op-weg-cropped-voor-AGI.jpg"
+      }
+    ],
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
+  },
+  "id_27919": {
+    "slug": "series-of-documentary-pockets-about-the-second-world-war",
+    "designer": "Jelle Van der Toorn Vrijthoff",
+    "title": "Series of documentary Pockets about the second world war",
+    "year": "1980",
+    "client": "Government Printing and Publishing",
+    "type": [
+      "Illustration"
+    ],
+    "details": [
+      "Book",
+      "Illustration",
+      "Lettering",
+      "Print",
+      "Typography"
+    ],
+    "sector": [
+      "Commercial"
+    ],
+    "images": [
+      {
+        "id": 27691,
+        "width": "1322",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-1voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-1voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-1voor-AGI.jpg"
+      },
+      {
+        "id": 27706,
+        "width": "3613",
+        "height": "1503",
+        "url": "/jellevandertoornvrijthoff/Lou-de-Jong-litho-1-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/Lou-de-Jong-litho-1-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/Lou-de-Jong-litho-1-voor-AGI.jpg"
+      },
+      {
+        "id": 27692,
+        "width": "1323",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-2-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-2-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-2-voor-AGI.jpg"
+      },
+      {
+        "id": 27693,
+        "width": "1321",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-3-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-3-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-3-voor-AGI.jpg"
+      },
+      {
+        "id": 27694,
+        "width": "1323",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-4-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-4-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-4-voor-AGI.jpg"
+      },
+      {
+        "id": 27695,
+        "width": "1326",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-5-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-5-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-5-voor-AGI.jpg"
+      },
+      {
+        "id": 27696,
+        "width": "1331",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-6-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-6-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-6-voor-AGI.jpg"
+      },
+      {
+        "id": 27697,
+        "width": "1335",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-7-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-7-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-7-voor-AGI.jpg"
+      },
+      {
+        "id": 27698,
+        "width": "1318",
+        "height": "2000",
+        "url": "/jellevandertoornvrijthoff/De-Jong-8-voor-AGI.jpg",
+        "small": "/jellevandertoornvrijthoff/_500xAUTO_crop_center-center_75_none/De-Jong-8-voor-AGI.jpg",
+        "large": "/jellevandertoornvrijthoff/_2000xAUTO_crop_center-center_75_none/De-Jong-8-voor-AGI.jpg"
+      }
+    ],
+    "nationalGroup": "Netherlands",
+    "overview": "1962–66: Royal Academy of Art, The Hague, graphic design and Communication (final exam cum laude; Esso Award). 1969–72: further graduate study at the Royal College of Art, London, department of graphic design...",
+    "yearOfBirth": "1946"
   }
   }
