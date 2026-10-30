@@ -67,7 +67,7 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* 卡片只显示设计师，单行省略 */
+  /* 卡片只显示设计师（+国家），单行省略 */
   .card-meta { font-size: 12px; color: #666; }
   .card-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -102,7 +102,10 @@
   .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; }
-  .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
+  .lb-designer { font-size: 15px; color: #555; margin-bottom: 16px; }
+  /* 灯箱设计师简介 */
+  .lb-overview { font-size: 14px; color: #444; line-height: 1.7; margin: 0 0 24px; padding: 14px 16px; background: #f7f7f7; border-left: 3px solid #d0d0d0; border-radius: 4px; white-space: pre-line; }
+  .lb-overview:empty { display: none; }
   /* 两列布局：年份|客户 一行，类型|领域 一行 */
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
   @media (max-width: 480px) {
@@ -170,6 +173,8 @@
     <div class="lb-content">
       <h2 class="lb-title" id="lb-title"></h2>
       <div class="lb-designer" id="lb-designer"></div>
+      <!-- 灯箱设计师简介 -->
+      <div class="lb-overview" id="lb-overview"></div>
       <div class="lb-meta-grid" id="lb-meta-grid"></div>
       <div class="lb-details" id="lb-details"></div>
     </div>
@@ -193,7 +198,7 @@
     return IMAGE_BASE_URL + (url.charAt(0) === '/' ? '' : '/') + url;
   }
 
-  /* 新增：Fisher-Yates 洗牌，返回新数组，不修改原数组 */
+  /* Fisher-Yates 洗牌，返回新数组，不修改原数组 */
   function shuffleArray(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -233,6 +238,7 @@
   const lbGallery = document.getElementById('lb-gallery');
   const lbTitle = document.getElementById('lb-title');
   const lbDesigner = document.getElementById('lb-designer');
+  const lbOverview = document.getElementById('lb-overview');
   const lbMetaGrid = document.getElementById('lb-meta-grid');
   const lbDetails = document.getElementById('lb-details');
   const searchBtn = document.getElementById('searchBtn');
@@ -250,7 +256,7 @@
 
   const state = {
     allProjects: [],
-    loadQueue: [], /* 新增：打乱后的加载队列，供瀑布流使用 */
+    loadQueue: [], /* 打乱后的加载队列，供瀑布流使用 */
     currentIndex: 0,
     chunksPerBatch: 1,
     rootMargin: 800,
@@ -340,7 +346,7 @@
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
 
-      /* 新增：生成随机加载队列；搜索索引仍基于 allProjects 原始顺序 */
+      /* 生成随机加载队列；搜索索引仍基于 allProjects 原始顺序 */
       state.loadQueue = shuffleArray(state.allProjects);
       state.currentIndex = 0;
       state.totalLoaded = 0;
@@ -373,8 +379,11 @@
         const types = Array.isArray(rec.type) ? rec.type.join(' ') : (rec.type || '');
         const details = Array.isArray(rec.details) ? rec.details.join(' ') : (rec.details || '');
         const sectors = Array.isArray(rec.sector) ? rec.sector.join(' ') : (rec.sector || '');
-        const haystack = [rec.title||'', rec.designer||'', rec.client||'', rec.year||'', details, sectors, types]
-          .join(' ').toLowerCase();
+        const haystack = [
+          rec.title || '', rec.designer || '', rec.client || '', rec.year || '',
+          rec.nationalGroup || '', rec.overview || '',
+          details, sectors, types
+        ].join(' ').toLowerCase();
         state.searchIndex[j] = { id: rec.id, haystack, record: rec };
       }
       statusEl.textContent = `正在构建搜索索引… ${end}/${total}`;
@@ -491,7 +500,7 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ===== 卡片：图片墙只加载 small，只显示设计师 ===== */
+  /* ===== 卡片：图片墙只加载 small，显示设计师 + 国家 ===== */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
@@ -555,11 +564,12 @@
     }
     body.appendChild(h2);
 
-    /* 卡片只显示设计师，无年份 */
+    /* 卡片只显示设计师 + 国家，无年份 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
-    sp1.textContent = record.designer || 'Unknown';
+    const country = String(record.nationalGroup || '').trim();
+    sp1.textContent = (record.designer || 'Unknown') + (country ? ' ' + country : '');
     sp1.title = sp1.textContent;
     meta.appendChild(sp1);
     body.appendChild(meta);
@@ -587,7 +597,6 @@
   async function loadNextBatch() {
     if (state.view !== 'all' || state.loading || state.finished) return;
 
-    /* 修改：随机队列加载 */
     if (state.currentIndex >= state.loadQueue.length) { state.finished = true; updateStatus(); return; }
 
     state.loading = true;
@@ -606,7 +615,6 @@
     }
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
-    /* 修改：从 loadQueue 取，而不是 allProjects */
     const nextRecords = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
     state.currentIndex += nextRecords.length;
 
@@ -866,7 +874,7 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱：只加载 large，无翻页/计数器/简介/国家 ===== */
+  /* ===== 灯箱：只加载 large，显示设计师+国家+overview ===== */
   function openLightbox(record) {
     lbGallery.innerHTML = '';
     const images = Array.isArray(record.images) ? record.images : [];
@@ -893,7 +901,13 @@
     });
 
     lbTitle.textContent = record.title || '无标题';
-    lbDesigner.textContent = `设计师: ${record.designer || '未知'}`;
+
+    /* 设计师 + 国家 */
+    const country = String(record.nationalGroup || '').trim();
+    lbDesigner.textContent = `设计师: ${record.designer || '未知'}${country ? ' · ' + country : ''}`;
+
+    /* 设计师简介 */
+    lbOverview.textContent = String(record.overview || '').trim();
 
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
