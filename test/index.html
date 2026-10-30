@@ -67,9 +67,11 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* 卡片只显示设计师（+国家），单行省略 */
-  .card-meta { font-size: 12px; color: #666; }
-  .card-meta span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 卡片：设计师左、年份右，两端对齐，单行省略 */
+  .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 8px; }
+  .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-meta span:first-child { flex: 1; min-width: 0; }
+  .card-meta span:last-child { flex-shrink: 0; }
 
   .card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); color: #9a9a9a; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, color .15s, background .15s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
@@ -103,8 +105,14 @@
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 16px; }
-  /* 灯箱设计师简介 */
-  .lb-overview { font-size: 14px; color: #444; line-height: 1.7; margin: 0 0 24px; padding: 14px 16px; background: #f7f7f7; border-left: 3px solid #d0d0d0; border-radius: 4px; white-space: pre-line; }
+  /* 灯箱简介：全文显示，不限制高度，保留换行 */
+  .lb-overview {
+    font-size: 14px; color: #444; line-height: 1.7;
+    margin: 0 0 24px; padding: 14px 16px;
+    background: #f7f7f7; border-left: 3px solid #d0d0d0;
+    border-radius: 4px; white-space: pre-line;
+    max-height: none; overflow: visible;
+  }
   .lb-overview:empty { display: none; }
   /* 两列布局：年份|客户 一行，类型|领域 一行 */
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
@@ -113,7 +121,7 @@
   }
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
-  .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; }
+  .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; }
   /* 关闭按钮无底色，白色 × */
   .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; z-index: 101; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .15s; }
   .lightbox-close:hover { opacity: .7; background: transparent; }
@@ -173,7 +181,6 @@
     <div class="lb-content">
       <h2 class="lb-title" id="lb-title"></h2>
       <div class="lb-designer" id="lb-designer"></div>
-      <!-- 灯箱设计师简介 -->
       <div class="lb-overview" id="lb-overview"></div>
       <div class="lb-meta-grid" id="lb-meta-grid"></div>
       <div class="lb-details" id="lb-details"></div>
@@ -256,7 +263,7 @@
 
   const state = {
     allProjects: [],
-    loadQueue: [], /* 打乱后的加载队列，供瀑布流使用 */
+    loadQueue: [],
     currentIndex: 0,
     chunksPerBatch: 1,
     rootMargin: 800,
@@ -500,7 +507,7 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ===== 卡片：图片墙只加载 small，显示设计师 + 国家 ===== */
+  /* ===== 卡片：图片墙只加载 small，设计师左 / 年份右 ===== */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
@@ -564,14 +571,16 @@
     }
     body.appendChild(h2);
 
-    /* 卡片只显示设计师 + 国家，无年份 */
+    /* 卡片：设计师左、年份右，不显示国家 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
-    const country = String(record.nationalGroup || '').trim();
-    sp1.textContent = (record.designer || 'Unknown') + (country ? ' ' + country : '');
+    sp1.textContent = record.designer || 'Unknown';
     sp1.title = sp1.textContent;
+    const sp2 = document.createElement('span');
+    sp2.textContent = record.year || '';
     meta.appendChild(sp1);
+    meta.appendChild(sp2);
     body.appendChild(meta);
 
     article.appendChild(imgWrap);
@@ -874,7 +883,7 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱：只加载 large，显示设计师+国家+overview ===== */
+  /* ===== 灯箱：只加载 large，显示设计师+国家+overview 全文 ===== */
   function openLightbox(record) {
     lbGallery.innerHTML = '';
     const images = Array.isArray(record.images) ? record.images : [];
@@ -906,7 +915,7 @@
     const country = String(record.nationalGroup || '').trim();
     lbDesigner.textContent = `设计师: ${record.designer || '未知'}${country ? ' · ' + country : ''}`;
 
-    /* 设计师简介 */
+    /* 设计师简介：全文显示 */
     lbOverview.textContent = String(record.overview || '').trim();
 
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
