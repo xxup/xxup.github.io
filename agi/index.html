@@ -145,15 +145,31 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  /* ===== 灯箱 ===== */
-  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 80px 20px 40px; overflow-y: auto; }
+  /* ===== 灯箱（全宽紧贴顶部） ===== */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,.92);
+    display: none;
+    align-items: flex-start; justify-content: center;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   .lightbox.open { display: flex; }
-  .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
 
+  .lightbox-inner {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  /* 顶部栏：fixed，不随灯箱滚动 */
   .lb-topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 101;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 24px;
+    padding: 14px 20px;
     pointer-events: none;
   }
   .lb-topbar > * { pointer-events: auto; }
@@ -163,15 +179,15 @@
     border: none; background: transparent;
     color: #fff; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    text-shadow: 0 1px 4px rgba(0,0,0,.6);
-    transition: opacity .15s, color .15s;
+    text-shadow: 0 1px 6px rgba(0,0,0,.75);
+    transition: opacity .15s, color .15s, transform .15s;
   }
-  .lb-fav:hover { opacity: .75; }
+  .lb-fav:hover { opacity: .8; transform: scale(1.05); }
   .lb-fav.active { color: #e0245e; }
   .lb-fav.active svg { fill: currentColor; }
 
   .lb-count {
-    background: rgba(0,0,0,.55); color: #fff;
+    background: rgba(0,0,0,.6); color: #fff;
     font-size: 12px; line-height: 1; padding: 6px 12px;
     border-radius: 12px; pointer-events: none;
   }
@@ -182,16 +198,21 @@
     border: none; background: transparent;
     color: #fff; font-size: 32px; line-height: 1; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    text-shadow: 0 1px 4px rgba(0,0,0,.6);
-    transition: opacity .15s;
+    text-shadow: 0 1px 6px rgba(0,0,0,.75);
+    transition: opacity .15s, transform .15s;
   }
-  .lightbox-close:hover { opacity: .7; background: transparent; }
+  .lightbox-close:hover { opacity: .8; transform: scale(1.05); background: transparent; }
 
   .lb-gallery-wrap { position: relative; background: #f0f0f0; }
   .lb-gallery { display: flex; flex-direction: column; }
-  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
+  .lb-gallery img { width: 100%; height: auto; display: block; }
 
-  .lb-content { padding: 24px 32px; }
+  /* 内容区：全宽时限制文字可读宽度并居中 */
+  .lb-content {
+    padding: 28px 20px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
   .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
@@ -208,10 +229,10 @@
   }
 
   @media (max-width: 480px) {
-    .lb-topbar { padding: 12px 14px; }
+    .lb-topbar { padding: 10px 12px; }
     .lb-fav, .lightbox-close { width: 40px; height: 40px; }
     .lb-meta-grid { gap: 12px 16px; }
-    .lb-content { padding: 20px 18px; }
+    .lb-content { padding: 20px 16px 32px; }
     .lb-meta-value { font-size: 13px; }
     .lb-title { font-size: 20px; }
     .lb-designer { font-size: 14px; }
@@ -996,7 +1017,7 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱 ===== */
+  /* ===== 灯箱（全宽紧贴顶部） ===== */
   function openLightbox(record) {
     state.currentLightboxId = String(record.id);
 
@@ -1031,7 +1052,6 @@
 
     lbTitle.textContent = record.title || '无标题';
 
-    /* 设计师行：设计师 · 国家 · 出生年 */
     const parts = [];
     if (record.designer) parts.push(record.designer);
     const country = String(record.nationalGroup || '').trim();
@@ -1191,10 +1211,6 @@
     populateFilters();
     restoreFromUrl();
     setupObserver();
-    updateLoading();
-  }
-
-  function updateLoading() {
     updateLoadMore();
   }
 
