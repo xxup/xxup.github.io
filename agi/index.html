@@ -20,33 +20,40 @@
   .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
   .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
   .logo-cell { width: 64px; border-right: 1px solid #e0e0e0; text-decoration: none; color: #000; }
-  .center-cell { flex: 1; padding: 0 8px; gap: 8px; min-width: 0; justify-content: flex-start; }
+  .center-cell { flex: 1; position: relative; overflow: hidden; }
   .icon-cell { width: 64px; background: transparent; border: none; cursor: pointer; color: #111; transition: background 0.15s; }
   .icon-cell:hover { background: #f9f9f9; }
   #searchBtn { border-left: none; }
   #hamburger { border-left: 1px solid #e0e0e0; }
 
-  /* 搜索取消按钮：仅搜索态显示 */
-  .search-cancel {
-    display: none; height: 100%; padding: 0 12px;
-    border: none; background: transparent; color: #333;
-    font-size: 15px; cursor: pointer; flex-shrink: 0; white-space: nowrap;
+  /* 搜索框：从右侧滑出，带圆角边框 */
+  .search-wrap {
+    position: absolute; inset: 0;
+    padding: 0 8px;
+    display: flex; align-items: center;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.2,.8,.2,1);
+    background: #fff;
+    z-index: 2;
   }
-  .search-cancel:hover { color: #000; }
+  body.searching .search-wrap {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
 
-  /* 圆角搜索框：默认隐藏，搜索态显示 */
   .search-box {
-    display: none; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     height: 40px; padding: 0 12px;
     background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 20px;
+    width: 100%;
     transition: border-color .15s, background .15s, box-shadow .15s;
-    flex: 1; min-width: 0;
   }
   .search-box:focus-within {
     background: #fff; border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59,130,246,.15);
   }
-  .search-box .icon-search { flex-shrink: 0; color: #999; }
+  .search-box .icon-search { color: #999; flex-shrink: 0; }
   .search-input {
     flex: 1; min-width: 0; height: 100%;
     border: none; outline: none; background: transparent;
@@ -62,12 +69,6 @@
   }
   .search-box.has-value .search-clear { display: flex; }
   .search-clear:hover { background: #999; }
-
-  /* 搜索态顶栏切换 */
-  body.searching .logo-cell { display: none; }
-  body.searching #searchBtn { display: none; }
-  body.searching .search-cancel { display: flex; }
-  body.searching .search-box { display: flex; }
 
   /* 搜索筛选栏 */
   .search-filter-bar { position: fixed; top: 64px; left: 0; right: 0; z-index: 55; background: #fff; border-bottom: 1px solid #e0e0e0; display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -209,8 +210,7 @@
     .lb-meta-value { font-size: 13px; }
     .lb-title { font-size: 20px; }
     .lb-designer { font-size: 14px; }
-    .search-cancel { padding: 0 10px; font-size: 14px; }
-    .center-cell { padding: 0 6px; gap: 6px; }
+    .search-wrap { padding: 0 6px; }
   }
 
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
@@ -225,14 +225,15 @@
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
     </a>
     <div class="nav-cell center-cell">
-      <button class="search-cancel" id="searchCancel" type="button">取消</button>
-      <div class="search-box" id="searchBox">
-        <svg class="icon-search" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"/>
-          <line x1="16.5" y1="16.5" x2="21" y2="21"/>
-        </svg>
-        <input type="search" class="search-input" id="searchInput" placeholder="搜索标题、设计师、客户…" autocomplete="off">
-        <button type="button" class="search-clear" id="searchClear" aria-label="清除搜索">×</button>
+      <div class="search-wrap" id="searchWrap">
+        <div class="search-box" id="searchBox">
+          <svg class="icon-search" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+          </svg>
+          <input type="search" class="search-input" id="searchInput" placeholder="搜索标题、设计师、客户…" autocomplete="off">
+          <button type="button" class="search-clear" id="searchClear" aria-label="清除搜索">×</button>
+        </div>
       </div>
     </div>
     <button class="nav-cell icon-cell" id="searchBtn" aria-label="搜索" type="button">
@@ -353,7 +354,6 @@
   const lbDetails = document.getElementById('lb-details');
   const lbTags = document.getElementById('lb-tags');
   const searchBtn = document.getElementById('searchBtn');
-  const searchCancel = document.getElementById('searchCancel');
   const searchBox = document.getElementById('searchBox');
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
@@ -431,7 +431,6 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
   }
 
-  /* ===== 搜索框清除按钮状态 ===== */
   function updateSearchClear() {
     searchBox.classList.toggle('has-value', searchInput.value.length > 0);
   }
@@ -803,7 +802,7 @@
     statusEl.textContent = '输入关键词或选择筛选条件';
     searchInput.value = '';
     updateSearchClear();
-    setTimeout(() => searchInput.focus(), 100);
+    setTimeout(() => searchInput.focus(), 300);
     updateLoadMore();
   }
 
@@ -1105,11 +1104,7 @@
   /* ===== 顶栏搜索交互 ===== */
   searchBtn.addEventListener('click', e => {
     e.stopPropagation();
-    enterSearch();
-  });
-  searchCancel.addEventListener('click', e => {
-    e.stopPropagation();
-    exitSearch();
+    if (state.view === 'search') exitSearch(); else enterSearch();
   });
   searchInput.addEventListener('input', () => {
     updateSearchClear();
@@ -1146,8 +1141,9 @@
   /* ===== 外部点击退出搜索 ===== */
   document.addEventListener('click', e => {
     if (state.view !== 'search') return;
-    if (e.target.closest('.search-box') ||
+    if (e.target.closest('.search-wrap') ||
         e.target.closest('.search-filter-bar') ||
+        e.target.closest('#searchBtn') ||
         e.target.closest('#hamburger') ||
         e.target.closest('.card') ||
         e.target.closest('.lightbox')) return;
