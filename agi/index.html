@@ -67,15 +67,11 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 卡片：设计师左、年份右，两端对齐，单行省略；无收藏按钮 */
   .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 8px; }
   .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .card-meta span:first-child { flex: 1; min-width: 0; }
   .card-meta span:last-child { flex-shrink: 0; }
-
-  .card-fav { position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); color: #9a9a9a; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, color .15s, background .15s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-  .card-fav:hover { transform: scale(1.1); background: #fff; color: #e0245e; }
-  .card-fav.active { color: #e0245e; }
-  .card-fav.active svg { fill: currentColor; }
 
   mark { background: #fff3a3; color: inherit; padding: 0 1px; border-radius: 2px; }
 
@@ -96,22 +92,51 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+  .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.9); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 80px 20px 40px; overflow-y: auto; }
   .lightbox.open { display: flex; }
   .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
 
-  /* 图片区：相对定位容器，用于放置「共 N 张」小字 */
-  .lb-gallery-wrap { position: relative; background: #f0f0f0; }
-  .lb-gallery { display: flex; flex-direction: column; }
-  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
-  /* 新增：图片区右上角「共 N 张」 */
+  /* 新增：灯箱顶部栏：左收藏、中计数、右关闭，均无底色 */
+  .lb-topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 101;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    pointer-events: none;
+  }
+  .lb-topbar > * { pointer-events: auto; }
+
+  .lb-fav {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: transparent;
+    color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,.6);
+    transition: opacity .15s, color .15s;
+  }
+  .lb-fav:hover { opacity: .75; }
+  .lb-fav.active { color: #e0245e; }
+  .lb-fav.active svg { fill: currentColor; }
+
   .lb-count {
-    position: absolute; top: 12px; right: 12px; z-index: 2;
     background: rgba(0,0,0,.55); color: #fff;
-    font-size: 12px; line-height: 1; padding: 6px 10px;
+    font-size: 12px; line-height: 1; padding: 6px 12px;
     border-radius: 12px; pointer-events: none;
   }
   .lb-count:empty { display: none; }
+
+  .lightbox-close {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: transparent;
+    color: #fff; font-size: 32px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,.6);
+    transition: opacity .15s;
+  }
+  .lightbox-close:hover { opacity: .7; background: transparent; }
+
+  .lb-gallery-wrap { position: relative; background: #f0f0f0; }
+  .lb-gallery { display: flex; flex-direction: column; }
+  .lb-gallery img { width: 100%; height: auto; border-bottom: 1px solid #eee; display: block; }
 
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
@@ -132,7 +157,7 @@
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; overflow-wrap: anywhere; }
   /* 详细分类 */
   .lb-details { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 24px; }
-  /* 新增：标签 chip */
+  /* 标签 chip */
   .lb-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
   .lb-tags:empty { display: none; }
   .lb-tag {
@@ -141,12 +166,10 @@
     font-size: 12px; line-height: 1.4; border-radius: 12px;
   }
 
-  /* 关闭按钮无底色，白色 × */
-  .lightbox-close { position: fixed; top: 20px; right: 24px; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 32px; line-height: 1; cursor: pointer; z-index: 101; text-shadow: 0 1px 4px rgba(0,0,0,.6); transition: opacity .15s; }
-  .lightbox-close:hover { opacity: .7; background: transparent; }
-
   /* 窄屏：保持 2 列，仅缩小间距与内边距 */
   @media (max-width: 480px) {
+    .lb-topbar { padding: 12px 14px; }
+    .lb-fav, .lightbox-close { width: 40px; height: 40px; }
     .lb-meta-grid { gap: 12px 16px; }
     .lb-content { padding: 20px 18px; }
     .lb-meta-value { font-size: 13px; }
@@ -203,10 +226,16 @@
 <div id="sentinel"></div>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
-  <button class="lightbox-close" aria-label="关闭">×</button>
+  <!-- 灯箱顶部栏：左收藏、中计数、右关闭，均无底色 -->
+  <div class="lb-topbar">
+    <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+    <div class="lb-count" id="lb-count"></div>
+    <button class="lightbox-close" aria-label="关闭">×</button>
+  </div>
   <div class="lightbox-inner">
     <div class="lb-gallery-wrap">
-      <div class="lb-count" id="lb-count"></div>
       <div class="lb-gallery" id="lb-gallery"></div>
     </div>
     <div class="lb-content">
@@ -276,6 +305,7 @@
   const lightbox = document.getElementById('lightbox');
   const lbGallery = document.getElementById('lb-gallery');
   const lbCount = document.getElementById('lb-count');
+  const lbFav = document.getElementById('lbFav');
   const lbTitle = document.getElementById('lb-title');
   const lbDesigner = document.getElementById('lb-designer');
   const lbOverview = document.getElementById('lb-overview');
@@ -320,7 +350,8 @@
     currentColCount: 0,
     favorites: new Set(),
     currentTerms: [],
-    lastSearchResults: []
+    lastSearchResults: [],
+    currentLightboxId: '' /* 新增：当前灯箱记录 id，用于收藏状态同步 */
   };
 
   /* ===== 收藏 ===== */
@@ -342,14 +373,13 @@
     updateFavoriteButtons(key);
     if (state.view === 'favorites') renderFavorites();
   }
+  /* 新增：同步灯箱收藏按钮状态 */
   function updateFavoriteButtons(id) {
     const active = state.favorites.has(String(id));
-    document.querySelectorAll('.card').forEach(card => {
-      if (String(card.dataset.id) === String(id)) {
-        const btn = card.querySelector('.card-fav');
-        if (btn) { btn.classList.toggle('active', active); btn.setAttribute('aria-pressed', active ? 'true' : 'false'); }
-      }
-    });
+    if (state.currentLightboxId && state.currentLightboxId === String(id)) {
+      lbFav.classList.toggle('active', active);
+      lbFav.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
   }
 
   let toastTimer;
@@ -542,7 +572,7 @@
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ===== 卡片：图片墙只加载 small，设计师左 / 年份右 ===== */
+  /* ===== 卡片：图片墙只加载 small，无收藏按钮 ===== */
   function createCard(record) {
     const article = document.createElement('article');
     article.className = 'card';
@@ -602,7 +632,7 @@
     }
     body.appendChild(h2);
 
-    /* 卡片：设计师左、年份右，不显示国家 */
+    /* 卡片：设计师左、年份右，无收藏按钮 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
@@ -616,15 +646,6 @@
 
     article.appendChild(imgWrap);
     article.appendChild(body);
-
-    const favBtn = document.createElement('button');
-    favBtn.className = 'card-fav' + (state.favorites.has(String(record.id)) ? ' active' : '');
-    favBtn.type = 'button';
-    favBtn.setAttribute('aria-label', '收藏');
-    favBtn.setAttribute('aria-pressed', state.favorites.has(String(record.id)) ? 'true' : 'false');
-    favBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-    favBtn.addEventListener('click', e => { e.stopPropagation(); toggleFavorite(record.id); });
-    article.appendChild(favBtn);
 
     article.addEventListener('click', () => openLightbox(record));
     article.addEventListener('keydown', e => {
@@ -855,7 +876,7 @@
       gallery.classList.remove('js-ready');
       state.columns = [];
       state.columnHeights = [];
-      statusEl.textContent = '暂无收藏，点击卡片右上角 ♥ 收藏';
+      statusEl.textContent = '暂无收藏，点击灯箱左上角 ♥ 收藏';
       updateLoadMore();
       return;
     }
@@ -914,12 +935,13 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱：large + 计数 + 设计师行增强 + overview + 2 列 meta + 详细分类 + 标签 ===== */
+  /* ===== 灯箱：large + 顶部左收藏 / 中计数 / 右关闭 ===== */
   function openLightbox(record) {
+    state.currentLightboxId = String(record.id);
+
     lbGallery.innerHTML = '';
     const images = Array.isArray(record.images) ? record.images : [];
 
-    /* 图片区：只加载 large，失败回退 small */
     images.forEach(imgData => {
       const urlLarge = resolveUrl(imgData.large);
       const urlSmall = resolveUrl(imgData.small);
@@ -940,13 +962,18 @@
       lbGallery.appendChild(img);
     });
 
-    /* ① 右上角「共 N 张」 */
+    /* 中间计数 */
     lbCount.textContent = images.length > 0 ? `共 ${images.length} 张` : '';
 
-    /* ② 标题 */
+    /* 左上角收藏按钮状态 */
+    const favActive = state.favorites.has(String(record.id));
+    lbFav.classList.toggle('active', favActive);
+    lbFav.setAttribute('aria-pressed', favActive ? 'true' : 'false');
+
+    /* 标题 */
     lbTitle.textContent = record.title || '无标题';
 
-    /* ③ 设计师行增强：设计师 · 国家 · 生卒年 · AGI since */
+    /* 设计师行：设计师 · 国家 · 生卒年 · AGI since */
     const parts = [];
     if (record.designer) parts.push(record.designer);
     const country = String(record.nationalGroup || '').trim();
@@ -960,10 +987,10 @@
     if (memberSince) parts.push(`AGI since ${memberSince}`);
     lbDesigner.textContent = parts.length ? `设计师: ${parts.join(' · ')}` : '设计师: 未知';
 
-    /* ④ overview 全文 */
+    /* overview 全文 */
     lbOverview.textContent = String(record.overview || '').trim();
 
-    /* ⑤ 元信息 2 列：年份|客户 一行，类型|领域 一行 */
+    /* 元信息 2 列 */
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
 
@@ -979,7 +1006,7 @@
     addMeta('类型', types);
     addMeta('领域', sectors);
 
-    /* ⑥ 详细分类 */
+    /* 详细分类 */
     lbDetails.innerHTML = '';
     const detailsText = Array.isArray(record.details) ? record.details.join('\n') : (record.details || '');
     if (detailsText) {
@@ -995,7 +1022,7 @@
       lbDetails.style.display = 'none';
     }
 
-    /* ⑦ 标签：有值才显示 */
+    /* 标签 */
     lbTags.innerHTML = '';
     const tags = Array.isArray(record.tags) ? record.tags.filter(Boolean) : [];
     if (tags.length) {
@@ -1012,7 +1039,18 @@
     lightbox.scrollTop = 0;
   }
 
-  function closeLightbox() { lightbox.classList.remove('open'); document.body.classList.remove('lightbox-open'); }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.classList.remove('lightbox-open');
+    state.currentLightboxId = '';
+  }
+
+  /* 灯箱收藏按钮：切换收藏 */
+  lbFav.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!state.currentLightboxId) return;
+    toggleFavorite(state.currentLightboxId);
+  });
 
   /* ===== 事件 ===== */
   searchBtn.addEventListener('click', e => {
