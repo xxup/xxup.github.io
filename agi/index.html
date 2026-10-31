@@ -67,7 +67,6 @@
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  /* 卡片：设计师左、年份右，两端对齐，单行省略；无收藏按钮 */
   .card-meta { font-size: 12px; color: #666; display: flex; justify-content: space-between; gap: 8px; }
   .card-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .card-meta span:first-child { flex: 1; min-width: 0; }
@@ -96,7 +95,7 @@
   .lightbox.open { display: flex; }
   .lightbox-inner { position: relative; max-width: 1000px; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; }
 
-  /* 新增：灯箱顶部栏：左收藏、中计数、右关闭，均无底色 */
+  /* 灯箱顶部栏：左收藏、中计数、右关闭，均无底色 */
   .lb-topbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 101;
     display: flex; align-items: center; justify-content: space-between;
@@ -141,7 +140,6 @@
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 16px; }
-  /* 灯箱简介：全文显示，保留换行 */
   .lb-overview {
     font-size: 14px; color: #444; line-height: 1.7;
     margin: 0 0 24px; padding: 14px 16px;
@@ -150,14 +148,11 @@
     max-height: none; overflow: visible;
   }
   .lb-overview:empty { display: none; }
-  /* 元信息两列：年份|客户 一行，类型|领域 一行；窄屏也保持 2 列 */
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; overflow-wrap: anywhere; }
-  /* 详细分类 */
   .lb-details { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 24px; }
-  /* 标签 chip */
   .lb-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
   .lb-tags:empty { display: none; }
   .lb-tag {
@@ -166,7 +161,6 @@
     font-size: 12px; line-height: 1.4; border-radius: 12px;
   }
 
-  /* 窄屏：保持 2 列，仅缩小间距与内边距 */
   @media (max-width: 480px) {
     .lb-topbar { padding: 12px 14px; }
     .lb-fav, .lightbox-close { width: 40px; height: 40px; }
@@ -226,7 +220,6 @@
 <div id="sentinel"></div>
 
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
-  <!-- 灯箱顶部栏：左收藏、中计数、右关闭，均无底色 -->
   <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -259,14 +252,12 @@
   const DATA_URL = './data.json';
   const FAV_KEY = 'gallery_favorites_v1';
 
-  /* 图片 URL：相对路径直接拼接，兼容绝对 URL */
   function resolveUrl(url) {
     if (!url) return '';
     if (/^https?:\/\//i.test(url)) return url;
     return IMAGE_BASE_URL + (url.charAt(0) === '/' ? '' : '/') + url;
   }
 
-  /* Fisher-Yates 洗牌，返回新数组，不修改原数组 */
   function shuffleArray(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -351,7 +342,7 @@
     favorites: new Set(),
     currentTerms: [],
     lastSearchResults: [],
-    currentLightboxId: '' /* 新增：当前灯箱记录 id，用于收藏状态同步 */
+    currentLightboxId: ''
   };
 
   /* ===== 收藏 ===== */
@@ -373,7 +364,6 @@
     updateFavoriteButtons(key);
     if (state.view === 'favorites') renderFavorites();
   }
-  /* 新增：同步灯箱收藏按钮状态 */
   function updateFavoriteButtons(id) {
     const active = state.favorites.has(String(id));
     if (state.currentLightboxId && state.currentLightboxId === String(id)) {
@@ -390,7 +380,7 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
   }
 
-  /* ===== 数据加载：仅 data.json，顶层为数组 ===== */
+  /* ===== 数据加载 ===== */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
@@ -417,7 +407,6 @@
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
 
-      /* 生成随机加载队列；搜索索引仍基于 allProjects 原始顺序 */
       state.loadQueue = shuffleArray(state.allProjects);
       state.currentIndex = 0;
       state.totalLoaded = 0;
@@ -632,7 +621,6 @@
     }
     body.appendChild(h2);
 
-    /* 卡片：设计师左、年份右，无收藏按钮 */
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
@@ -654,7 +642,7 @@
     return article;
   }
 
-  /* ===== 加载：从随机队列 loadQueue 取数据 ===== */
+  /* ===== 加载 ===== */
   async function loadNextBatch() {
     if (state.view !== 'all' || state.loading || state.finished) return;
 
@@ -906,19 +894,32 @@
     }
   }
 
+  /* ===== 响应式重排：仅在列数变化时重排，避免滚动回顶 ===== */
   let resizeTimer;
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (state.view === 'search') { doSearch(searchInput.value); return; }
-      if (state.view === 'favorites') { renderFavorites(); return; }
-      const cards = state.cardQueue.slice();
-      if (!cards.length) return;
+      /* 统一先算当前列数 */
       const style = getComputedStyle(gallery);
       const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
-      const innerWidth = gallery.clientWidth - paddingX;
+      let innerWidth = gallery.clientWidth - paddingX;
+      if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
       const newColCount = computeColumnCount(innerWidth, gap);
+
+      if (state.view === 'search') {
+        /* 修改：只有列数变化才重新搜索，避免移动端地址栏收起/展开触发 resize 时重建列表导致滚动回顶 */
+        if (newColCount !== state.currentColCount) doSearch(searchInput.value);
+        return;
+      }
+      if (state.view === 'favorites') {
+        /* 修改：同样只在列数变化时重渲染 */
+        if (newColCount !== state.currentColCount) renderFavorites();
+        return;
+      }
+
+      const cards = state.cardQueue.slice();
+      if (!cards.length) return;
       if (newColCount !== state.currentColCount) {
         layoutCards(cards);
         if (!state.finished && !state.loading) {
@@ -935,7 +936,7 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱：large + 顶部左收藏 / 中计数 / 右关闭 ===== */
+  /* ===== 灯箱 ===== */
   function openLightbox(record) {
     state.currentLightboxId = String(record.id);
 
@@ -962,18 +963,14 @@
       lbGallery.appendChild(img);
     });
 
-    /* 中间计数 */
     lbCount.textContent = images.length > 0 ? `共 ${images.length} 张` : '';
 
-    /* 左上角收藏按钮状态 */
     const favActive = state.favorites.has(String(record.id));
     lbFav.classList.toggle('active', favActive);
     lbFav.setAttribute('aria-pressed', favActive ? 'true' : 'false');
 
-    /* 标题 */
     lbTitle.textContent = record.title || '无标题';
 
-    /* 设计师行：设计师 · 国家 · 生卒年 · AGI since */
     const parts = [];
     if (record.designer) parts.push(record.designer);
     const country = String(record.nationalGroup || '').trim();
@@ -987,10 +984,8 @@
     if (memberSince) parts.push(`AGI since ${memberSince}`);
     lbDesigner.textContent = parts.length ? `设计师: ${parts.join(' · ')}` : '设计师: 未知';
 
-    /* overview 全文 */
     lbOverview.textContent = String(record.overview || '').trim();
 
-    /* 元信息 2 列 */
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
 
@@ -1006,7 +1001,6 @@
     addMeta('类型', types);
     addMeta('领域', sectors);
 
-    /* 详细分类 */
     lbDetails.innerHTML = '';
     const detailsText = Array.isArray(record.details) ? record.details.join('\n') : (record.details || '');
     if (detailsText) {
@@ -1022,7 +1016,6 @@
       lbDetails.style.display = 'none';
     }
 
-    /* 标签 */
     lbTags.innerHTML = '';
     const tags = Array.isArray(record.tags) ? record.tags.filter(Boolean) : [];
     if (tags.length) {
@@ -1045,7 +1038,6 @@
     state.currentLightboxId = '';
   }
 
-  /* 灯箱收藏按钮：切换收藏 */
   lbFav.addEventListener('click', e => {
     e.stopPropagation();
     if (!state.currentLightboxId) return;
