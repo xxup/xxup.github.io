@@ -38,7 +38,7 @@
   #hamburger { border-left: 1px solid #e0e0e0; }
   .icon-cell:hover { background: #f9f9f9; }
 
-  /* 搜索框容器：绝对定位覆盖 center-cell，内容居中 */
+  /* 搜索框容器：居中 */
   .search-wrap {
     position: absolute;
     inset: 0;
@@ -56,7 +56,7 @@
     pointer-events: auto;
   }
 
-  /* 搜索框：药丸，最大宽度 600px，从右侧展开 */
+  /* 搜索框：药丸，最大宽度 600px */
   .search-box {
     display: flex;
     align-items: center;
@@ -184,7 +184,7 @@
     min-height: 100vh;
   }
 
-  /* 顶部药丸：居中浮动，左收藏 / 中计数 / 右关闭 */
+  /* 顶部药丸：宽度 80%，高度缩小，左收藏 / 中计数 / 右关闭 */
   .lb-topbar {
     position: fixed;
     top: max(12px, env(safe-area-inset-top, 12px));
@@ -192,10 +192,11 @@
     transform: translateX(-50%) translateY(-12px) scale(.88);
     transform-origin: center top;
     z-index: 101;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 2px;
-    padding: 4px;
+    justify-content: space-between;
+    width: 80%;
+    padding: 3px;
     background: rgba(20,20,20,.62);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -205,7 +206,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity .3s, transform .3s cubic-bezier(.2,.8,.2,1);
-    max-width: calc(100% - 24px);
   }
   .lightbox.open .lb-topbar {
     opacity: 1;
@@ -215,8 +215,8 @@
 
   .lb-fav,
   .lightbox-close {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: none;
     background: transparent;
@@ -233,18 +233,20 @@
   .lb-fav.active { color: #ff3b6b; }
   .lb-fav.active svg { fill: currentColor; }
 
+  .lb-fav svg { width: 20px; height: 20px; }
+
   .lightbox-close {
-    font-size: 26px;
+    font-size: 24px;
     line-height: 1;
   }
 
   .lb-count {
+    height: 36px;
     padding: 0 12px;
-    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
     color: #fff;
     white-space: nowrap;
     flex-shrink: 0;
@@ -263,23 +265,59 @@
   }
   .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
   .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
-  .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
+  .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 20px; }
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; overflow-wrap: anywhere; }
-  .lb-details { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 24px; }
-  .lb-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+
+  /* 详情分类 + 标签：同一行，左详情右标签，竖线分隔 */
+  .lb-detail-tags {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .lb-details {
+    font-size: 13px;
+    color: #555;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .lb-details:empty { display: none; }
+
+  .lb-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 14px;
+    border-left: 1px solid #ddd;
+  }
   .lb-tags:empty { display: none; }
+  /* details 为空时，tags 不需要分隔线 */
+  .lb-details:empty + .lb-tags,
+  .lb-details[style*="none"] + .lb-tags {
+    padding-left: 0;
+    border-left: none;
+  }
+
   .lb-tag {
-    display: inline-block; padding: 4px 10px;
-    background: #f0f0f0; color: #444;
-    font-size: 12px; line-height: 1.4; border-radius: 12px;
+    display: inline-block;
+    padding: 2px 9px;
+    background: #f0f0f0;
+    color: #444;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 10px;
   }
 
   @media (max-width: 480px) {
     .lb-topbar { top: max(10px, env(safe-area-inset-top, 10px)); }
-    .lb-fav, .lightbox-close { width: 38px; height: 38px; }
-    .lb-count { height: 38px; padding: 0 10px; font-size: 12px; }
+    .lb-fav, .lightbox-close { width: 34px; height: 34px; }
+    .lb-count { height: 34px; padding: 0 10px; font-size: 11px; }
     .lb-meta-grid { gap: 12px 16px; }
     .lb-content { padding: 20px 16px 32px; }
     .lb-meta-value { font-size: 13px; }
@@ -287,6 +325,8 @@
     .lb-designer { font-size: 14px; }
     .search-wrap { padding: 0 6px; }
     .search-box { height: 42px; }
+    .lb-detail-tags { gap: 10px; }
+    .lb-tags { padding-left: 10px; }
   }
 
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
@@ -348,7 +388,7 @@
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
   <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
     <div class="lb-count" id="lb-count"></div>
     <button class="lightbox-close" aria-label="关闭">×</button>
@@ -361,8 +401,10 @@
       <h2 class="lb-title" id="lb-title"></h2>
       <div class="lb-designer" id="lb-designer"></div>
       <div class="lb-meta-grid" id="lb-meta-grid"></div>
-      <div class="lb-details" id="lb-details"></div>
-      <div class="lb-tags" id="lb-tags"></div>
+      <div class="lb-detail-tags">
+        <div class="lb-details" id="lb-details"></div>
+        <div class="lb-tags" id="lb-tags"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1125,21 +1167,16 @@
     addMeta('类型', types);
     addMeta('领域', sectors);
 
+    /* 详情分类：单行文本，与标签并列，中间竖线分隔 */
     lbDetails.innerHTML = '';
-    const detailsText = Array.isArray(record.details) ? record.details.join('\n') : (record.details || '');
+    const detailsText = Array.isArray(record.details) ? record.details.join(', ') : (record.details || '');
     if (detailsText) {
-      const strong = document.createElement('strong'); strong.textContent = '详细分类:';
-      lbDetails.appendChild(strong);
-      lbDetails.appendChild(document.createElement('br'));
-      const detailSpan = document.createElement('span');
-      detailSpan.style.whiteSpace = 'pre-line';
-      detailSpan.textContent = detailsText;
-      lbDetails.appendChild(detailSpan);
-      lbDetails.style.display = '';
+      lbDetails.textContent = '详细分类: ' + detailsText;
     } else {
-      lbDetails.style.display = 'none';
+      lbDetails.textContent = '';
     }
 
+    /* 标签：chip */
     lbTags.innerHTML = '';
     const tags = Array.isArray(record.tags) ? record.tags.filter(Boolean) : [];
     if (tags.length) {
