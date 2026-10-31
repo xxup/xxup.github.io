@@ -38,32 +38,51 @@
   #hamburger { border-left: 1px solid #e0e0e0; }
   .icon-cell:hover { background: #f9f9f9; }
 
+  /* 搜索框容器：绝对定位覆盖 center-cell，内容居中 */
   .search-wrap {
-    position: absolute; inset: 0;
-    padding: 0 8px;
-    display: flex; align-items: center;
-    opacity: 0; pointer-events: none;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity .2s;
-    background: #fff;
     z-index: 2;
   }
   body.searching .search-wrap {
-    opacity: 1; pointer-events: auto;
+    opacity: 1;
+    pointer-events: auto;
   }
 
+  /* 搜索框：药丸，最大宽度 600px，从右侧展开 */
   .search-box {
-    display: flex; align-items: center; gap: 8px;
-    height: 40px; padding: 0 12px;
-    background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-    transform: translateX(16px);
-    transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .15s, background .15s, box-shadow .15s;
+    max-width: 600px;
+    height: 44px;
+    padding: 0 14px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 22px;
+    transform: scale(.88);
+    opacity: 0;
+    transform-origin: right center;
+    transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .2s,
+                border-color .15s, background .15s, box-shadow .15s;
     touch-action: manipulation;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
   }
-  body.searching .search-box { transform: translateX(0); }
+  body.searching .search-box {
+    transform: scale(1);
+    opacity: 1;
+  }
   .search-box:focus-within {
     background: #fff; border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    box-shadow: 0 4px 20px rgba(59,130,246,.18), 0 0 0 3px rgba(59,130,246,.12);
   }
   .search-box .icon-search { color: #999; flex-shrink: 0; }
   .search-input {
@@ -145,7 +164,7 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  /* ===== 灯箱（全宽紧贴顶部） ===== */
+  /* ===== 灯箱：全宽紧贴顶部 ===== */
   .lightbox {
     position: fixed; inset: 0; z-index: 100;
     background: rgba(0,0,0,.92);
@@ -165,49 +184,78 @@
     min-height: 100vh;
   }
 
-  /* 顶部栏：fixed，不随灯箱滚动 */
+  /* 顶部药丸：居中浮动，左收藏 / 中计数 / 右关闭 */
   .lb-topbar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 101;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 20px;
+    position: fixed;
+    top: max(12px, env(safe-area-inset-top, 12px));
+    left: 50%;
+    transform: translateX(-50%) translateY(-12px) scale(.88);
+    transform-origin: center top;
+    z-index: 101;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    background: rgba(20,20,20,.62);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 8px 32px rgba(0,0,0,.35);
+    opacity: 0;
     pointer-events: none;
+    transition: opacity .3s, transform .3s cubic-bezier(.2,.8,.2,1);
+    max-width: calc(100% - 24px);
   }
-  .lb-topbar > * { pointer-events: auto; }
+  .lightbox.open .lb-topbar {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
+  }
 
-  .lb-fav {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: none; background: transparent;
-    color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    text-shadow: 0 1px 6px rgba(0,0,0,.75);
-    transition: opacity .15s, color .15s, transform .15s;
+  .lb-fav,
+  .lightbox-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity .15s, color .15s, background .15s;
   }
-  .lb-fav:hover { opacity: .8; transform: scale(1.05); }
-  .lb-fav.active { color: #e0245e; }
+  .lb-fav:hover,
+  .lightbox-close:hover { background: rgba(255,255,255,.12); }
+  .lb-fav.active { color: #ff3b6b; }
   .lb-fav.active svg { fill: currentColor; }
 
+  .lightbox-close {
+    font-size: 26px;
+    line-height: 1;
+  }
+
   .lb-count {
-    background: rgba(0,0,0,.6); color: #fff;
-    font-size: 12px; line-height: 1; padding: 6px 12px;
-    border-radius: 12px; pointer-events: none;
+    padding: 0 12px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: .2px;
   }
   .lb-count:empty { display: none; }
-
-  .lightbox-close {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: none; background: transparent;
-    color: #fff; font-size: 32px; line-height: 1; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    text-shadow: 0 1px 6px rgba(0,0,0,.75);
-    transition: opacity .15s, transform .15s;
-  }
-  .lightbox-close:hover { opacity: .8; transform: scale(1.05); background: transparent; }
 
   .lb-gallery-wrap { position: relative; background: #f0f0f0; }
   .lb-gallery { display: flex; flex-direction: column; }
   .lb-gallery img { width: 100%; height: auto; display: block; }
 
-  /* 内容区：全宽时限制文字可读宽度并居中 */
   .lb-content {
     padding: 28px 20px 40px;
     max-width: 1000px;
@@ -229,14 +277,16 @@
   }
 
   @media (max-width: 480px) {
-    .lb-topbar { padding: 10px 12px; }
-    .lb-fav, .lightbox-close { width: 40px; height: 40px; }
+    .lb-topbar { top: max(10px, env(safe-area-inset-top, 10px)); }
+    .lb-fav, .lightbox-close { width: 38px; height: 38px; }
+    .lb-count { height: 38px; padding: 0 10px; font-size: 12px; }
     .lb-meta-grid { gap: 12px 16px; }
     .lb-content { padding: 20px 16px 32px; }
     .lb-meta-value { font-size: 13px; }
     .lb-title { font-size: 20px; }
     .lb-designer { font-size: 14px; }
     .search-wrap { padding: 0 6px; }
+    .search-box { height: 42px; }
   }
 
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,.82); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
@@ -298,7 +348,7 @@
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
   <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
     <div class="lb-count" id="lb-count"></div>
     <button class="lightbox-close" aria-label="关闭">×</button>
@@ -1017,7 +1067,7 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱（全宽紧贴顶部） ===== */
+  /* ===== 灯箱 ===== */
   function openLightbox(record) {
     state.currentLightboxId = String(record.id);
 
