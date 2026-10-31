@@ -18,28 +18,39 @@
   /* ===== 顶栏 ===== */
   .topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 60; background: #fff; border-bottom: 1px solid #e0e0e0; }
   .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
-  .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .nav-cell { display: flex; align-items: center; justify-content: center; height: 100%; padding: 0; }
   .logo-cell { width: 64px; border-right: 1px solid #e0e0e0; text-decoration: none; color: #000; }
   .center-cell { flex: 1; position: relative; overflow: hidden; }
   .icon-cell { width: 64px; background: transparent; border: none; cursor: pointer; color: #111; transition: background 0.15s; }
-  .icon-cell:hover { background: #f9f9f9; }
-  #searchBtn { border-left: none; }
-  #hamburger { border-left: 1px solid #e0e0e0; }
 
-  /* 搜索框：从右侧滑出，带圆角边框 */
+  /* 搜索按钮：宽度可过渡，让位给输入框 */
+  #searchBtn {
+    width: 64px;
+    overflow: hidden;
+    border-left: none;
+    transition: width .3s cubic-bezier(.2,.8,.2,1), opacity .2s, background 0.15s;
+  }
+  body.searching #searchBtn {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #hamburger { border-left: 1px solid #e0e0e0; }
+  .icon-cell:hover { background: #f9f9f9; }
+
+  /* 搜索框：淡入 + 轻微滑入 */
   .search-wrap {
     position: absolute; inset: 0;
     padding: 0 8px;
     display: flex; align-items: center;
-    pointer-events: none;
-    transform: translateX(100%);
-    transition: transform .3s cubic-bezier(.2,.8,.2,1);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
     background: #fff;
     z-index: 2;
   }
   body.searching .search-wrap {
-    transform: translateX(0);
-    pointer-events: auto;
+    opacity: 1; pointer-events: auto;
   }
 
   .search-box {
@@ -47,8 +58,11 @@
     height: 40px; padding: 0 12px;
     background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 20px;
     width: 100%;
-    transition: border-color .15s, background .15s, box-shadow .15s;
+    transform: translateX(16px);
+    transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .15s, background .15s, box-shadow .15s;
+    touch-action: manipulation;
   }
+  body.searching .search-box { transform: translateX(0); }
   .search-box:focus-within {
     background: #fff; border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59,130,246,.15);
@@ -57,8 +71,10 @@
   .search-input {
     flex: 1; min-width: 0; height: 100%;
     border: none; outline: none; background: transparent;
-    font-size: 15px; color: #111;
+    font-size: 16px; /* 防 iOS 聚焦自动放大 */
+    color: #111;
     -webkit-appearance: none; appearance: none;
+    touch-action: manipulation;
   }
   .search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
   .search-clear {
@@ -1143,7 +1159,6 @@
     if (state.view !== 'search') return;
     if (e.target.closest('.search-wrap') ||
         e.target.closest('.search-filter-bar') ||
-        e.target.closest('#searchBtn') ||
         e.target.closest('#hamburger') ||
         e.target.closest('.card') ||
         e.target.closest('.lightbox')) return;
