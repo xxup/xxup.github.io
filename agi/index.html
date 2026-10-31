@@ -23,7 +23,6 @@
   .center-cell { flex: 1; position: relative; overflow: hidden; }
   .icon-cell { width: 64px; background: transparent; border: none; cursor: pointer; color: #111; transition: background 0.15s; }
 
-  /* 搜索按钮：宽度可过渡，让位给输入框 */
   #searchBtn {
     width: 64px;
     overflow: hidden;
@@ -39,7 +38,6 @@
   #hamburger { border-left: 1px solid #e0e0e0; }
   .icon-cell:hover { background: #f9f9f9; }
 
-  /* 搜索框：淡入 + 轻微滑入 */
   .search-wrap {
     position: absolute; inset: 0;
     padding: 0 8px;
@@ -71,7 +69,7 @@
   .search-input {
     flex: 1; min-width: 0; height: 100%;
     border: none; outline: none; background: transparent;
-    font-size: 16px; /* 防 iOS 聚焦自动放大 */
+    font-size: 16px;
     color: #111;
     -webkit-appearance: none; appearance: none;
     touch-action: manipulation;
@@ -86,7 +84,6 @@
   .search-box.has-value .search-clear { display: flex; }
   .search-clear:hover { background: #999; }
 
-  /* 搜索筛选栏 */
   .search-filter-bar { position: fixed; top: 64px; left: 0; right: 0; z-index: 55; background: #fff; border-bottom: 1px solid #e0e0e0; display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap; }
   body.searching .search-filter-bar { display: flex; }
   .search-filter-bar select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-size: 13px; color: #333; max-width: 200px; outline: none; }
@@ -196,15 +193,7 @@
 
   .lb-content { padding: 24px 32px; }
   .lb-title { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
-  .lb-designer { font-size: 15px; color: #555; margin-bottom: 16px; }
-  .lb-overview {
-    font-size: 14px; color: #444; line-height: 1.7;
-    margin: 0 0 24px; padding: 14px 16px;
-    background: #f7f7f7; border-left: 3px solid #d0d0d0;
-    border-radius: 4px; white-space: pre-line;
-    max-height: none; overflow: visible;
-  }
-  .lb-overview:empty { display: none; }
+  .lb-designer { font-size: 15px; color: #555; margin-bottom: 24px; }
   .lb-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; border-bottom: 1px solid #eee; padding-bottom: 24px; margin-bottom: 24px; }
   .lb-meta-item { display: flex; flex-direction: column; }
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
@@ -300,7 +289,6 @@
     <div class="lb-content">
       <h2 class="lb-title" id="lb-title"></h2>
       <div class="lb-designer" id="lb-designer"></div>
-      <div class="lb-overview" id="lb-overview"></div>
       <div class="lb-meta-grid" id="lb-meta-grid"></div>
       <div class="lb-details" id="lb-details"></div>
       <div class="lb-tags" id="lb-tags"></div>
@@ -365,7 +353,6 @@
   const lbFav = document.getElementById('lbFav');
   const lbTitle = document.getElementById('lb-title');
   const lbDesigner = document.getElementById('lb-designer');
-  const lbOverview = document.getElementById('lb-overview');
   const lbMetaGrid = document.getElementById('lb-meta-grid');
   const lbDetails = document.getElementById('lb-details');
   const lbTags = document.getElementById('lb-tags');
@@ -513,7 +500,7 @@
         const tags = Array.isArray(rec.tags) ? rec.tags.join(' ') : '';
         const haystack = [
           rec.title || '', rec.designer || '', rec.client || '', rec.year || '',
-          rec.nationalGroup || '', rec.overview || '',
+          rec.nationalGroup || '',
           details, sectors, types, tags
         ].join(' ').toLowerCase();
         state.searchIndex[j] = { id: rec.id, haystack, record: rec };
@@ -1044,20 +1031,14 @@
 
     lbTitle.textContent = record.title || '无标题';
 
+    /* 设计师行：设计师 · 国家 · 出生年 */
     const parts = [];
     if (record.designer) parts.push(record.designer);
     const country = String(record.nationalGroup || '').trim();
     if (country) parts.push(country);
     const yb = String(record.yearOfBirth || '').trim();
-    const yd = String(record.yearOfDeath || '').trim();
-    if (yb && yd) parts.push(`${yb}–${yd}`);
-    else if (yb) parts.push(`b. ${yb}`);
-    else if (yd) parts.push(`d. ${yd}`);
-    const memberSince = String(record.memberSince || '').trim();
-    if (memberSince) parts.push(`AGI since ${memberSince}`);
+    if (yb) parts.push(`b. ${yb}`);
     lbDesigner.textContent = parts.length ? `设计师: ${parts.join(' · ')}` : '设计师: 未知';
-
-    lbOverview.textContent = String(record.overview || '').trim();
 
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
@@ -1210,6 +1191,10 @@
     populateFilters();
     restoreFromUrl();
     setupObserver();
+    updateLoading();
+  }
+
+  function updateLoading() {
     updateLoadMore();
   }
 
