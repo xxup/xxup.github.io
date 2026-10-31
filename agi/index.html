@@ -25,7 +25,6 @@
   .icon-cell:hover { background: #f9f9f9; }
   #hamburger { border-left: 1px solid #e0e0e0; flex-shrink: 0; }
 
-  /* 搜索按钮：居中在中间区域 */
   .center-search-btn {
     position: absolute;
     left: 50%;
@@ -51,7 +50,6 @@
     transform: translate(-50%, -50%) scale(.5);
   }
 
-  /* 搜索框容器：居中 */
   .search-wrap {
     position: absolute;
     inset: 0;
@@ -69,7 +67,6 @@
     pointer-events: auto;
   }
 
-  /* 搜索框：药丸，最大宽度 600px */
   .search-box {
     display: flex;
     align-items: center;
@@ -144,11 +141,6 @@
   .card-img-wrap::before { content: ''; display: block; padding-bottom: var(--ratio, 75%); }
   .card-img-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
   .card-img-wrap img.loaded { opacity: 1; }
-  .card-img-wrap.img-error::after {
-    content: '⚠ 图片加载失败'; position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; color: #b0b0b0; pointer-events: none;
-  }
 
   .card-body { padding: 12px 14px; }
   .card-body h2 { margin: 0 0 6px; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -177,7 +169,7 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: #444; text-align: center; text-decoration: none; border-bottom: 1px solid #e0e0e0; }
 
-  /* ===== 灯箱：全宽紧贴顶部 ===== */
+  /* ===== 灯箱 ===== */
   .lightbox {
     position: fixed; inset: 0; z-index: 100;
     background: rgba(0,0,0,.92);
@@ -197,7 +189,6 @@
     min-height: 100vh;
   }
 
-  /* 顶部药丸：宽度 80%，高度缩小，左收藏 / 中计数 / 右关闭 */
   .lb-topbar {
     position: fixed;
     top: max(12px, env(safe-area-inset-top, 12px));
@@ -208,7 +199,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 40%;
+    width: 50%;
     padding: 3px;
     background: rgba(20,20,20,.62);
     backdrop-filter: blur(24px) saturate(180%);
@@ -283,7 +274,6 @@
   .lb-meta-label { font-size: 12px; color: #888; text-transform: uppercase; }
   .lb-meta-value { font-size: 14px; color: #222; font-weight: 500; word-break: break-word; overflow-wrap: anywhere; }
 
-  /* 详情分类 + 标签：同一行，左详情右标签，竖线分隔 */
   .lb-detail-tags {
     display: flex;
     align-items: center;
@@ -310,8 +300,7 @@
     border-left: 1px solid #ddd;
   }
   .lb-tags:empty { display: none; }
-  .lb-details:empty + .lb-tags,
-  .lb-details[style*="none"] + .lb-tags {
+  .lb-details:empty + .lb-tags {
     padding-left: 0;
     border-left: none;
   }
@@ -512,7 +501,6 @@
     colWidth: 0,
     gap: 16,
     totalLoaded: 0,
-    records: new Map(),
     recordById: new Map(),
     cardQueue: [],
     io: null,
@@ -564,6 +552,32 @@
     searchBox.classList.toggle('has-value', searchInput.value.length > 0);
   }
 
+  /* ===== 封面图查找：第一张有 small/large 的图 ===== */
+  function hasUsableImage(img) {
+    return !!(img && (img.small || img.large));
+  }
+
+  function findCoverImage(record) {
+    const imgs = Array.isArray(record.images) ? record.images : [];
+    for (let i = 0; i < imgs.length; i++) {
+      if (hasUsableImage(imgs[i])) {
+        return { image: imgs[i], index: i };
+      }
+    }
+    return null;
+  }
+
+  /* 项目队列：每个项目一项，附封面图信息；无可用图的项目跳过 */
+  function buildProjectQueue(records) {
+    const items = [];
+    records.forEach(rec => {
+      const cover = findCoverImage(rec);
+      if (!cover) return;
+      items.push({ record: rec, cover });
+    });
+    return items;
+  }
+
   /* ===== 数据加载 ===== */
   async function initData() {
     try {
@@ -591,13 +605,20 @@
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
 
-      state.loadQueue = shuffleArray(state.allProjects);
+      /* 以项目为单位构建随机队列，过滤无可用图片的项目 */
+      state.loadQueue = shuffleArray(buildProjectQueue(state.allProjects));
       state.currentIndex = 0;
       state.totalLoaded = 0;
       state.finished = false;
 
       await buildSearchIndexChunked();
-      statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，开始渲染…`;
+
+      if (!state.loadQueue.length) {
+        statusEl.textContent = '数据中没有可用的图片';
+        return;
+      }
+
+      statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，可用 ${state.loadQueue.length} 个项目，开始渲染…`;
       requestAnimationFrame(() => loadNextBatch());
     } catch (err) {
       console.error(err);
@@ -743,11 +764,34 @@
       if (state.columnHeights[i] < state.columnHeights[minIdx]) minIdx = i;
     }
     state.columns[minIdx].appendChild(card);
+    card.dataset.colIndex = String(minIdx);
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
   }
 
-  /* ===== 卡片 ===== */
-  function createCard(record) {
+  /* ===== 移除加载失败的卡片，并修正列高 ===== */
+  function removeCard(card) {
+    if (!card || !card.isConnected) return;
+    const idx = state.cardQueue.indexOf(card);
+    if (idx >= 0) state.cardQueue.splice(idx, 1);
+
+    const colIdx = parseInt(card.dataset.colIndex, 10);
+    if (!Number.isNaN(colIdx) && state.columnHeights[colIdx] != null) {
+      const ratio = parseFloat(card.dataset.ratio) || 1;
+      state.columnHeights[colIdx] = Math.max(
+        0,
+        state.columnHeights[colIdx] - (state.colWidth * ratio + HEADER_EST + state.gap)
+      );
+    }
+    card.remove();
+  }
+
+  /* ===== 卡片：以项目为单位，封面图失败则移除卡片 ===== */
+  function createCard(item) {
+    const record = item.record;
+    const cover = item.cover || {};
+    const image = cover.image || {};
+    const coverIndex = cover.index || 0;
+
     const article = document.createElement('article');
     article.className = 'card';
     article.dataset.id = record.id;
@@ -755,19 +799,16 @@
     article.setAttribute('role', 'button');
     article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
 
-    const images = Array.isArray(record.images) ? record.images : [];
-    const firstImg = images[0] || {};
-
-    const w = parseInt(firstImg.width, 10) || 2000;
-    const h = parseInt(firstImg.height, 10) || 1500;
+    const w = parseInt(image.width, 10) || 2000;
+    const h = parseInt(image.height, 10) || 1500;
     article.dataset.ratio = (h / w).toFixed(4);
 
     const imgWrap = document.createElement('div');
     imgWrap.className = 'card-img-wrap';
     imgWrap.style.setProperty('--ratio', (h / w) * 100 + '%');
 
-    const urlSmall = resolveUrl(firstImg.small);
-    const urlLarge = resolveUrl(firstImg.large);
+    const urlSmall = resolveUrl(image.small);
+    const urlLarge = resolveUrl(image.large);
     const primaryUrl = urlSmall || urlLarge;
 
     if (primaryUrl) {
@@ -780,19 +821,25 @@
       img.onload = () => img.classList.add('loaded');
       img.onerror = () => {
         if (img.dataset.fallback) {
-          imgWrap.classList.add('img-error');
-        } else if (urlLarge && img.src !== urlLarge) {
+          removeCard(article);
+          return;
+        }
+        if (urlLarge && img.src !== urlLarge) {
           img.dataset.fallback = '1';
           img.src = urlLarge;
         } else {
-          imgWrap.classList.add('img-error');
+          removeCard(article);
         }
       };
-      if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+      if (img.complete) {
+        if (img.naturalWidth > 0) img.classList.add('loaded');
+        else if (img.src) img.onerror();
+      }
 
       imgWrap.appendChild(img);
     } else {
-      imgWrap.classList.add('img-error');
+      removeCard(article);
+      return article;
     }
 
     const body = document.createElement('div');
@@ -820,9 +867,12 @@
     article.appendChild(imgWrap);
     article.appendChild(body);
 
-    article.addEventListener('click', () => openLightbox(record));
+    article.addEventListener('click', () => openLightbox(record, coverIndex));
     article.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(record); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(record, coverIndex);
+      }
     });
     return article;
   }
@@ -849,17 +899,18 @@
     }
 
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
-    const nextRecords = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
-    state.currentIndex += nextRecords.length;
+    const nextItems = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
+    state.currentIndex += nextItems.length;
 
-    nextRecords.forEach(rec => {
-      state.records.set(String(rec.id), rec);
-      const card = createCard(rec);
-      state.cardQueue.push(card);
-      appendCardToColumn(card);
+    nextItems.forEach(item => {
+      const card = createCard(item);
+      if (!card.isConnected) {
+        state.cardQueue.push(card);
+        appendCardToColumn(card);
+      }
     });
 
-    state.totalLoaded += nextRecords.length;
+    state.totalLoaded += nextItems.length;
     trimOldCards();
     state.loading = false;
     updateStatus();
@@ -876,7 +927,6 @@
     let removed = false;
     while (state.cardQueue.length > state.maxCards) {
       const old = state.cardQueue.shift();
-      state.records.delete(String(old.dataset.id));
       old.remove();
       removed = true;
     }
@@ -896,8 +946,9 @@
   function updateStatus(text) {
     if (text) { statusEl.textContent = text; updateLoadMore(); return; }
     if (state.view === 'search' || state.view === 'favorites') { updateLoadMore(); return; }
+    const remain = Math.max(0, state.loadQueue.length - state.currentIndex);
     if (state.finished) statusEl.textContent = `已加载全部 ${state.totalLoaded} 个项目`;
-    else statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 滚动加载更多`;
+    else statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 剩余约 ${remain} 个 · 滚动加载更多`;
     updateLoadMore();
   }
 
@@ -998,23 +1049,36 @@
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
       state.lastSearchResults = [];
-      statusEl.textContent = `未找到匹配的项目`;
+      statusEl.textContent = '未找到匹配的项目';
       syncUrl();
       return;
     }
 
     const records = matched.map(item => item.record);
     state.lastSearchResults = records;
-    const cards = records.map(rec => {
-      state.records.set(String(rec.id), rec);
-      return createCard(rec);
+
+    /* 搜索结果以项目为单位，过滤无可用封面图的项目 */
+    const cards = [];
+    records.forEach(rec => {
+      const cover = findCoverImage(rec);
+      if (!cover) return;
+      const card = createCard({ record: rec, cover });
+      if (!card.isConnected) cards.push(card);
     });
+
+    if (!cards.length) {
+      gallery.innerHTML = '';
+      gallery.classList.remove('js-ready');
+      statusEl.textContent = `找到 ${totalMatched} 个匹配项目，但没有可用图片`;
+      syncUrl();
+      return;
+    }
 
     layoutCards(cards);
 
     const filterDesc = [q, yearFilter, typeFilter].filter(Boolean).join(' · ');
     if (totalMatched > MAX_SEARCH_RESULTS) {
-      statusEl.textContent = `共 ${totalMatched} 个匹配「${filterDesc}」，显示前 ${MAX_SEARCH_RESULTS} 个`;
+      statusEl.textContent = `共 ${totalMatched}+ 个匹配「${filterDesc}」，显示前 ${cards.length} 个项目`;
     } else {
       statusEl.textContent = `找到 ${totalMatched} 个匹配「${filterDesc}」的项目`;
     }
@@ -1048,7 +1112,15 @@
       if (rec) favRecords.push(rec);
     });
 
-    if (!favRecords.length) {
+    const cards = [];
+    favRecords.forEach(rec => {
+      const cover = findCoverImage(rec);
+      if (!cover) return;
+      const card = createCard({ record: rec, cover });
+      if (!card.isConnected) cards.push(card);
+    });
+
+    if (!cards.length) {
       gallery.innerHTML = '';
       gallery.classList.remove('js-ready');
       state.columns = [];
@@ -1058,10 +1130,6 @@
       return;
     }
 
-    const cards = favRecords.map(rec => {
-      state.records.set(String(rec.id), rec);
-      return createCard(rec);
-    });
     layoutCards(cards);
     statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
   }
@@ -1122,14 +1190,36 @@
   function openDrawer() { if (state.view === 'search') exitSearch(); document.body.classList.add('drawer-open'); }
   function closeDrawer() { document.body.classList.remove('drawer-open'); }
 
-  /* ===== 灯箱 ===== */
-  function openLightbox(record) {
+  /* ===== 灯箱：定位到封面图 ===== */
+  function scrollToLightboxImage(srcIndex) {
+    const list = lbGallery.querySelectorAll('img');
+    let target = null;
+    list.forEach(img => {
+      if (img.dataset.srcIndex === String(srcIndex)) target = img;
+    });
+    if (!target) target = list[0];
+
+    if (!target) { lightbox.scrollTop = 0; return; }
+
+    const apply = () => {
+      lightbox.scrollTop = Math.max(0, target.offsetTop - 8);
+    };
+    apply();
+    if (!target.complete) {
+      target.addEventListener('load', apply, { once: true });
+    }
+  }
+
+  function openLightbox(record, coverIndex) {
     state.currentLightboxId = String(record.id);
+    const startIndex = Math.max(0, parseInt(coverIndex, 10) || 0);
 
     lbGallery.innerHTML = '';
     const images = Array.isArray(record.images) ? record.images : [];
 
-    images.forEach(imgData => {
+    images.forEach((imgData, i) => {
+      if (!hasUsableImage(imgData)) return;
+
       const urlLarge = resolveUrl(imgData.large);
       const urlSmall = resolveUrl(imgData.small);
       const primary = urlLarge || urlSmall;
@@ -1140,6 +1230,12 @@
       img.loading = 'lazy';
       img.decoding = 'async';
       img.alt = record.title || '';
+      img.dataset.srcIndex = String(i);
+
+      const w = parseInt(imgData.width, 10);
+      const h = parseInt(imgData.height, 10);
+      img.style.aspectRatio = (w > 0 && h > 0) ? `${w} / ${h}` : '4 / 3';
+
       img.onerror = () => {
         if (img.dataset.fallback) { img.style.display = 'none'; return; }
         img.dataset.fallback = '1';
@@ -1149,7 +1245,8 @@
       lbGallery.appendChild(img);
     });
 
-    lbCount.textContent = images.length > 0 ? `共 ${images.length} 张` : '';
+    const usableCount = lbGallery.querySelectorAll('img').length;
+    lbCount.textContent = usableCount > 0 ? `共 ${usableCount} 张` : '';
 
     const favActive = state.favorites.has(String(record.id));
     lbFav.classList.toggle('active', favActive);
@@ -1182,11 +1279,7 @@
 
     lbDetails.innerHTML = '';
     const detailsText = Array.isArray(record.details) ? record.details.join(', ') : (record.details || '');
-    if (detailsText) {
-      lbDetails.textContent = '详细分类: ' + detailsText;
-    } else {
-      lbDetails.textContent = '';
-    }
+    lbDetails.textContent = detailsText ? '详细分类: ' + detailsText : '';
 
     lbTags.innerHTML = '';
     const tags = Array.isArray(record.tags) ? record.tags.filter(Boolean) : [];
@@ -1202,6 +1295,8 @@
     lightbox.classList.add('open');
     document.body.classList.add('lightbox-open');
     lightbox.scrollTop = 0;
+
+    requestAnimationFrame(() => scrollToLightboxImage(startIndex));
   }
 
   function closeLightbox() {
