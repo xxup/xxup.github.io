@@ -45,10 +45,10 @@
     --overlay: rgba(0,0,0,.4);
     --lb-bg: rgba(0,0,0,.92);
     --lb-surface: #ffffff;
-    --lb-bar-bg: rgba(20,20,20,.62);
-    --lb-bar-border: rgba(255,255,255,.12);
+    /* 【修改】灯箱药丸透明磨砂 */
+    --lb-bar-bg: rgba(255,255,255,.10);
+    --lb-bar-border: rgba(255,255,255,.22);
     --lb-text: #ffffff;
-    --lb-nav-bg: rgba(20,20,20,.5);
     --toast-bg: rgba(0,0,0,.82);
     --toast-text: #ffffff;
     --chip-bg: #f0f0f0;
@@ -102,11 +102,9 @@
   body.view-discover #gallery,
   body.view-discover #status,
   body.view-discover #loadMoreWrap,
-  body.view-discover #homeFilterBanner,
   body.view-about #gallery,
   body.view-about #status,
-  body.view-about #loadMoreWrap,
-  body.view-about #homeFilterBanner { display: none !important; }
+  body.view-about #loadMoreWrap { display: none !important; }
 
   .topbar { position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 60; background: var(--surface); border-bottom: 1px solid var(--border); }
   .topbar-inner { display: flex; height: 64px; margin: 0 auto; align-items: stretch; }
@@ -253,13 +251,7 @@
   .load-more-btn:hover { background: var(--surface-3); }
   .load-more-btn:disabled { opacity: .5; cursor: default; }
 
-  .drawer-overlay { position: fixed; inset: 0; z-index: 70; background: var(--overlay); opacity: 0; pointer-events: none; transition: opacity .25s; }
-  body.drawer-open .drawer-overlay { opacity: 1; pointer-events: auto; }
-  .drawer { position: fixed; top: 0; left: 0; right: 0; z-index: 80; background: var(--surface); border-bottom: 1px solid var(--border); transform: translateY(-100%); transition: transform .3s; display: flex; flex-direction: column; padding: 12px 24px 16px; }
-  body.drawer-open .drawer { transform: translateY(0); }
-  .drawer-head { display: flex; justify-content: space-between; align-items: center; }
-
-  /* 主题切换按钮 */
+  /* 主题切换按钮（基础样式，药丸内会覆盖尺寸） */
   .theme-toggle { width: 36px; height: 36px; border: none; background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
   .theme-toggle:hover { background: var(--surface-3); }
   .theme-toggle .icon-sun { display: none; }
@@ -267,9 +259,59 @@
   [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
   [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
-  .drawer-close { width: 32px; height: 32px; border: none; background: transparent; font-size: 22px; cursor: pointer; color: var(--text); }
-  .drawer nav { display: flex; flex-direction: column; }
-  .drawer nav a { display: block; padding: 16px 0; color: var(--text-2); text-align: center; text-decoration: none; border-bottom: 1px solid var(--border); }
+  /* 【新增】汉堡药丸菜单：固定浮层 + 宽高比自适配设备屏幕 */
+  .pill-menu {
+    position: fixed;
+    top: clamp(66px, 9vw, 72px);
+    right: clamp(8px, 2vw, 16px);
+    z-index: 58;
+    display: flex;
+    align-items: center;
+    gap: clamp(1px, 0.5vw, 2px);
+    padding: clamp(3px, 0.8vw, 5px) clamp(4px, 1.2vw, 6px);
+    max-width: calc(100vw - clamp(16px, 4vw, 32px));
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    opacity: 0;
+    transform: translateY(-8px) scale(.92);
+    transform-origin: top right;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s cubic-bezier(.2,.8,.2,1);
+  }
+  .pill-menu::-webkit-scrollbar { display: none; }
+  [data-theme="dark"] .pill-menu { background: rgba(30,30,30,.72); }
+  body.pill-open .pill-menu {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  body.searching .pill-menu { top: clamp(126px, 18vw, 132px); }
+
+  .pill-menu .pill-btn,
+  .pill-menu .theme-toggle { flex-shrink: 0; }
+  .pill-menu .pill-btn {
+    height: clamp(32px, 7.8vw, 36px);
+    padding: 0 clamp(8px, 2.8vw, 14px);
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: clamp(12px, 3.5vw, 14px);
+    cursor: pointer;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .pill-menu .pill-btn:hover { background: var(--surface-3); }
+  .pill-menu .theme-toggle {
+    width: clamp(30px, 7.8vw, 36px);
+    height: clamp(30px, 7.8vw, 36px);
+  }
 
   /* 发现页 / 关于页 */
   .page-view { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
@@ -279,14 +321,12 @@
 
   .discover-head h1 { margin: 0 0 6px; font-size: 28px; color: var(--text); }
 
-  /* 【新增】发现页分区（国家 / 类型 / 领域 / 设计师） */
   .discover-section { margin-bottom: 28px; }
   .discover-section-title {
     margin: 0 0 12px; font-size: 18px; font-weight: 600; color: var(--text);
     padding-bottom: 8px; border-bottom: 1px solid var(--border);
   }
 
-  /* 【新增】chip 索引（国家 / 类型 / 领域） */
   .discover-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .discover-chip {
     display: inline-flex; align-items: center; gap: 8px;
@@ -333,39 +373,6 @@
     background: var(--surface-3); padding: 1px 6px; border-radius: 8px;
   }
 
-  /* 【新增】首页设计师/类别过滤横幅 */
-  .home-filter-banner {
-    max-width: 1600px;
-    margin: 16px 16px 0;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    font-size: 14px;
-  }
-  .home-filter-banner[hidden] { display: none; }
-  .home-filter-banner strong { color: var(--text); font-weight: 600; }
-  .home-filter-banner button {
-    padding: 6px 14px;
-    border: 1px solid var(--accent);
-    border-radius: 16px;
-    background: var(--surface);
-    color: var(--accent);
-    font-size: 13px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background .15s, color .15s;
-  }
-  .home-filter-banner button:hover { background: var(--accent); color: #fff; }
-  @media (max-width: 640px) {
-    .home-filter-banner { margin: 10px 10px 0; padding: 10px 12px; font-size: 13px; }
-  }
-
   .about-section { margin-bottom: 32px; }
   .about-section h2 { margin: 0 0 12px; font-size: 18px; color: var(--text); }
   .about-section p { margin: 0 0 12px; line-height: 1.7; color: var(--text-2); font-size: 14px; }
@@ -396,9 +403,10 @@
     min-height: 100vh;
   }
 
+  /* 【修改】灯箱顶栏：透明磨砂 + 宽高比自适应 */
   .lb-topbar {
     position: fixed;
-    top: max(12px, env(safe-area-inset-top, 12px));
+    top: max(clamp(10px, 2.4vw, 16px), env(safe-area-inset-top, 10px));
     left: 50%;
     transform: translateX(-50%) translateY(-12px) scale(.88);
     transform-origin: center top;
@@ -406,14 +414,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 80%;
-    padding: 3px;
+    width: clamp(240px, 80vw, 480px);
+    padding: clamp(2px, 0.6vw, 4px);
     background: var(--lb-bar-bg);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-radius: 999px;
     border: 1px solid var(--lb-bar-border);
-    box-shadow: 0 8px 32px rgba(0,0,0,.35);
+    box-shadow: 0 8px 32px rgba(0,0,0,.25);
     opacity: 0; pointer-events: none;
     transition: opacity .3s, transform .3s cubic-bezier(.2,.8,.2,1);
   }
@@ -423,23 +431,29 @@
     pointer-events: auto;
   }
 
+  /* 【修改】灯箱按钮自适应尺寸 */
   .lb-fav, .lightbox-close {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: clamp(30px, 8vw, 36px);
+    height: clamp(30px, 8vw, 36px);
+    border-radius: 50%;
     border: none; background: transparent; color: var(--lb-text);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     transition: opacity .15s, color .15s, background .15s;
   }
-  .lb-fav:hover, .lightbox-close:hover { background: rgba(255,255,255,.12); }
+  .lb-fav:hover, .lightbox-close:hover { background: rgba(255,255,255,.18); }
   .lb-fav.active { color: var(--heart); }
   .lb-fav.active svg { fill: currentColor; }
   .lb-fav svg { width: 20px; height: 20px; }
-  .lightbox-close { font-size: 24px; line-height: 1; }
+  .lightbox-close { font-size: clamp(20px, 5vw, 24px); line-height: 1; }
 
+  /* 【修改】灯箱计数自适应尺寸 */
   .lb-count {
-    height: 36px; padding: 0 12px;
+    height: clamp(30px, 8vw, 36px);
+    padding: 0 clamp(8px, 2.6vw, 12px);
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: var(--lb-text);
+    font-size: clamp(10px, 2.8vw, 12px);
+    color: var(--lb-text);
     white-space: nowrap; flex-shrink: 0;
     letter-spacing: .2px;
   }
@@ -491,9 +505,6 @@
   }
 
   @media (max-width: 480px) {
-    .lb-topbar { top: max(10px, env(safe-area-inset-top, 10px)); }
-    .lb-fav, .lightbox-close { width: 34px; height: 34px; }
-    .lb-count { height: 34px; padding: 0 10px; font-size: 11px; }
     .lb-meta-grid { gap: 12px 16px; }
     .lb-content { padding: 20px 16px 32px; }
     .lb-meta-value { font-size: 13px; }
@@ -547,6 +558,17 @@
   </div>
 </div>
 
+<!-- 【新增】汉堡药丸菜单（主题切换 / 索引 / 收藏 / 关于） -->
+<div class="pill-menu" id="pillMenu" role="menu" aria-hidden="true">
+  <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式" type="button">
+    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  <button class="pill-btn" type="button" data-view="discover">索引</button>
+  <button class="pill-btn" type="button" data-view="favorites">收藏</button>
+  <button class="pill-btn" type="button" data-view="about">关于</button>
+</div>
+
 <!-- 筛选栏顺序：全部年份 → 全部国家 → 全部类型 → 设计师chip → 清除筛选 -->
 <div class="search-filter-bar" id="searchFilterBar">
   <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
@@ -559,30 +581,6 @@
   <button id="clearFilters" type="button">清除筛选</button>
 </div>
 
-<div class="drawer-overlay" id="drawerOverlay"></div>
-<aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawer-head">
-    <!-- 深色模式切换 -->
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式" type="button">
-      <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
-    <button class="drawer-close" id="drawerClose" aria-label="关闭菜单">×</button>
-  </div>
-  <nav>
-    <a href="#" data-view="home">首页</a>
-    <a href="#" data-view="discover">发现</a>
-    <a href="#" data-view="favorites">收藏夹</a>
-    <a href="#" data-view="about">关于</a>
-  </nav>
-</aside>
-
-<!-- 【新增】首页过滤横幅 -->
-<div class="home-filter-banner" id="homeFilterBanner" hidden>
-  <span>正在查看 <strong id="homeFilterName"></strong> 的作品</span>
-  <button type="button" id="homeFilterClear">查看全部作品</button>
-</div>
-
 <main id="gallery" class="gallery" aria-live="polite"></main>
 <div id="status" class="status">正在下载 data.json…</div>
 <div class="load-more-wrap" id="loadMoreWrap">
@@ -590,7 +588,7 @@
 </div>
 <div id="sentinel"></div>
 
-<!-- 【替换】发现页：国家 / 类型 / 领域 / 设计师 A-Z 四类索引 -->
+<!-- 发现页：国家 / 类型 / 领域 / 设计师 A-Z 四类索引 -->
 <section id="discoverView" class="page-view" hidden>
   <header class="discover-head">
     <h1>发现</h1>
@@ -629,15 +627,15 @@
     <h2>使用说明</h2>
     <ul>
       <li><strong>搜索</strong>：支持标题、设计师、客户、标签等关键词；可叠加年份、国家、类型筛选。</li>
-      <li><strong>发现</strong>：按国家、类型、领域、设计师 A-Z 四类索引浏览；点击任一项返回首页查看对应作品。</li>
+      <li><strong>索引</strong>：按国家、类型、领域、设计师 A-Z 四类索引浏览；点击任一项返回首页查看对应作品。点 Logo 可回到全部作品。</li>
       <li><strong>收藏</strong>：灯箱左上角 ♥ 收藏作品，收藏保存在浏览器本地（localStorage），换设备不同步。</li>
-      <li><strong>深色模式</strong>：抽屉左上角太阳 / 月亮图标切换。</li>
-      <li><strong>键盘</strong>：<kbd>←</kbd> <kbd>→</kbd> 切换灯箱图片，<kbd>Esc</kbd> 关闭灯箱 / 抽屉 / 搜索。</li>
+      <li><strong>深色模式</strong>：右上角汉堡菜单打开药丸，点太阳 / 月亮图标切换。</li>
+      <li><strong>键盘</strong>：<kbd>←</kbd> <kbd>→</kbd> 切换灯箱图片，<kbd>Esc</kbd> 关闭灯箱 / 菜单 / 搜索。</li>
       <li><strong>手势</strong>：灯箱内双指缩放、双击放大，放大后可拖动。</li>
     </ul>
   </div>
 </section>
-<!-- 灯箱（无翻页按钮） -->
+<!-- 灯箱（无翻页按钮，药丸透明自适应） -->
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
   <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
@@ -776,7 +774,7 @@
   const HEADER_EST = 70, CHUNK_SIZE = 15;
   const SEARCH_PAGE = 60;
 
-  /* 【新增】首页过滤类型的中文标签 */
+  /* 首页过滤类型的中文标签 */
   const FILTER_LABELS = {
     designer: '设计师',
     country:  '国家',
@@ -801,9 +799,7 @@
   const searchInput = document.getElementById('searchInput');
   const searchClear = document.getElementById('searchClear');
   const hamburger = document.getElementById('hamburger');
-  const drawer = document.getElementById('drawer');
-  const drawerOverlay = document.getElementById('drawerOverlay');
-  const drawerClose = document.getElementById('drawerClose');
+  const pillMenu = document.getElementById('pillMenu');
   const filterYear = document.getElementById('filterYear');
   const filterType = document.getElementById('filterType');
   const filterCountry = document.getElementById('filterCountry');
@@ -854,7 +850,7 @@
     scrollSyncTimer: null,
     filterDesigner: '',
     discoverRendered: false,
-    /* 【新增】首页过滤：type + value 支持 设计师 / 国家 / 类型 / 领域 */
+    /* 首页过滤：type + value 支持 设计师 / 国家 / 类型 / 领域 */
     homeFilterType: '',
     homeFilterValue: ''
   };
@@ -948,7 +944,7 @@
     return items;
   }
 
-  /* 【新增】判断记录是否匹配当前 home 过滤 */
+  /* 判断记录是否匹配当前 home 过滤 */
   function matchHomeFilter(rec) {
     const t = state.homeFilterType;
     const v = state.homeFilterValue;
@@ -966,7 +962,7 @@
     return true;
   }
 
-  /* 【新增】按 homeFilterType/Value 重建队列 */
+  /* 按 homeFilterType/Value 重建队列 */
   function rebuildHomeQueue() {
     const records = state.allProjects.filter(matchHomeFilter);
     state.loadQueue = shuffleArray(buildProjectQueue(records));
@@ -978,26 +974,13 @@
     state.dehydrated.clear();
   }
 
-  /* 【新增】更新首页过滤横幅显隐 */
-  function updateHomeFilterBanner() {
-    const banner = document.getElementById('homeFilterBanner');
-    const nameEl = document.getElementById('homeFilterName');
-    if (!banner) return;
-    const show = state.view === 'all' && !!state.homeFilterType && !!state.homeFilterValue;
-    banner.hidden = !show;
-    if (!show || !nameEl) return;
-    nameEl.textContent = state.homeFilterType === 'designer'
-      ? state.homeFilterValue
-      : `${FILTER_LABELS[state.homeFilterType] || ''} · ${state.homeFilterValue}`;
-  }
-
-  /* 【新增】发现页点击任意索引项：切回首页并只显示匹配作品 */
+  /* 发现页点击任意索引项：切回首页并只显示匹配作品（无横幅，静默状态） */
   function showFilterInHome(type, value) {
     const v = String(value || '').trim();
     if (!type || !v) return;
 
     exitPageViews();
-    closeDrawer();
+    closePill();
     document.body.classList.remove('searching');
     clearTimeout(state.searchTimer);
     searchInput.value = '';
@@ -1012,44 +995,19 @@
     state.searchShown = 0;
     state.searchTotal = 0;
     state.savedCards = [];
-    state.allCards = [];   /* 过滤状态变化，作废旧首页缓存 */
+    state.allCards = [];
 
     state.view = 'all';
     state.homeFilterType = type;
     state.homeFilterValue = v;
     rebuildHomeQueue();
     clearGalleryForSearch();
-
-    updateHomeFilterBanner();
     syncUrl();
 
     if (!state.loadQueue.length) {
       statusEl.textContent = `没有找到「${FILTER_LABELS[type] || ''} · ${v}」对应的作品`;
       updateLoadMore();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    updateStatus('正在加载…');
-    setupObserver();
-    requestAnimationFrame(() => loadNextBatch());
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  /* 【新增】清除首页过滤，恢复全部作品 */
-  function clearHomeFilter() {
-    if (!state.homeFilterType && !state.homeFilterValue) return;
-    state.homeFilterType = '';
-    state.homeFilterValue = '';
-    state.allCards = [];   /* 过滤状态变化，作废旧首页缓存 */
-    rebuildHomeQueue();
-    clearGalleryForSearch();
-    updateHomeFilterBanner();
-    syncUrl();
-
-    if (!state.loadQueue.length) {
-      statusEl.textContent = '数据中没有可用的图片';
-      updateLoadMore();
       return;
     }
 
@@ -1204,7 +1162,7 @@
     } else if (state.view === 'about') {
       params.set('view', 'about');
     } else if (state.view === 'all' && state.homeFilterType && state.homeFilterValue) {
-      /* 【新增】首页过滤参数 hf=type:value */
+      /* 首页过滤参数 hf=type:value */
       params.set('hf', `${state.homeFilterType}:${state.homeFilterValue}`);
     }
     const qs = params.toString();
@@ -1216,13 +1174,13 @@
     const q = params.get('q'), year = params.get('year'), type = params.get('type');
     const country = params.get('country');
     const designer = params.get('designer');
-    const hf = params.get('hf');   /* 【新增】 */
+    const hf = params.get('hf');
 
     if (view === 'favorites') { enterFavorites(); return; }
     if (view === 'discover') { enterDiscover(); return; }
     if (view === 'about') { enterAbout(); return; }
 
-    /* 【新增】URL 带 hf 且无其它 view：恢复首页过滤 */
+    /* URL 带 hf 且无其它 view：静默恢复首页过滤 */
     if (hf && !view) {
       const idx = hf.indexOf(':');
       if (idx > 0) {
@@ -1232,7 +1190,6 @@
           state.homeFilterType = ft;
           state.homeFilterValue = fv;
           rebuildHomeQueue();
-          updateHomeFilterBanner();
           statusEl.textContent = '正在加载…';
           return;
         }
@@ -1615,11 +1572,11 @@
     state.liveCount = 0;
   }
 
-  /* 进入发现页 */
+  /* 进入发现页（索引页） */
   function enterDiscover() {
     if (state.view === 'discover') return;
     exitPageViews();
-    closeDrawer();
+    closePill();
     if (state.view === 'all') state.allCards = state.cardQueue.slice();
     if (state.view === 'search') {
       document.body.classList.remove('searching');
@@ -1645,11 +1602,10 @@
       renderDiscover();
       state.discoverRendered = true;
     }
-    updateHomeFilterBanner();
     syncUrl();
   }
 
-  /* 【改造】发现页：国家 / 类型 / 领域 / 设计师 四类索引 */
+  /* 发现页：国家 / 类型 / 领域 / 设计师 四类索引 */
   function renderDiscover() {
     const total = state.allProjects.length;
     const designerMap = new Map();
@@ -1741,7 +1697,7 @@
     });
   }
 
-  /* 【新增】渲染 chip 列表（国家 / 类型 / 领域 共用） */
+  /* 渲染 chip 列表（国家 / 类型 / 领域 共用） */
   function renderChips(containerId, map, filterType, sorter) {
     const wrap = document.getElementById(containerId);
     if (!wrap) return;
@@ -1770,7 +1726,7 @@
   function enterAbout() {
     if (state.view === 'about') return;
     exitPageViews();
-    closeDrawer();
+    closePill();
     if (state.view === 'all') state.allCards = state.cardQueue.slice();
     if (state.view === 'search') {
       document.body.classList.remove('searching');
@@ -1793,7 +1749,6 @@
     const av = document.getElementById('aboutView');
     av.hidden = false;
     renderAbout();
-    updateHomeFilterBanner();
     syncUrl();
   }
 
@@ -1820,7 +1775,7 @@
   function enterSearch(preset) {
     if (state.view === 'search') return;
     exitPageViews();
-    closeDrawer();
+    closePill();
     state.savedView = state.view;
     state.savedCards = state.view === 'all' ? state.cardQueue.slice() : [];
     if (state.view === 'all') state.allCards = state.cardQueue.slice();
@@ -1859,7 +1814,6 @@
     }
 
     updateLoadMore();
-    updateHomeFilterBanner();
     syncUrl();
 
     if (preset && (preset.q || preset.year || preset.type || preset.country || preset.designer)) {
@@ -1913,7 +1867,6 @@
     state.savedCards = [];
     setCards(saved);
     updateStatus();
-    updateHomeFilterBanner();
     syncUrl();
     setupObserver();
     requestAnimationFrame(checkSentinel);
@@ -2035,7 +1988,7 @@
   }
 
   function enterFavorites() {
-    closeDrawer();
+    closePill();
     exitPageViews();
     if (state.view === 'favorites') return;
     if (state.view === 'all') state.allCards = state.cardQueue.slice();
@@ -2057,7 +2010,6 @@
     }
     state.view = 'favorites';
     state.currentTerms = [];
-    updateHomeFilterBanner();
     syncUrl();
     renderFavorites();
   }
@@ -2096,7 +2048,7 @@
 
   /* 首页：支持从 all / search / favorites / discover / about 恢复 */
   function goHome() {
-    closeDrawer();
+    closePill();
     exitPageViews();
     if (state.view === 'search') { exitSearch(); return; }
     if (state.view === 'discover' || state.view === 'about') {
@@ -2114,7 +2066,6 @@
         setupObserver();
         requestAnimationFrame(() => loadNextBatch());
       }
-      updateHomeFilterBanner();
       syncUrl();
       return;
     }
@@ -2124,11 +2075,52 @@
       const cards = state.allCards.length ? state.allCards : state.cardQueue.slice();
       setCards(cards);
       updateStatus();
-      updateHomeFilterBanner();
       syncUrl();
       setupObserver();
       requestAnimationFrame(checkSentinel);
     }
+  }
+
+  /* 点 Logo 回到初始状态：清空所有过滤 + 切回全部作品 + 从头加载 */
+  function resetToHome() {
+    closePill();
+    exitPageViews();
+
+    document.body.classList.remove('searching');
+    clearTimeout(state.searchTimer);
+    searchInput.value = '';
+    updateSearchClear();
+    filterYear.value = '';
+    filterType.value = '';
+    filterCountry.value = '';
+    state.filterDesigner = '';
+    updateDesignerChip();
+    state.currentTerms = [];
+    state.searchResults = [];
+    state.searchShown = 0;
+    state.searchTotal = 0;
+    state.savedCards = [];
+    state.allCards = [];
+
+    state.homeFilterType = '';
+    state.homeFilterValue = '';
+
+    state.view = 'all';
+    rebuildHomeQueue();
+    clearGalleryForSearch();
+    syncUrl();
+
+    if (!state.loadQueue.length) {
+      statusEl.textContent = '数据中没有可用的图片';
+      updateLoadMore();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    updateStatus('正在加载…');
+    setupObserver();
+    requestAnimationFrame(() => loadNextBatch());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   let resizeTimer;
@@ -2161,14 +2153,18 @@
     }, 200);
   }
 
-  function openDrawer() {
-    if (state.view === 'search') exitSearch();
-    document.body.classList.add('drawer-open');
-    drawer.setAttribute('aria-hidden', 'false');
+  /* 药丸菜单开 / 关 */
+  function openPill() {
+    document.body.classList.add('pill-open');
+    pillMenu.setAttribute('aria-hidden', 'false');
   }
-  function closeDrawer() {
-    document.body.classList.remove('drawer-open');
-    drawer.setAttribute('aria-hidden', 'true');
+  function closePill() {
+    document.body.classList.remove('pill-open');
+    pillMenu.setAttribute('aria-hidden', 'true');
+  }
+  function togglePill() {
+    if (document.body.classList.contains('pill-open')) closePill();
+    else openPill();
   }
 
   /*  灯箱  */
@@ -2176,9 +2172,7 @@
     const els = [
       document.querySelector('.topbar'),
       document.querySelector('.search-filter-bar'),
-      document.querySelector('.drawer'),
-      document.querySelector('.drawer-overlay'),
-      document.getElementById('homeFilterBanner'),
+      document.querySelector('.pill-menu'),
       gallery, statusEl, loadMoreWrap,
       document.getElementById('discoverView'),
       document.getElementById('aboutView')
@@ -2535,38 +2529,39 @@
   /* 仅点击空白区域才退出搜索 */
   document.addEventListener('click', e => {
     if (state.view !== 'search') return;
-    if (e.target.closest('.topbar, .search-filter-bar, .drawer, .drawer-overlay, .lightbox, .card, .load-more-wrap, .status, #sentinel, .toast')) return;
+    if (e.target.closest('.topbar, .search-filter-bar, .pill-menu, .lightbox, .card, .load-more-wrap, .status, #sentinel, .toast')) return;
     if (e.target === gallery || e.target === document.body || e.target === document.documentElement) exitSearch();
   });
 
+  /* 汉堡按钮：开关药丸 */
   hamburger.addEventListener('click', e => {
     e.stopPropagation();
-    if (document.body.classList.contains('drawer-open')) closeDrawer(); else openDrawer();
+    togglePill();
   });
-  drawerClose.addEventListener('click', closeDrawer);
-  drawerOverlay.addEventListener('click', closeDrawer);
 
-  drawer.querySelectorAll('a[data-view]').forEach(a => {
-    a.addEventListener('click', e => {
+  /* 点击药丸与汉堡以外区域 → 关闭药丸 */
+  document.addEventListener('click', e => {
+    if (!document.body.classList.contains('pill-open')) return;
+    if (e.target.closest('#pillMenu') || e.target.closest('#hamburger')) return;
+    closePill();
+  });
+
+  /* 药丸内导航按钮：索引 / 收藏 / 关于 */
+  pillMenu.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', e => {
       e.preventDefault();
-      const v = a.dataset.view;
-      if (v === 'favorites') enterFavorites();
-      else if (v === 'home') goHome();
-      else if (v === 'discover') enterDiscover();
+      const v = btn.dataset.view;
+      closePill();
+      if (v === 'discover') enterDiscover();
+      else if (v === 'favorites') enterFavorites();
       else if (v === 'about') enterAbout();
     });
   });
 
-  /* 【新增】logo 点击回到首页（保留当前过滤状态） */
+  /* 点 Logo 回到初始状态（清过滤 + 全部作品） */
   const logoCell = document.getElementById('logoCell');
   if (logoCell) {
-    logoCell.addEventListener('click', e => { e.preventDefault(); goHome(); });
-  }
-
-  /* 【新增】首页过滤横幅"查看全部作品"按钮 */
-  const homeFilterClear = document.getElementById('homeFilterClear');
-  if (homeFilterClear) {
-    homeFilterClear.addEventListener('click', () => clearHomeFilter());
+    logoCell.addEventListener('click', e => { e.preventDefault(); resetToHome(); });
   }
 
   /* 主题切换 */
@@ -2587,7 +2582,7 @@
       return;
     }
     if (e.key === 'Escape') {
-      if (document.body.classList.contains('drawer-open')) closeDrawer();
+      if (document.body.classList.contains('pill-open')) closePill();
       else if (state.view === 'search') exitSearch();
     }
   });
@@ -2613,7 +2608,6 @@
     restoreFromUrl();
     setupObserver();
     updateLoadMore();
-    updateHomeFilterBanner();
   }
 
   init();
