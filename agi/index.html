@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AGI会员作品瀑布流图片墙</title>
-<!-- ✨ 主题预加载，避免深色模式白屏闪烁 -->
+<!-- 主题预加载，避免深色模式白屏闪烁 -->
 <script>
   (function () {
     try {
@@ -19,7 +19,7 @@
   })();
 </script>
 <style>
-  /* ✨ 主题 CSS 变量（浅色默认） */
+  /* 主题CSS变量（浅色默认） */
   :root {
     --bg: #f5f5f5;
     --surface: #ffffff;
@@ -98,7 +98,7 @@
   body.searching { padding-top: 124px; }
   body.lightbox-open { overflow: hidden; }
 
-  /* ✨ 发现/关于页：隐藏主视图 */
+  /* 发现/关于页：隐藏主视图 */
   body.view-discover #gallery,
   body.view-discover #status,
   body.view-discover #loadMoreWrap,
@@ -197,7 +197,7 @@
   }
   .search-filter-bar button:hover { background: var(--surface-2); }
 
-  /* ✨ 设计师过滤 chip */
+  /* 设计师过滤chip */
   .filter-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 4px 6px 4px 12px; border-radius: 16px;
@@ -224,7 +224,7 @@
     .gallery.js-ready .col { gap: 12px; }
   }
 
-  /* 📌 contain 去掉 paint，避免 hover 阴影被裁剪 */
+  /* contain去掉paint，避免hover阴影被裁剪 */
   .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout style; }
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
   .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -257,7 +257,7 @@
   body.drawer-open .drawer { transform: translateY(0); }
   .drawer-head { display: flex; justify-content: space-between; align-items: center; }
 
-  /* ✨ 主题切换按钮 */
+  /* 主题切换按钮 */
   .theme-toggle { width: 36px; height: 36px; border: none; background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
   .theme-toggle:hover { background: var(--surface-3); }
   .theme-toggle .icon-sun { display: none; }
@@ -269,7 +269,7 @@
   .drawer nav { display: flex; flex-direction: column; }
   .drawer nav a { display: block; padding: 16px 0; color: var(--text-2); text-align: center; text-decoration: none; border-bottom: 1px solid var(--border); }
 
-  /* ✨ 发现页 / 关于页 */
+  /* 发现页 / 关于页 */
   .page-view { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
   @media (max-width: 640px) { .page-view { padding: 16px 12px 32px; } }
 
@@ -413,7 +413,7 @@
   }
   .lb-count:empty { display: none; }
 
-  /* ✨ 灯箱左右导航按钮 */
+  /* 灯箱左右导航按钮 */
   .lb-nav {
     position: fixed; top: 50%;
     transform: translateY(-50%);
@@ -503,7 +503,7 @@
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--toast-bg); color: var(--toast-text); padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ♿ 尊重减弱动效偏好 */
+  /* 尊重减弱动效偏好 */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       transition-duration: 0.01ms !important;
@@ -541,7 +541,7 @@
   </div>
 </div>
 
-<!-- ✨ 筛选栏顺序：全部年份 → 全部国家 → 全部类型 → 设计师 chip → 清除筛选 -->
+<!-- 筛选栏顺序：全部年份 → 全部国家 → 全部类型 → 设计师chip → 清除筛选 -->
 <div class="search-filter-bar" id="searchFilterBar">
   <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
   <select id="filterCountry" aria-label="按国家筛选"><option value="">全部国家</option></select>
@@ -556,7 +556,7 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawer-head">
-    <!-- ✨ 深色模式切换 -->
+    <!-- 深色模式切换 -->
     <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式" type="button">
       <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -578,7 +578,7 @@
 </div>
 <div id="sentinel"></div>
 
-<!-- ✨ 发现页 -->
+<!-- 发现页 -->
 <section id="discoverView" class="page-view" hidden>
   <header class="discover-head">
     <h1>发现</h1>
@@ -601,7 +601,7 @@
   </div>
 </section>
 
-<!-- ✨ 关于页（仅项目简介 + 使用说明） -->
+<!-- 关于页（仅项目简介 + 使用说明） -->
 <section id="aboutView" class="page-view" hidden>
   <div class="about-section">
     <h2>项目简介</h2>
@@ -658,20 +658,20 @@
   const FAV_KEY = 'gallery_favorites_v1';
   const THEME_KEY = 'gallery_theme_v1';
 
-  /* ✨ CDN 变体目录模板（卡片只使用 small；large/medium 保留以兼容旧数据） */
+  /* CDN变体目录模板（卡片只使用small；large/medium保留以兼容旧数据） */
   const VARIANT_TEMPLATES = {
     small:  '_500xAUTO_crop_center-center_75_none',
     medium: '_1600xAUTO_crop_center-center_75_none',
     large:  '_2000xAUTO_crop_center-center_75_none'
   };
 
-  /* ✨ WeakMap 缓存，同一 img 对象只展开一次 */
+  /* WeakMap缓存，同一img对象只展开一次 */
   const expandCache = new WeakMap();
 
-  /* ✨ 由原图 URL 派生 small/medium/large
-     - 相对路径：  "/Andrew/file.jpg"
-     - 完整 URL：  "https://.../Andrew/file.jpg"
-     - 已含 small/large 的旧对象直接 passthrough
+  /* 由原图URL派生 small/medium/large
+     - 相对路径： "/Andrew/file.jpg"
+     - 完整URL： "https://.../Andrew/file.jpg"
+     - 已含small/large的旧对象直接passthrough
   */
   function expandImage(img) {
     if (!img) return null;
@@ -835,11 +835,11 @@
     lastFocus: null,
     rebalanceRaf: 0,
     scrollSyncTimer: null,
-    filterDesigner: '',       // ✨ 设计师过滤（来自发现页）
-    discoverRendered: false   // ✨ 发现页是否已渲染
+    filterDesigner: '',   // 设计师过滤（来自发现页）
+    discoverRendered: false   // 发现页是否已渲染
   };
 
-  /* ============ 收藏 ============ */
+  /*  收藏  */
   function loadFavorites() {
     try {
       const raw = localStorage.getItem(FAV_KEY);
@@ -878,7 +878,7 @@
     searchBox.classList.toggle('has-value', searchInput.value.length > 0);
   }
 
-  /* ✨ 隐藏发现/关于页 */
+  /* 隐藏发现/关于页 */
   function exitPageViews() {
     document.body.classList.remove('view-discover', 'view-about');
     const dv = document.getElementById('discoverView');
@@ -887,7 +887,7 @@
     if (av) av.hidden = true;
   }
 
-  /* ✨ 设计师 chip 显隐 */
+  /* 设计师chip显隐 */
   function updateDesignerChip() {
     const chip = document.getElementById('designerChip');
     const nameEl = document.getElementById('designerChipName');
@@ -928,10 +928,10 @@
     return items;
   }
 
-  /* ============ 数据加载 ============ */
+  /*  数据加载  */
   async function initData() {
     try {
-      statusEl.textContent = '正在下载数据 (约8MB，请稍候)…';
+      statusEl.textContent = '正在下载数据…';
       const res = await fetch(DATA_URL);
       if (!res.ok) throw new Error('HTTP ' + res.status);
 
@@ -986,7 +986,7 @@
     }
   }
 
-  /* ⚡ 索引 + 倒排索引 */
+  /* 索引 + 倒排索引 */
   const TOKEN_SPLIT_RE = /[\s,，。;；、|\/\\\-_·:：()（）\[\]【】"'“”‘’!！?？]+/;
   async function buildSearchIndexChunked() {
     const total = state.allProjects.length;
@@ -1056,7 +1056,7 @@
     if (prevCountry && countries.has(prevCountry)) filterCountry.value = prevCountry;
   }
 
-  /* ============ URL 同步 ============ */
+  /*  URL同步  */
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
@@ -1099,7 +1099,7 @@
     }
   }
 
-  /* ============ 布局 ============ */
+  /*  布局  */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -1202,7 +1202,7 @@
     card.remove();
   }
 
-  /* ============ 卡片 ============ */
+  /*  卡片  */
   function createCard(item) {
     const record = item && item.record;
     if (!record) return null;
@@ -1258,7 +1258,7 @@
 
     materializeCard(article);
 
-    /* ✨ 同步失败（primaryUrl 为空）时返回 null，避免空壳卡 */
+    /* 同步失败（primaryUrl为空）时返回null，避免空壳卡 */
     if (article._imgFailed) return null;
 
     article.addEventListener('click', () => openLightbox(record, coverIndex));
@@ -1271,7 +1271,7 @@
     return article;
   }
 
-  /* ✨ 实体化：卡片只加载 small，失败直接删卡 */
+  /* 实体化：卡片只加载small，失败直接删卡 */
   function materializeCard(card) {
     if (!card || card._img || card._imgFailed) return;
     const item = card._item;
@@ -1294,7 +1294,7 @@
     img.decoding = 'async';
     img.onload = () => img.classList.add('loaded');
 
-    /* ✨ 任何失败直接删卡，不回退 */
+    /* 任何失败直接删卡，不回退 */
     img.onerror = () => {
       card._imgFailed = true;
       img.remove();
@@ -1356,7 +1356,7 @@
     });
   }
 
-  /* ============ 无限加载 ============ */
+  /*  无限加载  */
   function renderItemsChunked(items) {
     return new Promise(resolve => {
       let i = 0;
@@ -1453,7 +1453,7 @@
     state.io.observe(sentinel);
   }
 
-  /* ============ 视图切换 ============ */
+  /*  视图切换  */
   function clearGalleryForSearch() {
     gallery.innerHTML = '';
     gallery.classList.remove('js-ready');
@@ -1464,7 +1464,7 @@
     state.liveCount = 0;
   }
 
-  /* ✨ 进入发现页 */
+  /* 进入发现页 */
   function enterDiscover() {
     if (state.view === 'discover') return;
     exitPageViews();
@@ -1497,7 +1497,7 @@
     syncUrl();
   }
 
-  /* ✨ 渲染发现页 */
+  /* 渲染发现页 */
   function renderDiscover() {
     const total = state.allProjects.length;
     const designerMap = new Map();
@@ -1599,12 +1599,12 @@
     });
   }
 
-  /* ✨ 发现页三入口跳转 */
+  /* 发现页三入口跳转 */
   function searchByDesigner(name) { enterSearch({ focus: false, designer: name }); }
   function searchByYear(year) { enterSearch({ focus: false, year }); }
   function searchByCountry(country) { enterSearch({ focus: false, country }); }
 
-  /* ✨ 进入关于页 */
+  /* 进入关于页 */
   function enterAbout() {
     if (state.view === 'about') return;
     exitPageViews();
@@ -1634,7 +1634,7 @@
     syncUrl();
   }
 
-  /* ✨ 渲染关于页统计 */
+  /* 渲染关于页统计 */
   function renderAbout() {
     const total = state.allProjects.length;
     const designers = new Set();
@@ -1653,7 +1653,7 @@
       `共 ${total} 个项目 · ${designers.size} 位设计师 · 覆盖 ${countries.size} 个国家 · 年份跨度 ${span}`;
   }
 
-  /* ✨ 进入搜索，支持预设筛选 */
+  /* 进入搜索，支持预设筛选 */
   function enterSearch(preset) {
     if (state.view === 'search') return;
     exitPageViews();
@@ -1703,7 +1703,7 @@
     }
   }
 
-  /* ✨ 退出搜索：按来源视图恢复（all / favorites / discover / about） */
+  /* 退出搜索：按来源视图恢复（all / favorites / discover / about） */
   function exitSearch() {
     if (state.view !== 'search') return;
     const prevView = state.savedView;
@@ -1928,7 +1928,7 @@
     statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
   }
 
-  /* 首页：支持从 all / search / favorites / discover / about 恢复 */
+  /* 首页：支持从 all / search / favorites / discover / about恢复 */
   function goHome() {
     closeDrawer();
     exitPageViews();
@@ -2001,7 +2001,7 @@
     drawer.setAttribute('aria-hidden', 'true');
   }
 
-  /* ============ 灯箱 ============ */
+  /*  灯箱  */
   function setBackgroundInert(on) {
     const els = [
       document.querySelector('.topbar'),
@@ -2034,7 +2034,7 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
-  /* ✨ 灯箱直接加载原图（原图即大图内容），老数据兜底用 large/small */
+  /* 灯箱直接加载原图（原图即大图内容），老数据兜底用large/small */
   function loadLbImage(entry) {
     if (!entry || entry.loaded) return;
     entry.loaded = true;
@@ -2061,7 +2061,7 @@
     entry.img.src = primary;
   }
 
-  /* ⚡ 灯箱懒加载：前 2 张立即，其余 IntersectionObserver */
+  /* 灯箱懒加载：前 2 张立即，其余 IntersectionObserver */
   function setupLbLazyLoad() {
     if (state.lbIO) state.lbIO.disconnect();
     state.lbIO = new IntersectionObserver(entries => {
@@ -2118,7 +2118,7 @@
     }
   }
 
-  /* ✨ 缩放 + 双击放大 + 放大后拖动 */
+  /* 缩放 + 双击放大 + 放大后拖动 */
   function attachZoom(wrap, img) {
     const MIN = 1, MAX = 4;
     let scale = 1, tx = 0, ty = 0;
@@ -2316,7 +2316,7 @@
     }
   }
 
-  /* ============ 事件绑定 ============ */
+  /*  事件绑定  */
   lbFav.addEventListener('click', e => {
     e.stopPropagation();
     if (!state.currentLightboxId) return;
@@ -2399,7 +2399,7 @@
     });
   });
 
-  /* ✨ 主题切换 */
+  /* 主题切换 */
   themeToggle.addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', cur);
@@ -2407,7 +2407,7 @@
     showToast(cur === 'dark' ? '已切换到深色模式' : '已切换到浅色模式');
   });
 
-  /* ✨ 发现页 tab 切换 */
+  /* 发现页tab切换 */
   document.querySelectorAll('.discover-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
@@ -2418,7 +2418,7 @@
     });
   });
 
-  /* ✨ 设计师即时过滤 */
+  /* 设计师即时过滤 */
   document.getElementById('designerFilterInput').addEventListener('input', e => {
     const q = e.target.value.trim().toLowerCase();
     const az = document.getElementById('designerAZ');
