@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AGI会员作品瀑布流图片墙</title>
-<!-- 主题预加载，避免深色模式白屏闪烁 -->
+<title>AGI会员瀑布流作品展示</title>
 <script>
   (function () {
     try {
@@ -19,7 +18,6 @@
   })();
 </script>
 <style>
-  /* 主题CSS变量（浅色默认） */
   :root {
     --bg: #f5f5f5;
     --surface: #ffffff;
@@ -45,7 +43,6 @@
     --overlay: rgba(0,0,0,.4);
     --lb-bg: rgba(0,0,0,.92);
     --lb-surface: #ffffff;
-    /* 灯箱药丸透明磨砂 */
     --lb-bar-bg: rgba(255,255,255,.10);
     --lb-bar-border: rgba(255,255,255,.22);
     --lb-text: #ffffff;
@@ -54,6 +51,10 @@
     --chip-bg: #f0f0f0;
     --chip-text: #444444;
     --heart: #ff3b6b;
+    /* 药丸菜单磨砂变量 */
+    --pill-bg: rgba(255,255,255,.55);
+    --pill-divider: rgba(0,0,0,.10);
+    --pill-hover: rgba(0,0,0,.055);
     color-scheme: light;
   }
   [data-theme="dark"] {
@@ -85,6 +86,10 @@
     --toast-text: #111111;
     --chip-bg: #2a2a2a;
     --chip-text: #cccccc;
+    /* 药丸菜单暗色磨砂 */
+    --pill-bg: rgba(28,28,28,.55);
+    --pill-divider: rgba(255,255,255,.16);
+    --pill-hover: rgba(255,255,255,.09);
     color-scheme: dark;
   }
 
@@ -98,7 +103,6 @@
   body.searching { padding-top: 124px; }
   body.lightbox-open { overflow: hidden; }
 
-  /* 发现/关于页：隐藏主视图 */
   body.view-discover #gallery,
   body.view-discover #status,
   body.view-discover #loadMoreWrap,
@@ -184,8 +188,13 @@
   .search-filter-bar {
     position: fixed; top: 64px; left: 0; right: 0; z-index: 55;
     background: var(--surface); border-bottom: 1px solid var(--border);
-    display: none; padding: 10px 16px; gap: 8px; align-items: center; flex-wrap: wrap;
+    display: none; padding: 10px 16px; gap: 8px; align-items: center;
+    /* 单行不换行，超宽横向滚动，保证 body.searching 的 padding-top 恒定 */
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
+  .search-filter-bar::-webkit-scrollbar { display: none; }
+  .search-filter-bar > * { flex-shrink: 0; }
   body.searching .search-filter-bar { display: flex; }
   .search-filter-bar select {
     padding: 6px 10px; border: 1px solid var(--border-2); border-radius: 6px;
@@ -197,7 +206,6 @@
   }
   .search-filter-bar button:hover { background: var(--surface-2); }
 
-  /* 设计师过滤chip */
   .filter-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 4px 6px 4px 12px; border-radius: 16px;
@@ -224,7 +232,6 @@
     .gallery.js-ready .col { gap: 12px; }
   }
 
-  /* contain去掉paint，避免hover阴影被裁剪 */
   .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: zoom-in; transition: transform .15s, box-shadow .15s; contain: layout style; }
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
   .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -251,7 +258,6 @@
   .load-more-btn:hover { background: var(--surface-3); }
   .load-more-btn:disabled { opacity: .5; cursor: default; }
 
-  /* 主题切换按钮（基础样式，药丸内会覆盖尺寸） */
   .theme-toggle { width: 36px; height: 36px; border: none; background: transparent; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
   .theme-toggle:hover { background: var(--surface-3); }
   .theme-toggle .icon-sun { display: none; }
@@ -259,65 +265,114 @@
   [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
   [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
-  /* 汉堡药丸菜单：从顶部滑入，屏幕上下左右居中，宽度 80% */
+  /* ========== 药丸菜单：整体加大 + 文本居中 + 防闪 + 竖线隔断 ========== */
   .pill-menu {
+    --pill-gap: clamp(6px, 1.8vw, 14px);     /* 分隔线对齐基准 */
+
     position: fixed;
     top: 50%;
     left: 50%;
     z-index: 58;
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
-    gap: clamp(4px, 1.5vw, 12px);
-    width: 80vw;
-    max-width: 680px;
-    padding: clamp(6px, 1.6vw, 10px) clamp(8px, 2vw, 16px);
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    justify-content: center;                 /* 覆盖原 space-evenly */
+    gap: var(--pill-gap);
+    width: 82vw;
+    max-width: 760px;
+    padding: clamp(8px, 1.8vw, 12px) clamp(10px, 2.2vw, 20px);
+    /* 更透的磨砂底 */
+    background: var(--pill-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
     border: 1px solid var(--border);
     border-radius: 999px;
     box-shadow: 0 12px 40px rgba(0,0,0,.18);
     overflow-x: auto;
     scrollbar-width: none;
 
-    /* 关闭态：位于屏幕上方外，不可交互 */
+    /* 防闪：强制合成层，避免 backdrop-filter 首次采样硬切 */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+
+    /* 初始态：位移更近（-60vh）+ 微缩放 */
     opacity: 0;
-    transform: translate(-50%, -50%) translateY(-100vh);
+    visibility: hidden;
+    transform: translate(-50%, -50%) translateY(-60vh) scale(.96);
     pointer-events: none;
-    transition: opacity .28s ease, transform .38s cubic-bezier(.2,.8,.2,1);
+    transition:
+      opacity .26s ease,
+      transform .36s cubic-bezier(.2,.8,.2,1),
+      visibility 0s linear .36s;             /* 关闭时延迟隐藏 */
   }
   .pill-menu::-webkit-scrollbar { display: none; }
-  [data-theme="dark"] .pill-menu { background: rgba(30,30,30,.82); }
 
-  /* 打开态：从上方滑入到屏幕正中 */
   body.pill-open .pill-menu {
     opacity: 1;
-    transform: translate(-50%, -50%) translateY(0);
+    visibility: visible;
+    transform: translate(-50%, -50%) translateY(0) scale(1);
     pointer-events: auto;
+    transition:
+      opacity .26s ease,
+      transform .36s cubic-bezier(.2,.8,.2,1),
+      visibility 0s linear 0s;               /* 打开时立即可见 */
   }
 
   .pill-menu .pill-btn,
   .pill-menu .theme-toggle { flex-shrink: 0; }
+
+  /* 药丸一体化：相邻按钮之间用竖线分隔 */
+  .pill-menu > * { position: relative; }
+  .pill-menu > * + *::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--pill-gap) / 2);    /* 落在相邻 gap 正中央 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: clamp(20px, 5vw, 26px);
+    background: var(--pill-divider);
+    pointer-events: none;
+  }
+
   .pill-menu .pill-btn {
-    height: clamp(32px, 7.5vw, 36px);
-    padding: 0 clamp(6px, 2vw, 14px);
+    flex: 1 1 auto;                          /* 三个文字按钮等宽均分 */
+    height: clamp(40px, 8.5vw, 44px);
+    padding: 0 clamp(14px, 3vw, 22px);
     border: none;
     background: transparent;
     color: var(--text);
-    font-size: clamp(11px, 3.2vw, 14px);
+    font-size: clamp(13px, 3.5vw, 16px);
     cursor: pointer;
     border-radius: 999px;
-    white-space: nowrap;
+    white-space: nowrap;                     /* 防止文字折行撑破等宽 */
     transition: background .15s;
-  }
-  .pill-menu .pill-btn:hover { background: var(--surface-3); }
-  .pill-menu .theme-toggle {
-    width: clamp(30px, 7.5vw, 36px);
-    height: clamp(30px, 7.5vw, 36px);
+    /* 文本水平 + 垂直居中 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
-  /* 发现页 / 关于页 */
+  /* 统一半透明悬停，避免实心块破坏磨砂 */
+  .pill-menu .pill-btn:hover,
+  .pill-menu .theme-toggle:hover { background: var(--pill-hover); }
+
+  .pill-menu .theme-toggle {
+    flex: 0 0 auto;                          /* 主题按钮固定方形，不参与均分 */
+    width: clamp(40px, 8.5vw, 44px);
+    height: clamp(40px, 8.5vw, 44px);
+  }
+
+  /* 主题图标：抗压缩 + 强制方形 + 与按钮尺寸视觉对齐 */
+
+  .pill-menu .theme-toggle svg {
+  flex: 0 0 auto;
+  width: clamp(20px, 5.5vw, 24px);
+  height: clamp(20px, 5.5vw, 24px);
+  pointer-events: none;
+}
+
   .page-view { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
   @media (max-width: 640px) { .page-view { padding: 16px 12px 32px; } }
 
@@ -387,7 +442,6 @@
     font-size: 12px; color: var(--text);
   }
 
-  /* 灯箱 */
   .lightbox {
     position: fixed; inset: 0; z-index: 100;
     background: var(--lb-bg);
@@ -407,7 +461,6 @@
     min-height: 100vh;
   }
 
-  /* 灯箱药丸：透明磨砂，宽度为屏幕 50% */
   .lb-topbar {
     position: fixed;
     top: max(clamp(10px, 2.4vw, 16px), env(safe-area-inset-top, 10px));
@@ -435,7 +488,6 @@
     pointer-events: auto;
   }
 
-  /* 灯箱按钮：尺寸调大 */
   .lb-fav, .lightbox-close {
     width: clamp(34px, 9vw, 40px);
     height: clamp(34px, 9vw, 40px);
@@ -449,13 +501,10 @@
   .lb-fav.active { color: var(--heart); }
   .lb-fav.active svg { fill: currentColor; }
 
-  /* ♥ SVG 调大 */
   .lb-fav svg { width: clamp(22px, 5.5vw, 26px); height: clamp(22px, 5.5vw, 26px); }
 
-  /* × 字号调大 */
   .lightbox-close { font-size: clamp(24px, 6.5vw, 30px); line-height: 1; }
 
-  /* 灯箱计数：高度/字号跟随按钮放大 */
   .lb-count {
     height: clamp(34px, 9vw, 40px);
     padding: 0 clamp(10px, 3vw, 14px);
@@ -528,7 +577,6 @@
   .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--toast-bg); color: var(--toast-text); padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* 尊重减弱动效偏好 */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       transition-duration: 0.01ms !important;
@@ -566,18 +614,17 @@
   </div>
 </div>
 
-<!-- 汉堡药丸菜单（从顶部滑入 / 屏幕上下左右居中 / 宽度 80%） -->
+<!-- 药丸菜单：按「关于 → 收藏 → 发现 → 主题切换」排序 -->
 <div class="pill-menu" id="pillMenu" role="menu" aria-hidden="true">
-  <button class="theme-toggle" id="themeToggle" aria-label="切换深色模式" type="button">
+  <button class="pill-btn" type="button" role="menuitem" data-view="about">关于</button>
+  <button class="pill-btn" type="button" role="menuitem" data-view="favorites">收藏</button>
+  <button class="pill-btn" type="button" role="menuitem" data-view="discover">发现</button>
+  <button class="theme-toggle" id="themeToggle" type="button" role="menuitem" aria-label="切换深色模式">
     <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
-  <button class="pill-btn" type="button" data-view="discover">索引</button>
-  <button class="pill-btn" type="button" data-view="favorites">收藏</button>
-  <button class="pill-btn" type="button" data-view="about">关于</button>
 </div>
 
-<!-- 筛选栏顺序：全部年份 → 全部国家 → 全部类型 → 设计师chip → 清除筛选 -->
 <div class="search-filter-bar" id="searchFilterBar">
   <select id="filterYear" aria-label="按年份筛选"><option value="">全部年份</option></select>
   <select id="filterCountry" aria-label="按国家筛选"><option value="">全部国家</option></select>
@@ -596,7 +643,6 @@
 </div>
 <div id="sentinel"></div>
 
-<!-- 发现页：国家 / 类型 / 领域 / 设计师 A-Z 四类索引 -->
 <section id="discoverView" class="page-view" hidden>
   <header class="discover-head">
     <h1>发现</h1>
@@ -624,7 +670,6 @@
   </section>
 </section>
 
-<!-- 关于页（仅项目简介 + 使用说明） -->
 <section id="aboutView" class="page-view" hidden>
   <div class="about-section">
     <h2>项目简介</h2>
@@ -638,12 +683,11 @@
       <li><strong>索引</strong>：按国家、类型、领域、设计师 A-Z 四类索引浏览；点击任一项返回首页查看对应作品。点 Logo 可回到全部作品。</li>
       <li><strong>收藏</strong>：灯箱左上角 ♥ 收藏作品，收藏保存在浏览器本地（localStorage），换设备不同步。</li>
       <li><strong>深色模式</strong>：右上角汉堡菜单打开药丸，点太阳 / 月亮图标切换。</li>
-      <li><strong>键盘</strong>：<kbd>←</kbd> <kbd>→</kbd> 切换灯箱图片，<kbd>Esc</kbd> 关闭灯箱 / 菜单 / 搜索。</li>
       <li><strong>手势</strong>：灯箱内双指缩放、双击放大，放大后可拖动。</li>
     </ul>
   </div>
 </section>
-<!-- 灯箱（无翻页按钮，药丸透明自适应宽度 50%） -->
+
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
   <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
@@ -669,7 +713,6 @@
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
 <script>
 (function () {
   'use strict';
@@ -678,18 +721,16 @@
   const DATA_URL = './data.json';
   const FAV_KEY = 'gallery_favorites_v1';
   const THEME_KEY = 'gallery_theme_v1';
+  const HOME_ORDER_KEY = 'gallery_home_order_v1';   // P3-3: 会话内首页顺序固定
 
-  /* CDN变体目录模板（卡片只使用small；large/medium保留以兼容旧数据） */
   const VARIANT_TEMPLATES = {
     small:  '_500xAUTO_crop_center-center_75_none',
     medium: '_1600xAUTO_crop_center-center_75_none',
     large:  '_2000xAUTO_crop_center-center_75_none'
   };
 
-  /* WeakMap缓存，同一img对象只展开一次 */
   const expandCache = new WeakMap();
 
-  /* 由原图URL派生 small/medium/large */
   function expandImage(img) {
     if (!img) return null;
     if (img.small || img.large) return img;
@@ -765,16 +806,23 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+  // P0-1: 单次正则替换，杜绝多词依次替换破坏已插入的 <mark> 标签
   function highlightHtml(text, terms) {
     const safe = escapeHtml(text || '');
     if (!terms || !terms.length) return safe;
-    let out = safe;
     const uniq = [...new Set(terms.filter(Boolean).map(t => escapeHtml(t)))];
+    if (!uniq.length) return safe;
     uniq.sort((a, b) => b.length - a.length);
-    uniq.forEach(t => {
-      out = out.replace(new RegExp('(' + escapeRegExp(t) + ')', 'gi'), '<mark>$1</mark>');
-    });
-    return out;
+    const pattern = uniq.map(escapeRegExp).join('|');
+    return safe.replace(new RegExp('(' + pattern + ')', 'gi'), '<mark>$1</mark>');
+  }
+
+  // P1-1: 保序过滤（替代原 intersectSorted）
+  function filterBySet(base, other) {
+    if (!base || !base.length || !other || !other.length) return [];
+    const set = new Set(other);
+    return base.filter(x => set.has(x));
   }
 
   const MIN_COL = 230, MAX_COLS = 6;
@@ -782,7 +830,6 @@
   const HEADER_EST = 70, CHUNK_SIZE = 15;
   const SEARCH_PAGE = 60;
 
-  /* 首页过滤类型的中文标签 */
   const FILTER_LABELS = {
     designer: '设计师',
     country:  '国家',
@@ -839,6 +886,8 @@
     dehydrated: new Set(),
     liveCount: 0,
     io: null,
+    ioRootMargin: 0,        // P2-2: 记录 sentinel IO 的 rootMargin，用于幂等重建
+    cardIO: null,           // P1-2: 卡片懒渲染观察器（与 sentinel IO 分开）
     searchTimer: null,
     searchIndex: [],
     inverted: new Map(),
@@ -854,16 +903,14 @@
     lbIndex: 0,
     lbIO: null,
     lastFocus: null,
-    rebalanceRaf: 0,
     scrollSyncTimer: null,
     filterDesigner: '',
     discoverRendered: false,
-    /* 首页过滤：type + value 支持 设计师 / 国家 / 类型 / 领域 */
     homeFilterType: '',
-    homeFilterValue: ''
+    homeFilterValue: '',
+    aboutStats: ''          // P3-2: 关于页统计预计算
   };
 
-  /*  收藏  */
   function loadFavorites() {
     try {
       const raw = localStorage.getItem(FAV_KEY);
@@ -902,7 +949,6 @@
     searchBox.classList.toggle('has-value', searchInput.value.length > 0);
   }
 
-  /* 隐藏发现/关于页 */
   function exitPageViews() {
     document.body.classList.remove('view-discover', 'view-about');
     const dv = document.getElementById('discoverView');
@@ -911,7 +957,6 @@
     if (av) av.hidden = true;
   }
 
-  /* 设计师chip显隐 */
   function updateDesignerChip() {
     const chip = document.getElementById('designerChip');
     const nameEl = document.getElementById('designerChipName');
@@ -952,7 +997,37 @@
     return items;
   }
 
-  /* 判断记录是否匹配当前 home 过滤 */
+  // P3-3: 首页顺序种子（sessionStorage），同会话内刷新保持一致
+  function getHomeOrderSeed() {
+    try {
+      const raw = sessionStorage.getItem(HOME_ORDER_KEY);
+      if (!raw) return null;
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.map(String) : null;
+    } catch (e) { return null; }
+  }
+  function saveHomeOrderSeed(items) {
+    try {
+      sessionStorage.setItem(HOME_ORDER_KEY, JSON.stringify(items.map(it => String(it.record.id))));
+    } catch (e) {}
+  }
+  function orderBySeed(items, seed) {
+    if (!seed || !seed.length) return null;
+    const orderMap = new Map(seed.map((id, i) => [String(id), i]));
+    for (const it of items) if (!orderMap.has(String(it.record.id))) return null;
+    return items.slice().sort((a, b) =>
+      orderMap.get(String(a.record.id)) - orderMap.get(String(b.record.id))
+    );
+  }
+  function buildSeededHomeQueue() {
+    const items = buildProjectQueue(state.allProjects);
+    const ordered = orderBySeed(items, getHomeOrderSeed());
+    if (ordered) return ordered;
+    const shuffled = shuffleArray(items);
+    saveHomeOrderSeed(shuffled);
+    return shuffled;
+  }
+
   function matchHomeFilter(rec) {
     const t = state.homeFilterType;
     const v = state.homeFilterValue;
@@ -970,10 +1045,11 @@
     return true;
   }
 
-  /* 按 homeFilterType/Value 重建队列 */
   function rebuildHomeQueue() {
     const records = state.allProjects.filter(matchHomeFilter);
-    state.loadQueue = shuffleArray(buildProjectQueue(records));
+    const items = buildProjectQueue(records);
+    const ordered = orderBySeed(items, getHomeOrderSeed());
+    state.loadQueue = ordered || shuffleArray(items);
     state.currentIndex = 0;
     state.totalLoaded = 0;
     state.finished = false;
@@ -982,7 +1058,6 @@
     state.dehydrated.clear();
   }
 
-  /* 发现页点击任意索引项：切回首页并只显示匹配作品（无横幅，静默状态） */
   function showFilterInHome(type, value) {
     const v = String(value || '').trim();
     if (!type || !v) return;
@@ -1025,7 +1100,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /*  数据加载  */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据…';
@@ -1052,7 +1126,8 @@
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
 
-      state.loadQueue = shuffleArray(buildProjectQueue(state.allProjects));
+      // P3-3: 首页顺序按 sessionStorage 种子固定，会话内刷新不抖动
+      state.loadQueue = buildSeededHomeQueue();
       state.currentIndex = 0;
       state.totalLoaded = 0;
       state.finished = false;
@@ -1060,7 +1135,7 @@
       state.dehydrated.clear();
 
       await buildSearchIndexChunked();
-
+      computeAboutStats();      // P3-2: 一次性统计
       rebuildFilters();
 
       if (!state.loadQueue.length) {
@@ -1073,7 +1148,12 @@
     } catch (err) {
       console.error(err);
       statusEl.textContent = '';
-      statusEl.append('加载失败：' + (err && err.message ? err.message : err) + '。');
+      // P2-3: file:// 打开时的友好提示
+      if (location.protocol === 'file:') {
+        statusEl.append('加载失败：浏览器限制 file:// 读取本地 JSON。请用本地服务器打开（例如在目录运行 npx serve，然后访问 http://localhost:3000）。');
+      } else {
+        statusEl.append('加载失败：' + (err && err.message ? err.message : err) + '。');
+      }
       const btn = document.createElement('button');
       btn.className = 'load-more-btn';
       btn.style.cssText = 'margin-left:8px;padding:4px 14px;font-size:13px;';
@@ -1083,7 +1163,6 @@
     }
   }
 
-  /* 索引 + 倒排索引 */
   const TOKEN_SPLIT_RE = /[\s,，。;；、|\/\\\-_·:：()（）\[\]【】"'“”‘’!！?？]+/;
   async function buildSearchIndexChunked() {
     const total = state.allProjects.length;
@@ -1120,7 +1199,6 @@
     }
   }
 
-  /* 重建筛选下拉（年份 / 国家 / 类型） */
   function rebuildFilters() {
     const prevYear = filterYear.value;
     const prevType = filterType.value;
@@ -1153,7 +1231,7 @@
     if (prevCountry && countries.has(prevCountry)) filterCountry.value = prevCountry;
   }
 
-  /*  URL同步  */
+  // P2-4: try/catch + 保留 hash
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
@@ -1170,11 +1248,15 @@
     } else if (state.view === 'about') {
       params.set('view', 'about');
     } else if (state.view === 'all' && state.homeFilterType && state.homeFilterValue) {
-      /* 首页过滤参数 hf=type:value */
       params.set('hf', `${state.homeFilterType}:${state.homeFilterValue}`);
     }
     const qs = params.toString();
-    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+    const url = location.pathname + (qs ? '?' + qs : '') + location.hash;
+    try {
+      history.replaceState(null, '', url);
+    } catch (e) {
+      // file:// 等环境可能抛出 SecurityError，忽略即可
+    }
   }
   function restoreFromUrl() {
     const params = new URLSearchParams(location.search);
@@ -1188,7 +1270,6 @@
     if (view === 'discover') { enterDiscover(); return; }
     if (view === 'about') { enterAbout(); return; }
 
-    /* URL 带 hf 且无其它 view：静默恢复首页过滤 */
     if (hf && !view) {
       const idx = hf.indexOf(':');
       if (idx > 0) {
@@ -1216,7 +1297,6 @@
     }
   }
 
-  /*  布局  */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -1234,6 +1314,7 @@
 
   function layoutCards(cards) {
     gallery.classList.add('js-ready');
+    if (state.cardIO) state.cardIO.disconnect();   // P1-2: 重排前清空旧观察
     gallery.innerHTML = '';
     state.columns = [];
     state.columnHeights = [];
@@ -1271,9 +1352,12 @@
 
     if (state.view === 'all') setupObserver();
 
+    // P3-1: 用真实列高校正估算值
     requestAnimationFrame(() => {
-      rehydrateVisibleCards();
-      rebalanceCardWindow();
+      for (let i = 0; i < state.columns.length; i++) {
+        const h = state.columns[i].offsetHeight;
+        if (h > 0) state.columnHeights[i] = h + state.gap;
+      }
     });
 
     updateLoadMore();
@@ -1283,7 +1367,8 @@
   function setCards(cards) {
     state.cardQueue = cards.slice();
     state.dehydrated.clear();
-    state.liveCount = state.cardQueue.filter(c => c._img).length;
+    // P3-4-d: 显式聚合，语义明确
+    state.liveCount = state.cardQueue.reduce((n, c) => n + (c && c._img ? 1 : 0), 0);
     layoutCards(cards);
   }
 
@@ -1299,10 +1384,15 @@
     state.columns[minIdx].appendChild(card);
     card.dataset.colIndex = String(minIdx);
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
+
+    // P1-2: 交给卡片 IO 管理水化/脱水
+    if (!state.cardIO) setupCardObserver();
+    state.cardIO.observe(card);
   }
 
   function removeCard(card) {
     if (!card || !card.isConnected) return;
+    if (state.cardIO) state.cardIO.unobserve(card);   // P1-2
     const idx = state.cardQueue.indexOf(card);
     if (idx >= 0) state.cardQueue.splice(idx, 1);
     state.dehydrated.delete(card);
@@ -1310,16 +1400,21 @@
 
     const colIdx = parseInt(card.dataset.colIndex, 10);
     if (!Number.isNaN(colIdx) && state.columnHeights[colIdx] != null) {
-      const ratio = parseFloat(card.dataset.ratio) || 1;
-      state.columnHeights[colIdx] = Math.max(
-        0,
-        state.columnHeights[colIdx] - (state.colWidth * ratio + HEADER_EST + state.gap)
-      );
+      // 删除前取真实高度校正；不可用则回退估算
+      const realH = card.offsetHeight;
+      if (realH > 0) {
+        state.columnHeights[colIdx] = Math.max(0, state.columnHeights[colIdx] - (realH + state.gap));
+      } else {
+        const ratio = parseFloat(card.dataset.ratio) || 1;
+        state.columnHeights[colIdx] = Math.max(
+          0,
+          state.columnHeights[colIdx] - (state.colWidth * ratio + HEADER_EST + state.gap)
+        );
+      }
     }
     card.remove();
   }
 
-  /*  卡片  */
   function createCard(item) {
     const record = item && item.record;
     if (!record) return null;
@@ -1410,11 +1505,13 @@
     img.onload = () => img.classList.add('loaded');
 
     img.onerror = () => {
+      // 防误删：若该卡已被重新水化（_img 换成了新对象），忽略旧图的失败回调
+      if (card._img && card._img !== img) return;
       card._imgFailed = true;
       img.remove();
       if (card._img === img) card._img = null;
       state.liveCount = Math.max(0, state.liveCount - 1);
-      removeCard(card);
+      removeCard(card);   // 失败即删，保持原有行为
     };
 
     img.src = primaryUrl;
@@ -1428,56 +1525,33 @@
 
   function dematerializeCard(card) {
     if (!card || !card._img) return;
+    // 防误删：脱水前解绑旧 img 回调，避免旧图加载失败误删已重新水化的卡片
+    card._img.onload = null;
+    card._img.onerror = null;
     card._img.remove();
     card._img = null;
     state.liveCount = Math.max(0, state.liveCount - 1);
     state.dehydrated.add(card);
   }
 
-  function rehydrateVisibleCards() {
-    if (!state.dehydrated.size) return;
-    if (gallery.offsetParent === null) return;
-    const vh = window.innerHeight;
-    const margin = 600;
-    for (const card of state.dehydrated) {
-      const r = card.getBoundingClientRect();
-      if (r.bottom > -margin && r.top < vh + margin) materializeCard(card);
-    }
+  // P1-2: 卡片懒渲染观察器
+  function setupCardObserver() {
+    if (state.cardIO) return;
+    state.cardIO = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        const card = entry.target;
+        if (entry.isIntersecting) materializeCard(card);
+        else dematerializeCard(card);
+      }
+    }, { rootMargin: '800px 0px' });
   }
 
-  function rebalanceCardWindow() {
-    const max = state.maxCards || 300;
-    if (state.liveCount <= max) return;
-    const vh = window.innerHeight;
-    const live = state.cardQueue.filter(c => c._img);
-    const scored = live.map(c => {
-      const r = c.getBoundingClientRect();
-      let d = 0;
-      if (r.bottom < 0) d = -r.bottom;
-      else if (r.top > vh) d = r.top - vh;
-      return { c, d };
-    });
-    scored.sort((a, b) => b.d - a.d);
-    const excess = state.liveCount - max;
-    for (let i = 0; i < excess && i < scored.length; i++) dematerializeCard(scored[i].c);
-  }
-
-  function scheduleRebalance() {
-    if (state.view === 'discover' || state.view === 'about') return;
-    if (state.rebalanceRaf) return;
-    state.rebalanceRaf = requestAnimationFrame(() => {
-      state.rebalanceRaf = 0;
-      rehydrateVisibleCards();
-      rebalanceCardWindow();
-    });
-  }
-
-  /*  无限加载  */
   function renderItemsChunked(items) {
+    // P3-4-e: 返回真正上屏的卡片数
     return new Promise(resolve => {
-      let i = 0;
+      let i = 0, success = 0;
       const CHUNK = 10;
-      if (!items.length) { resolve(); return; }
+      if (!items.length) { resolve(0); return; }
       const step = () => {
         const end = Math.min(i + CHUNK, items.length);
         for (; i < end; i++) {
@@ -1485,9 +1559,15 @@
           if (!card) continue;
           state.cardQueue.push(card);
           appendCardToColumn(card);
+          success++;
+        }
+        // P3-1: 每帧末用真实高度校准列高，抑制估算累积误差
+        for (let c = 0; c < state.columns.length; c++) {
+          const h = state.columns[c].offsetHeight;
+          if (h > 0) state.columnHeights[c] = h + state.gap;
         }
         if (i < items.length) requestAnimationFrame(step);
-        else resolve();
+        else resolve(success);
       };
       requestAnimationFrame(step);
     });
@@ -1517,12 +1597,10 @@
     const nextItems = state.loadQueue.slice(state.currentIndex, state.currentIndex + batchSize);
     state.currentIndex += nextItems.length;
 
-    await renderItemsChunked(nextItems);
-
-    state.totalLoaded += nextItems.length;
+    const added = await renderItemsChunked(nextItems);
+    state.totalLoaded += added;   // P3-4-e: 只计真正上屏的卡片
     state.loading = false;
     updateStatus();
-    scheduleRebalance();
 
     if (!state.finished) requestAnimationFrame(checkSentinel);
   }
@@ -1561,16 +1639,19 @@
     loadMoreBtn.textContent = state.loading ? '加载中…' : label;
   }
 
+  // P2-2: rootMargin 未变时跳过重建，避免重复 observe
   function setupObserver() {
+    if (state.io && state.ioRootMargin === state.rootMargin) return;
     if (state.io) state.io.disconnect();
+    state.ioRootMargin = state.rootMargin;
     state.io = new IntersectionObserver(entries => {
       if (entries.some(e => e.isIntersecting)) loadNextBatch();
     }, { rootMargin: state.rootMargin + 'px 0px' });
     state.io.observe(sentinel);
   }
 
-  /*  视图切换  */
   function clearGalleryForSearch() {
+    if (state.cardIO) state.cardIO.disconnect();
     gallery.innerHTML = '';
     gallery.classList.remove('js-ready');
     state.columns = [];
@@ -1580,7 +1661,6 @@
     state.liveCount = 0;
   }
 
-  /* 进入发现页（索引页） */
   function enterDiscover() {
     if (state.view === 'discover') return;
     exitPageViews();
@@ -1613,7 +1693,6 @@
     syncUrl();
   }
 
-  /* 发现页：国家 / 类型 / 领域 / 设计师 四类索引 */
   function renderDiscover() {
     const total = state.allProjects.length;
     const designerMap = new Map();
@@ -1649,7 +1728,6 @@
     renderChips('discoverTypeChips', typeMap, 'type', (a, b) => a.localeCompare(b, 'zh'));
     renderChips('discoverSectorChips', sectorMap, 'sector', (a, b) => a.localeCompare(b, 'zh'));
 
-    /* 设计师 A-Z 索引 */
     const groups = new Map();
     [...designerMap.entries()].forEach(([name, count]) => {
       const first = name.charAt(0).toUpperCase();
@@ -1705,7 +1783,6 @@
     });
   }
 
-  /* 渲染 chip 列表（国家 / 类型 / 领域 共用） */
   function renderChips(containerId, map, filterType, sorter) {
     const wrap = document.getElementById(containerId);
     if (!wrap) return;
@@ -1730,7 +1807,6 @@
     });
   }
 
-  /* 进入关于页 */
   function enterAbout() {
     if (state.view === 'about') return;
     exitPageViews();
@@ -1760,26 +1836,26 @@
     syncUrl();
   }
 
-  /* 渲染关于页统计 */
-  function renderAbout() {
+  // P3-2: 关于页统计一次性预计算
+  function computeAboutStats() {
     const total = state.allProjects.length;
     const designers = new Set();
     const countries = new Set();
     let minY = Infinity, maxY = -Infinity;
-
     state.allProjects.forEach(rec => {
       if (rec.designer) designers.add(String(rec.designer).trim());
       if (rec.nationalGroup) countries.add(String(rec.nationalGroup).trim());
       const y = parseInt(rec.year, 10);
       if (!isNaN(y)) { if (y < minY) minY = y; if (y > maxY) maxY = y; }
     });
-
     const span = (minY !== Infinity && maxY !== -Infinity) ? `${minY}–${maxY}` : '-';
-    document.getElementById('aboutStats').textContent =
-      `共 ${total} 个项目 · ${designers.size} 位设计师 · 覆盖 ${countries.size} 个国家 · 年份跨度 ${span}`;
+    state.aboutStats = `共 ${total} 个项目 · ${designers.size} 位设计师 · 覆盖 ${countries.size} 个国家 · 年份跨度 ${span}`;
   }
 
-  /* 进入搜索，支持预设筛选 */
+  function renderAbout() {
+    document.getElementById('aboutStats').textContent = state.aboutStats || '统计中…';
+  }
+
   function enterSearch(preset) {
     if (state.view === 'search') return;
     exitPageViews();
@@ -1829,7 +1905,6 @@
     }
   }
 
-  /* 退出搜索：按来源视图恢复（all / favorites / discover / about） */
   function exitSearch() {
     if (state.view !== 'search') return;
     const prevView = state.savedView;
@@ -1881,14 +1956,9 @@
     requestAnimationFrame(() => updateSearchClear());
   }
 
-  /* 倒排查询 */
   function lookupInverted(term) {
     if (!/^[a-z0-9]+$/.test(term) || term.length < 2) return null;
     return state.inverted.get(term) || null;
-  }
-  function intersectSorted(a, b) {
-    const setB = new Set(b);
-    return a.filter(x => setB.has(x));
   }
 
   function doSearch(keyword) {
@@ -1916,10 +1986,21 @@
     const terms = state.currentTerms;
     let candidates = null;
     if (terms.length) {
+      // P1-1: 收集所有词的倒排索引；若任一不在索引内则退化为全表扫描
+      const lists = [];
+      let allIndexed = true;
       for (const term of terms) {
         const inv = lookupInverted(term);
-        if (inv) candidates = candidates ? intersectSorted(candidates, inv) : inv.slice();
-        if (candidates && candidates.length === 0) break;
+        if (!inv) { allIndexed = false; break; }
+        lists.push(inv);
+      }
+      if (allIndexed && lists.length) {
+        // 按集合长度升序求交，减少每轮过滤量
+        lists.sort((a, b) => a.length - b.length);
+        candidates = lists[0].slice();
+        for (let i = 1; i < lists.length && candidates.length; i++) {
+          candidates = filterBySet(candidates, lists[i]);
+        }
       }
     }
 
@@ -1957,7 +2038,6 @@
     syncUrl();
   }
 
-  /* 搜索结果分页渲染 */
   function showSearchResults(reset) {
     if (reset) {
       clearGalleryForSearch();
@@ -1984,7 +2064,6 @@
       setCards(cards);
     } else {
       cards.forEach(c => { state.cardQueue.push(c); appendCardToColumn(c); });
-      scheduleRebalance();
     }
 
     if (!cards.length && reset) {
@@ -2038,13 +2117,7 @@
     });
 
     if (!cards.length) {
-      gallery.innerHTML = '';
-      gallery.classList.remove('js-ready');
-      state.columns = [];
-      state.columnHeights = [];
-      state.cardQueue = [];
-      state.dehydrated.clear();
-      state.liveCount = 0;
+      clearGalleryForSearch();
       statusEl.textContent = '暂无收藏，点击灯箱左上角 ♥ 收藏';
       updateLoadMore();
       return;
@@ -2054,7 +2127,6 @@
     statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
   }
 
-  /* 首页：支持从 all / search / favorites / discover / about 恢复 */
   function goHome() {
     closePill();
     exitPageViews();
@@ -2089,7 +2161,6 @@
     }
   }
 
-  /* 点 Logo 回到初始状态：清空所有过滤 + 切回全部作品 + 从头加载 */
   function resetToHome() {
     closePill();
     exitPageViews();
@@ -2142,12 +2213,19 @@
       if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
       const newColCount = computeColumnCount(innerWidth, gap);
 
+      // P1-4: 搜索/收藏只重排，不丢已加载结果
       if (state.view === 'search') {
-        if (newColCount !== state.currentColCount) showSearchResults(true);
+        if (newColCount !== state.currentColCount) {
+          const cards = state.cardQueue.slice();
+          if (cards.length) layoutCards(cards);
+        }
         return;
       }
       if (state.view === 'favorites') {
-        if (newColCount !== state.currentColCount) renderFavorites();
+        if (newColCount !== state.currentColCount) {
+          const cards = state.cardQueue.slice();
+          if (cards.length) layoutCards(cards);
+        }
         return;
       }
       if (state.view === 'discover' || state.view === 'about') return;
@@ -2161,7 +2239,6 @@
     }, 200);
   }
 
-  /* 药丸菜单开 / 关 */
   function openPill() {
     document.body.classList.add('pill-open');
     pillMenu.setAttribute('aria-hidden', 'false');
@@ -2175,7 +2252,6 @@
     else openPill();
   }
 
-  /*  灯箱  */
   function setBackgroundInert(on) {
     const els = [
       document.querySelector('.topbar'),
@@ -2261,12 +2337,7 @@
     lightbox.scrollTo({ top: Math.max(0, top), behavior: (smooth && !reduced) ? 'smooth' : 'auto' });
   }
 
-  function gotoLbImage(i) {
-    if (i < 0 || i >= state.lbImages.length) return;
-    state.lbIndex = i;
-    updateLbCount();
-    scrollToLightboxImage(i, true);
-  }
+  // P1-3: gotoLbImage 已随方向键功能移除（仅保留滚动定位）
 
   function syncLbIndexFromScroll() {
     if (!state.lbImages.length) return;
@@ -2283,7 +2354,6 @@
     }
   }
 
-  /* 缩放 + 双击放大 + 放大后拖动 */
   function attachZoom(wrap, img) {
     const MIN = 1, MAX = 4;
     let scale = 1, tx = 0, ty = 0;
@@ -2394,7 +2464,9 @@
       img.dataset.fallback = '';
       img.style.transformOrigin = 'center center';
       img.style.willChange = 'transform';
-      img.style.maxHeight = '92vh';
+      // P2-1: 去掉 maxHeight/objectFit，避免宽高比例与容器 aspect-ratio 冲突产生留白
+      img.style.width = '100%';
+      img.style.height = '100%';
       img.style.objectFit = 'contain';
 
       wrap.appendChild(img);
@@ -2479,7 +2551,6 @@
     }
   }
 
-  /*  事件绑定  */
   lbFav.addEventListener('click', e => {
     e.stopPropagation();
     if (!state.currentLightboxId) return;
@@ -2534,27 +2605,25 @@
     if (state.view === 'search') doSearch(searchInput.value);
   });
 
-  /* 仅点击空白区域才退出搜索 */
+  // P3-4-c: 点击 body / gallery / .col 空白均退出搜索；交互元素不触发
   document.addEventListener('click', e => {
     if (state.view !== 'search') return;
-    if (e.target.closest('.topbar, .search-filter-bar, .pill-menu, .lightbox, .card, .load-more-wrap, .status, #sentinel, .toast')) return;
-    if (e.target === gallery || e.target === document.body || e.target === document.documentElement) exitSearch();
+    if (e.target.closest('.topbar, .search-filter-bar, .pill-menu, .lightbox, .card, .load-more-wrap, .status, #sentinel, .toast, button, a, input, select')) return;
+    exitSearch();
   });
 
-  /* 汉堡按钮：开关药丸（从顶部滑入 / 屏幕上下左右居中 / 宽度 80%） */
   hamburger.addEventListener('click', e => {
     e.stopPropagation();
     togglePill();
   });
 
-  /* 点击药丸与汉堡以外区域 → 关闭药丸 */
   document.addEventListener('click', e => {
     if (!document.body.classList.contains('pill-open')) return;
     if (e.target.closest('#pillMenu') || e.target.closest('#hamburger')) return;
     closePill();
   });
 
-  /* 药丸内导航按钮：索引 / 收藏 / 关于 */
+  // 药丸菜单按钮分发（data-view 顺序不影响逻辑）
   pillMenu.querySelectorAll('[data-view]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -2566,13 +2635,11 @@
     });
   });
 
-  /* 点 Logo 回到初始状态（清过滤 + 全部作品） */
   const logoCell = document.getElementById('logoCell');
   if (logoCell) {
     logoCell.addEventListener('click', e => { e.preventDefault(); resetToHome(); });
   }
 
-  /* 主题切换 */
   themeToggle.addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', cur);
@@ -2580,12 +2647,10 @@
     showToast(cur === 'dark' ? '已切换到深色模式' : '已切换到浅色模式');
   });
 
-  /* a11y + 灯箱键盘导航 */
   document.addEventListener('keydown', e => {
     if (lightbox.classList.contains('open')) {
       if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); gotoLbImage(state.lbIndex - 1); return; }
-      if (e.key === 'ArrowRight') { e.preventDefault(); gotoLbImage(state.lbIndex + 1); return; }
+      // P1-3: 已移除 ←/→ 方向键翻图
       trapFocus(e);
       return;
     }
@@ -2608,7 +2673,7 @@
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
 
-  window.addEventListener('scroll', scheduleRebalance, { passive: true });
+  // P1-2: 已移除 window scroll 上的 scheduleRebalance —— 改用 IO 管理卡片水化
 
   async function init() {
     loadFavorites();
