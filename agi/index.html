@@ -277,23 +277,39 @@
 
   .discover-head h1 { margin: 0 0 6px; font-size: 28px; color: var(--text); }
 
-  .discover-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
-  .discover-tab {
-    padding: 10px 16px; border: none; background: transparent;
-    color: var(--text-2); font-size: 14px; cursor: pointer;
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
-  }
-  .discover-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
+  /* 【修改】删除 .discover-tabs / .discover-tab / #designerFilterInput / .discover-chips / .discover-chip 样式（已无引用） */
   .discover-panel { padding-top: 4px; }
 
-  #designerFilterInput {
-    width: 100%; max-width: 360px; height: 40px; padding: 0 14px;
-    border: 1px solid var(--border); border-radius: 20px;
-    background: var(--surface-3); color: var(--text); font-size: 14px;
-    outline: none; margin-bottom: 16px;
+  /* 【新增】发现页 · 设计师作品面板 */
+  .discover-works-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+    margin: 0 0 16px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
   }
-  #designerFilterInput:focus { border-color: var(--accent); background: var(--surface); }
+  .discover-back-btn {
+    padding: 6px 14px; border: 1px solid var(--border-2); border-radius: 18px;
+    background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .discover-back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--surface-2); }
+  .discover-works-title { margin: 0; font-size: 20px; font-weight: 600; color: var(--text); }
+  .discover-works-head .page-stats { margin: 0; }
+
+  /* 【新增】发现页作品瀑布流容器（与主 gallery 结构一致） */
+  .discover-works-grid {
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .discover-works-grid .col {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px;
+  }
+  @media (orientation: portrait) and (max-width: 640px) {
+    .discover-works-grid { gap: 10px; }
+    .discover-works-grid .col { gap: 10px; }
+  }
+  @media (orientation: landscape) and (max-width: 900px) {
+    .discover-works-grid { gap: 12px; }
+    .discover-works-grid .col { gap: 12px; }
+  }
 
   .az-letters {
     display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 16px;
@@ -326,13 +342,6 @@
     flex-shrink: 0; font-size: 11px; color: var(--text-3);
     background: var(--surface-3); padding: 1px 6px; border-radius: 8px;
   }
-
-  .discover-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .discover-chip {
-    padding: 8px 16px; border: 1px solid var(--border); border-radius: 20px;
-    background: var(--surface); color: var(--text); font-size: 14px; cursor: pointer;
-  }
-  .discover-chip:hover { border-color: var(--accent); color: var(--accent); }
 
   .about-section { margin-bottom: 32px; }
   .about-section h2 { margin: 0 0 12px; font-size: 18px; color: var(--text); }
@@ -413,31 +422,7 @@
   }
   .lb-count:empty { display: none; }
 
-  /* 灯箱左右导航按钮 */
-  .lb-nav {
-    position: fixed; top: 50%;
-    transform: translateY(-50%);
-    z-index: 101;
-    width: 46px; height: 46px;
-    border-radius: 50%; border: none;
-    background: var(--lb-nav-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    color: #fff; font-size: 28px; line-height: 1;
-    cursor: pointer; display: none; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity .25s;
-    user-select: none;
-  }
-  .lightbox.open .lb-nav { display: flex; opacity: 1; }
-  .lb-nav:disabled { opacity: .25; cursor: default; }
-  .lb-nav:hover:not(:disabled) { background: rgba(40,40,40,.75); }
-  .lb-prev { left: 16px; }
-  .lb-next { right: 16px; }
-  @media (max-width: 480px) {
-    .lb-nav { width: 40px; height: 40px; font-size: 24px; }
-    .lb-prev { left: 8px; }
-    .lb-next { right: 8px; }
-  }
+  /* 【修改】删除 .lb-nav / .lb-prev / .lb-next 及其媒体查询样式 */
 
   .lb-gallery-wrap { position: relative; background: var(--img-bg); }
   .lb-gallery { display: flex; flex-direction: column; }
@@ -578,26 +563,26 @@
 </div>
 <div id="sentinel"></div>
 
-<!-- 发现页 -->
+<!-- 【替换】发现页：仅保留设计师索引 + 新增设计师作品面板 -->
 <section id="discoverView" class="page-view" hidden>
   <header class="discover-head">
     <h1>发现</h1>
     <p class="page-stats" id="discoverStats"></p>
   </header>
-  <div class="discover-tabs" role="tablist">
-    <button class="discover-tab active" data-tab="designer" type="button">按设计师</button>
-    <button class="discover-tab" data-tab="year" type="button">按年份</button>
-    <button class="discover-tab" data-tab="country" type="button">按国家</button>
-  </div>
+
+  <!-- 索引面板：删除搜索输入框，仅保留 A-Z -->
   <div class="discover-panel" id="discoverPanelDesigner">
-    <input type="search" id="designerFilterInput" placeholder="搜索设计师…" autocomplete="off">
     <div class="designer-az" id="designerAZ"></div>
   </div>
-  <div class="discover-panel" id="discoverPanelYear" hidden>
-    <div class="discover-chips" id="discoverYearChips"></div>
-  </div>
-  <div class="discover-panel" id="discoverPanelCountry" hidden>
-    <div class="discover-chips" id="discoverCountryChips"></div>
+
+  <!-- 【新增】设计师作品面板，默认隐藏 -->
+  <div class="discover-panel" id="discoverPanelWorks" hidden>
+    <div class="discover-works-head">
+      <button type="button" class="discover-back-btn" id="discoverWorksBack">← 返回设计师索引</button>
+      <h2 class="discover-works-title" id="discoverWorksTitle"></h2>
+      <p class="page-stats" id="discoverWorksStats"></p>
+    </div>
+    <div class="discover-works-grid" id="discoverWorksGrid"></div>
   </div>
 </section>
 
@@ -612,7 +597,7 @@
     <h2>使用说明</h2>
     <ul>
       <li><strong>搜索</strong>：支持标题、设计师、客户、标签等关键词；可叠加年份、国家、类型筛选。</li>
-      <li><strong>发现</strong>：按设计师 A-Z、年份、国家三种维度浏览作品。</li>
+      <li><strong>发现</strong>：按设计师 A-Z 索引浏览；点击设计师直接查看其全部作品。</li>
       <li><strong>收藏</strong>：灯箱左上角 ♥ 收藏作品，收藏保存在浏览器本地（localStorage），换设备不同步。</li>
       <li><strong>深色模式</strong>：抽屉左上角太阳 / 月亮图标切换。</li>
       <li><strong>键盘</strong>：<kbd>←</kbd> <kbd>→</kbd> 切换灯箱图片，<kbd>Esc</kbd> 关闭灯箱 / 抽屉 / 搜索。</li>
@@ -620,17 +605,15 @@
     </ul>
   </div>
 </section>
-
+<!-- 灯箱（【修改】删除 lbPrev / lbNext 翻页按钮） -->
 <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="项目详情">
-<div class="lb-topbar">
+  <div class="lb-topbar">
     <button class="lb-fav" id="lbFav" aria-label="收藏" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
     <div class="lb-count" id="lb-count"></div>
     <button class="lightbox-close" aria-label="关闭">×</button>
   </div>
-  <button class="lb-nav lb-prev" id="lbPrev" aria-label="上一张" type="button">‹</button>
-  <button class="lb-nav lb-next" id="lbNext" aria-label="下一张" type="button">›</button>
   <div class="lightbox-inner">
     <div class="lb-gallery-wrap">
       <div class="lb-gallery" id="lb-gallery"></div>
@@ -668,11 +651,7 @@
   /* WeakMap缓存，同一img对象只展开一次 */
   const expandCache = new WeakMap();
 
-  /* 由原图URL派生 small/medium/large
-     - 相对路径： "/Andrew/file.jpg"
-     - 完整URL： "https://.../Andrew/file.jpg"
-     - 已含small/large的旧对象直接passthrough
-  */
+  /* 由原图URL派生 small/medium/large */
   function expandImage(img) {
     if (!img) return null;
     if (img.small || img.large) return img;
@@ -777,8 +756,7 @@
   const lbMetaGrid = document.getElementById('lb-meta-grid');
   const lbDetails = document.getElementById('lb-details');
   const lbTags = document.getElementById('lb-tags');
-  const lbPrev = document.getElementById('lbPrev');
-  const lbNext = document.getElementById('lbNext');
+  /* 【修改】删除 lbPrev / lbNext 元素引用 */
   const searchBtn = document.getElementById('searchBtn');
   const searchBox = document.getElementById('searchBox');
   const searchInput = document.getElementById('searchInput');
@@ -836,7 +814,10 @@
     rebalanceRaf: 0,
     scrollSyncTimer: null,
     filterDesigner: '',   // 设计师过滤（来自发现页）
-    discoverRendered: false   // 发现页是否已渲染
+    discoverRendered: false,   // 发现页是否已渲染
+    /* 【新增】发现页当前展示的设计师作品状态 */
+    discoverWorksDesigner: '',
+    discoverWorksRecords: []
   };
 
   /*  收藏  */
@@ -1258,7 +1239,6 @@
 
     materializeCard(article);
 
-    /* 同步失败（primaryUrl为空）时返回null，避免空壳卡 */
     if (article._imgFailed) return null;
 
     article.addEventListener('click', () => openLightbox(record, coverIndex));
@@ -1271,7 +1251,6 @@
     return article;
   }
 
-  /* 实体化：卡片只加载small，失败直接删卡 */
   function materializeCard(card) {
     if (!card || card._img || card._imgFailed) return;
     const item = card._item;
@@ -1294,7 +1273,6 @@
     img.decoding = 'async';
     img.onload = () => img.classList.add('loaded');
 
-    /* 任何失败直接删卡，不回退 */
     img.onerror = () => {
       card._imgFailed = true;
       img.remove();
@@ -1490,6 +1468,10 @@
     document.body.classList.add('view-discover');
     const dv = document.getElementById('discoverView');
     dv.hidden = false;
+
+    /* 【新增】每次进入发现页都重置为索引状态 */
+    hideDesignerWorks();
+
     if (!state.discoverRendered) {
       renderDiscover();
       state.discoverRendered = true;
@@ -1497,30 +1479,20 @@
     syncUrl();
   }
 
-  /* 渲染发现页 */
+  /* 渲染发现页（【修改】仅保留设计师 A-Z 索引） */
   function renderDiscover() {
     const total = state.allProjects.length;
     const designerMap = new Map();
-    const years = new Set();
-    const countries = new Set();
 
     state.allProjects.forEach(rec => {
       if (rec.designer) {
         const n = String(rec.designer).trim();
         if (n) designerMap.set(n, (designerMap.get(n) || 0) + 1);
       }
-      if (rec.year) {
-        const y = String(rec.year).trim();
-        if (y) years.add(y);
-      }
-      if (rec.nationalGroup) {
-        const c = String(rec.nationalGroup).trim();
-        if (c) countries.add(c);
-      }
     });
 
     document.getElementById('discoverStats').textContent =
-      `${total} 个项目 · ${designerMap.size} 位设计师 · ${countries.size} 个国家 · ${years.size} 个年份`;
+      `${total} 个项目 · ${designerMap.size} 位设计师`;
 
     const groups = new Map();
     [...designerMap.entries()].forEach(([name, count]) => {
@@ -1569,40 +1541,89 @@
         countEl.textContent = d.count;
         btn.appendChild(nameEl);
         btn.appendChild(countEl);
-        btn.addEventListener('click', () => searchByDesigner(d.name));
+        /* 【修改】点击设计师直接在发现页内展示作品，不再跳转搜索 */
+        btn.addEventListener('click', () => showDesignerWorks(d.name));
         list.appendChild(btn);
       });
       sec.appendChild(list);
       az.appendChild(sec);
     });
-
-    const yearWrap = document.getElementById('discoverYearChips');
-    yearWrap.innerHTML = '';
-    [...years].sort((a, b) => b.localeCompare(a, 'zh')).forEach(y => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'discover-chip';
-      btn.textContent = y;
-      btn.addEventListener('click', () => searchByYear(y));
-      yearWrap.appendChild(btn);
-    });
-
-    const countryWrap = document.getElementById('discoverCountryChips');
-    countryWrap.innerHTML = '';
-    [...countries].sort((a, b) => a.localeCompare(b, 'en')).forEach(c => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'discover-chip';
-      btn.textContent = c;
-      btn.addEventListener('click', () => searchByCountry(c));
-      countryWrap.appendChild(btn);
-    });
+    /* 【删除】yearWrap / countryWrap 渲染块 */
   }
 
-  /* 发现页三入口跳转 */
-  function searchByDesigner(name) { enterSearch({ focus: false, designer: name }); }
-  function searchByYear(year) { enterSearch({ focus: false, year }); }
-  function searchByCountry(country) { enterSearch({ focus: false, country }); }
+  /* 【新增】发现页：点击设计师直接展示其作品（不跳转搜索） */
+  function showDesignerWorks(name) {
+    if (!name) return;
+
+    const records = state.allProjects.filter(rec =>
+      String(rec.designer || '').trim() === name
+    );
+
+    state.discoverWorksDesigner = name;
+    state.discoverWorksRecords = records;
+
+    document.getElementById('discoverWorksTitle').textContent = name;
+    document.getElementById('discoverWorksStats').textContent = `共 ${records.length} 个项目`;
+
+    layoutWorksGrid(document.getElementById('discoverWorksGrid'), records);
+
+    document.getElementById('discoverPanelDesigner').hidden = true;
+    document.getElementById('discoverPanelWorks').hidden = false;
+
+    document.getElementById('discoverPanelWorks').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* 【新增】返回索引：隐藏作品面板，恢复索引面板 */
+  function hideDesignerWorks() {
+    state.discoverWorksDesigner = '';
+    state.discoverWorksRecords = [];
+    const worksPanel = document.getElementById('discoverPanelWorks');
+    const idxPanel = document.getElementById('discoverPanelDesigner');
+    const grid = document.getElementById('discoverWorksGrid');
+    if (grid) grid.innerHTML = '';
+    if (worksPanel) worksPanel.hidden = true;
+    if (idxPanel) idxPanel.hidden = false;
+  }
+
+  /* 【新增】发现页作品瀑布流布局（复用列高最短插入算法，独立于主 gallery） */
+  function layoutWorksGrid(container, records) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    const style = getComputedStyle(container);
+    const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
+    let innerWidth = container.clientWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
+    if (!innerWidth || innerWidth <= 0) return;
+
+    const count = computeColumnCount(innerWidth, gap);
+    const colWidth = (innerWidth - gap * (count - 1)) / count;
+
+    const cols = [];
+    const heights = new Array(count).fill(0);
+    for (let i = 0; i < count; i++) {
+      const col = document.createElement('div');
+      col.className = 'col';
+      container.appendChild(col);
+      cols.push(col);
+    }
+
+    records.forEach(rec => {
+      const cover = findCoverImage(rec);
+      if (!cover) return;
+      const card = createCard({ record: rec, cover });
+      if (!card) return;
+
+      const ratio = parseFloat(card.dataset.ratio) || 1;
+      let minIdx = 0;
+      for (let i = 1; i < heights.length; i++) {
+        if (heights[i] < heights[minIdx]) minIdx = i;
+      }
+      cols[minIdx].appendChild(card);
+      heights[minIdx] += colWidth * ratio + HEADER_EST + gap;
+    });
+  }
 
   /* 进入关于页 */
   function enterAbout() {
@@ -1982,6 +2003,15 @@
         return;
       }
 
+      /* 【新增】发现页：正在展示某位设计师作品时重排 */
+      if (state.view === 'discover' && state.discoverWorksDesigner) {
+        layoutWorksGrid(
+          document.getElementById('discoverWorksGrid'),
+          state.discoverWorksRecords
+        );
+        return;
+      }
+
       const cards = state.cardQueue.slice();
       if (!cards.length) return;
       if (newColCount !== state.currentColCount) {
@@ -2034,7 +2064,6 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
-  /* 灯箱直接加载原图（原图即大图内容），老数据兜底用large/small */
   function loadLbImage(entry) {
     if (!entry || entry.loaded) return;
     entry.loaded = true;
@@ -2061,7 +2090,6 @@
     entry.img.src = primary;
   }
 
-  /* 灯箱懒加载：前 2 张立即，其余 IntersectionObserver */
   function setupLbLazyLoad() {
     if (state.lbIO) state.lbIO.disconnect();
     state.lbIO = new IntersectionObserver(entries => {
@@ -2079,10 +2107,7 @@
     const n = state.lbImages.length;
     lbCount.textContent = n ? `${state.lbIndex + 1} / ${n}` : '';
   }
-  function updateLbNav() {
-    lbPrev.disabled = state.lbIndex <= 0;
-    lbNext.disabled = state.lbIndex >= state.lbImages.length - 1;
-  }
+  /* 【删除】updateLbNav() 函数 */
 
   function scrollToLightboxImage(index, smooth) {
     const entry = state.lbImages[index];
@@ -2098,7 +2123,7 @@
     if (i < 0 || i >= state.lbImages.length) return;
     state.lbIndex = i;
     updateLbCount();
-    updateLbNav();
+    /* 【删除】updateLbNav(); */
     scrollToLightboxImage(i, true);
   }
 
@@ -2114,7 +2139,7 @@
     if (best !== state.lbIndex) {
       state.lbIndex = best;
       updateLbCount();
-      updateLbNav();
+      /* 【删除】updateLbNav(); */
     }
   }
 
@@ -2246,7 +2271,7 @@
     const startIdx = state.lbImages.findIndex(e => e.index === (parseInt(coverIndex, 10) || 0));
     state.lbIndex = startIdx >= 0 ? startIdx : 0;
     updateLbCount();
-    updateLbNav();
+    /* 【删除】updateLbNav(); */
 
     const favActive = state.favorites.has(String(record.id));
     lbFav.classList.toggle('active', favActive);
@@ -2262,7 +2287,6 @@
     if (yb) parts.push(`b. ${yb}`);
     lbDesigner.textContent = parts.length ? `设计师: ${parts.join(' · ')}` : '设计师: 未知';
 
-    /* 保持原代码布局：类型/领域原逻辑 */
     const types = Array.isArray(record.type) ? record.type.join(', ') : (record.type || '-');
     const sectors = Array.isArray(record.sector) ? record.sector.join(', ') : (record.sector || '-');
 
@@ -2323,8 +2347,7 @@
     toggleFavorite(state.currentLightboxId);
   });
 
-  lbPrev.addEventListener('click', e => { e.stopPropagation(); gotoLbImage(state.lbIndex - 1); });
-  lbNext.addEventListener('click', e => { e.stopPropagation(); gotoLbImage(state.lbIndex + 1); });
+  /* 【删除】lbPrev / lbNext 点击事件 */
 
   lightbox.addEventListener('scroll', () => {
     clearTimeout(state.scrollSyncTimer);
@@ -2399,6 +2422,16 @@
     });
   });
 
+  /* 【新增】发现页：返回设计师索引 */
+  const discoverWorksBack = document.getElementById('discoverWorksBack');
+  if (discoverWorksBack) {
+    discoverWorksBack.addEventListener('click', () => {
+      hideDesignerWorks();
+      const dv = document.getElementById('discoverView');
+      if (dv) dv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
   /* 主题切换 */
   themeToggle.addEventListener('click', () => {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -2407,30 +2440,8 @@
     showToast(cur === 'dark' ? '已切换到深色模式' : '已切换到浅色模式');
   });
 
-  /* 发现页tab切换 */
-  document.querySelectorAll('.discover-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
-      document.querySelectorAll('.discover-tab').forEach(b => b.classList.toggle('active', b === btn));
-      document.getElementById('discoverPanelDesigner').hidden = tab !== 'designer';
-      document.getElementById('discoverPanelYear').hidden = tab !== 'year';
-      document.getElementById('discoverPanelCountry').hidden = tab !== 'country';
-    });
-  });
-
-  /* 设计师即时过滤 */
-  document.getElementById('designerFilterInput').addEventListener('input', e => {
-    const q = e.target.value.trim().toLowerCase();
-    const az = document.getElementById('designerAZ');
-    az.querySelectorAll('.az-item').forEach(el => {
-      const name = el.querySelector('.az-name').textContent.toLowerCase();
-      el.style.display = (!q || name.indexOf(q) !== -1) ? '' : 'none';
-    });
-    az.querySelectorAll('.az-group').forEach(g => {
-      const anyVisible = [...g.querySelectorAll('.az-item')].some(el => el.style.display !== 'none');
-      g.style.display = anyVisible ? '' : 'none';
-    });
-  });
+  /* 【删除】发现页tab切换事件（tab 已移除） */
+  /* 【删除】designerFilterInput 输入框过滤事件（输入框已移除） */
 
   /* a11y + 灯箱键盘导航 */
   document.addEventListener('keydown', e => {
