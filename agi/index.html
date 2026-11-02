@@ -51,7 +51,6 @@
     --chip-bg: #f0f0f0;
     --chip-text: #444444;
     --heart: #ff3b6b;
-    /* 药丸菜单磨砂变量 */
     --pill-bg: rgba(255,255,255,.55);
     --pill-divider: rgba(0,0,0,.10);
     --pill-hover: rgba(0,0,0,.055);
@@ -189,7 +188,6 @@
     position: fixed; top: 64px; left: 0; right: 0; z-index: 55;
     background: var(--surface); border-bottom: 1px solid var(--border);
     display: none; padding: 10px 16px; gap: 8px; align-items: center;
-    /* 单行不换行，超宽横向滚动，保证 body.searching 的 padding-top 恒定 */
     flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain;
     scrollbar-width: none;
   }
@@ -265,9 +263,8 @@
   [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
   [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
-  /* ========== 药丸菜单：整体加大 + 文本居中 + 防闪 + 竖线隔断 ========== */
   .pill-menu {
-    --pill-gap: clamp(6px, 1.8vw, 14px);     /* 分隔线对齐基准 */
+    --pill-gap: clamp(6px, 1.8vw, 14px);
 
     position: fixed;
     top: 50%;
@@ -275,12 +272,11 @@
     z-index: 58;
     display: flex;
     align-items: center;
-    justify-content: center;                 /* 覆盖原 space-evenly */
+    justify-content: center; 
     gap: var(--pill-gap);
     width: 82vw;
     max-width: 760px;
     padding: clamp(8px, 1.8vw, 12px) clamp(10px, 2.2vw, 20px);
-    /* 更透的磨砂底 */
     background: var(--pill-bg);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
@@ -289,13 +285,9 @@
     box-shadow: 0 12px 40px rgba(0,0,0,.18);
     overflow-x: auto;
     scrollbar-width: none;
-
-    /* 防闪：强制合成层，避免 backdrop-filter 首次采样硬切 */
     will-change: transform, opacity;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-
-    /* 初始态：位移更近（-60vh）+ 微缩放 */
     opacity: 0;
     visibility: hidden;
     transform: translate(-50%, -50%) translateY(-60vh) scale(.96);
@@ -303,7 +295,7 @@
     transition:
       opacity .26s ease,
       transform .36s cubic-bezier(.2,.8,.2,1),
-      visibility 0s linear .36s;             /* 关闭时延迟隐藏 */
+      visibility 0s linear .36s; 
   }
   .pill-menu::-webkit-scrollbar { display: none; }
 
@@ -315,18 +307,17 @@
     transition:
       opacity .26s ease,
       transform .36s cubic-bezier(.2,.8,.2,1),
-      visibility 0s linear 0s;               /* 打开时立即可见 */
+      visibility 0s linear 0s;
   }
 
   .pill-menu .pill-btn,
   .pill-menu .theme-toggle { flex-shrink: 0; }
 
-  /* 药丸一体化：相邻按钮之间用竖线分隔 */
   .pill-menu > * { position: relative; }
   .pill-menu > * + *::before {
     content: '';
     position: absolute;
-    left: calc(-1 * var(--pill-gap) / 2);    /* 落在相邻 gap 正中央 */
+    left: calc(-1 * var(--pill-gap) / 2);
     top: 50%;
     transform: translateY(-50%);
     width: 1px;
@@ -336,7 +327,7 @@
   }
 
   .pill-menu .pill-btn {
-    flex: 1 1 auto;                          /* 三个文字按钮等宽均分 */
+    flex: 1 1 auto;
     height: clamp(40px, 8.5vw, 44px);
     padding: 0 clamp(14px, 3vw, 22px);
     border: none;
@@ -345,26 +336,21 @@
     font-size: clamp(13px, 3.5vw, 16px);
     cursor: pointer;
     border-radius: 999px;
-    white-space: nowrap;                     /* 防止文字折行撑破等宽 */
+    white-space: nowrap;
     transition: background .15s;
-    /* 文本水平 + 垂直居中 */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-align: center;
   }
-
-  /* 统一半透明悬停，避免实心块破坏磨砂 */
   .pill-menu .pill-btn:hover,
   .pill-menu .theme-toggle:hover { background: var(--pill-hover); }
 
   .pill-menu .theme-toggle {
-    flex: 0 0 auto;                          /* 主题按钮固定方形，不参与均分 */
+    flex: 0 0 auto;
     width: clamp(40px, 8.5vw, 44px);
     height: clamp(40px, 8.5vw, 44px);
   }
-
-  /* 主题图标：抗压缩 + 强制方形 + 与按钮尺寸视觉对齐 */
 
   .pill-menu .theme-toggle svg {
   flex: 0 0 auto;
@@ -614,7 +600,6 @@
   </div>
 </div>
 
-<!-- 药丸菜单：按「关于 → 收藏 → 发现 → 主题切换」排序 -->
 <div class="pill-menu" id="pillMenu" role="menu" aria-hidden="true">
   <button class="pill-btn" type="button" role="menuitem" data-view="about">关于</button>
   <button class="pill-btn" type="button" role="menuitem" data-view="favorites">收藏</button>
@@ -721,7 +706,7 @@
   const DATA_URL = './data.json';
   const FAV_KEY = 'gallery_favorites_v1';
   const THEME_KEY = 'gallery_theme_v1';
-  const HOME_ORDER_KEY = 'gallery_home_order_v1';   // P3-3: 会话内首页顺序固定
+  const HOME_ORDER_KEY = 'gallery_home_order_v1';
 
   const VARIANT_TEMPLATES = {
     small:  '_500xAUTO_crop_center-center_75_none',
@@ -807,7 +792,6 @@
   }
   function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-  // P0-1: 单次正则替换，杜绝多词依次替换破坏已插入的 <mark> 标签
   function highlightHtml(text, terms) {
     const safe = escapeHtml(text || '');
     if (!terms || !terms.length) return safe;
@@ -817,8 +801,6 @@
     const pattern = uniq.map(escapeRegExp).join('|');
     return safe.replace(new RegExp('(' + pattern + ')', 'gi'), '<mark>$1</mark>');
   }
-
-  // P1-1: 保序过滤（替代原 intersectSorted）
   function filterBySet(base, other) {
     if (!base || !base.length || !other || !other.length) return [];
     const set = new Set(other);
@@ -886,8 +868,8 @@
     dehydrated: new Set(),
     liveCount: 0,
     io: null,
-    ioRootMargin: 0,        // P2-2: 记录 sentinel IO 的 rootMargin，用于幂等重建
-    cardIO: null,           // P1-2: 卡片懒渲染观察器（与 sentinel IO 分开）
+    ioRootMargin: 0,
+    cardIO: null,  
     searchTimer: null,
     searchIndex: [],
     inverted: new Map(),
@@ -908,7 +890,7 @@
     discoverRendered: false,
     homeFilterType: '',
     homeFilterValue: '',
-    aboutStats: ''          // P3-2: 关于页统计预计算
+    aboutStats: ''
   };
 
   function loadFavorites() {
@@ -996,8 +978,6 @@
     });
     return items;
   }
-
-  // P3-3: 首页顺序种子（sessionStorage），同会话内刷新保持一致
   function getHomeOrderSeed() {
     try {
       const raw = sessionStorage.getItem(HOME_ORDER_KEY);
@@ -1125,8 +1105,6 @@
       state.allProjects.forEach(rec => {
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
-
-      // P3-3: 首页顺序按 sessionStorage 种子固定，会话内刷新不抖动
       state.loadQueue = buildSeededHomeQueue();
       state.currentIndex = 0;
       state.totalLoaded = 0;
@@ -1135,7 +1113,7 @@
       state.dehydrated.clear();
 
       await buildSearchIndexChunked();
-      computeAboutStats();      // P3-2: 一次性统计
+      computeAboutStats();
       rebuildFilters();
 
       if (!state.loadQueue.length) {
@@ -1230,8 +1208,6 @@
     if (prevType && types.has(prevType)) filterType.value = prevType;
     if (prevCountry && countries.has(prevCountry)) filterCountry.value = prevCountry;
   }
-
-  // P2-4: try/catch + 保留 hash
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
@@ -1255,7 +1231,6 @@
     try {
       history.replaceState(null, '', url);
     } catch (e) {
-      // file:// 等环境可能抛出 SecurityError，忽略即可
     }
   }
   function restoreFromUrl() {
@@ -1314,7 +1289,7 @@
 
   function layoutCards(cards) {
     gallery.classList.add('js-ready');
-    if (state.cardIO) state.cardIO.disconnect();   // P1-2: 重排前清空旧观察
+    if (state.cardIO) state.cardIO.disconnect();
     gallery.innerHTML = '';
     state.columns = [];
     state.columnHeights = [];
@@ -1352,7 +1327,6 @@
 
     if (state.view === 'all') setupObserver();
 
-    // P3-1: 用真实列高校正估算值
     requestAnimationFrame(() => {
       for (let i = 0; i < state.columns.length; i++) {
         const h = state.columns[i].offsetHeight;
@@ -1367,7 +1341,6 @@
   function setCards(cards) {
     state.cardQueue = cards.slice();
     state.dehydrated.clear();
-    // P3-4-d: 显式聚合，语义明确
     state.liveCount = state.cardQueue.reduce((n, c) => n + (c && c._img ? 1 : 0), 0);
     layoutCards(cards);
   }
@@ -1385,14 +1358,13 @@
     card.dataset.colIndex = String(minIdx);
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
 
-    // P1-2: 交给卡片 IO 管理水化/脱水
     if (!state.cardIO) setupCardObserver();
     state.cardIO.observe(card);
   }
 
   function removeCard(card) {
     if (!card || !card.isConnected) return;
-    if (state.cardIO) state.cardIO.unobserve(card);   // P1-2
+    if (state.cardIO) state.cardIO.unobserve(card);
     const idx = state.cardQueue.indexOf(card);
     if (idx >= 0) state.cardQueue.splice(idx, 1);
     state.dehydrated.delete(card);
@@ -1400,7 +1372,6 @@
 
     const colIdx = parseInt(card.dataset.colIndex, 10);
     if (!Number.isNaN(colIdx) && state.columnHeights[colIdx] != null) {
-      // 删除前取真实高度校正；不可用则回退估算
       const realH = card.offsetHeight;
       if (realH > 0) {
         state.columnHeights[colIdx] = Math.max(0, state.columnHeights[colIdx] - (realH + state.gap));
@@ -1505,13 +1476,12 @@
     img.onload = () => img.classList.add('loaded');
 
     img.onerror = () => {
-      // 防误删：若该卡已被重新水化（_img 换成了新对象），忽略旧图的失败回调
       if (card._img && card._img !== img) return;
       card._imgFailed = true;
       img.remove();
       if (card._img === img) card._img = null;
       state.liveCount = Math.max(0, state.liveCount - 1);
-      removeCard(card);   // 失败即删，保持原有行为
+      removeCard(card);
     };
 
     img.src = primaryUrl;
@@ -1525,7 +1495,6 @@
 
   function dematerializeCard(card) {
     if (!card || !card._img) return;
-    // 防误删：脱水前解绑旧 img 回调，避免旧图加载失败误删已重新水化的卡片
     card._img.onload = null;
     card._img.onerror = null;
     card._img.remove();
@@ -1534,7 +1503,6 @@
     state.dehydrated.add(card);
   }
 
-  // P1-2: 卡片懒渲染观察器
   function setupCardObserver() {
     if (state.cardIO) return;
     state.cardIO = new IntersectionObserver(entries => {
@@ -1547,7 +1515,6 @@
   }
 
   function renderItemsChunked(items) {
-    // P3-4-e: 返回真正上屏的卡片数
     return new Promise(resolve => {
       let i = 0, success = 0;
       const CHUNK = 10;
@@ -1561,7 +1528,6 @@
           appendCardToColumn(card);
           success++;
         }
-        // P3-1: 每帧末用真实高度校准列高，抑制估算累积误差
         for (let c = 0; c < state.columns.length; c++) {
           const h = state.columns[c].offsetHeight;
           if (h > 0) state.columnHeights[c] = h + state.gap;
@@ -1598,7 +1564,7 @@
     state.currentIndex += nextItems.length;
 
     const added = await renderItemsChunked(nextItems);
-    state.totalLoaded += added;   // P3-4-e: 只计真正上屏的卡片
+    state.totalLoaded += added;
     state.loading = false;
     updateStatus();
 
@@ -1639,7 +1605,6 @@
     loadMoreBtn.textContent = state.loading ? '加载中…' : label;
   }
 
-  // P2-2: rootMargin 未变时跳过重建，避免重复 observe
   function setupObserver() {
     if (state.io && state.ioRootMargin === state.rootMargin) return;
     if (state.io) state.io.disconnect();
@@ -1836,7 +1801,6 @@
     syncUrl();
   }
 
-  // P3-2: 关于页统计一次性预计算
   function computeAboutStats() {
     const total = state.allProjects.length;
     const designers = new Set();
@@ -1986,7 +1950,6 @@
     const terms = state.currentTerms;
     let candidates = null;
     if (terms.length) {
-      // P1-1: 收集所有词的倒排索引；若任一不在索引内则退化为全表扫描
       const lists = [];
       let allIndexed = true;
       for (const term of terms) {
@@ -1995,7 +1958,6 @@
         lists.push(inv);
       }
       if (allIndexed && lists.length) {
-        // 按集合长度升序求交，减少每轮过滤量
         lists.sort((a, b) => a.length - b.length);
         candidates = lists[0].slice();
         for (let i = 1; i < lists.length && candidates.length; i++) {
@@ -2213,7 +2175,6 @@
       if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
       const newColCount = computeColumnCount(innerWidth, gap);
 
-      // P1-4: 搜索/收藏只重排，不丢已加载结果
       if (state.view === 'search') {
         if (newColCount !== state.currentColCount) {
           const cards = state.cardQueue.slice();
@@ -2336,8 +2297,6 @@
     const top = lightbox.scrollTop + (rect.top - lbRect.top) - 8;
     lightbox.scrollTo({ top: Math.max(0, top), behavior: (smooth && !reduced) ? 'smooth' : 'auto' });
   }
-
-  // P1-3: gotoLbImage 已随方向键功能移除（仅保留滚动定位）
 
   function syncLbIndexFromScroll() {
     if (!state.lbImages.length) return;
@@ -2464,7 +2423,6 @@
       img.dataset.fallback = '';
       img.style.transformOrigin = 'center center';
       img.style.willChange = 'transform';
-      // P2-1: 去掉 maxHeight/objectFit，避免宽高比例与容器 aspect-ratio 冲突产生留白
       img.style.width = '100%';
       img.style.height = '100%';
       img.style.objectFit = 'contain';
@@ -2605,7 +2563,6 @@
     if (state.view === 'search') doSearch(searchInput.value);
   });
 
-  // P3-4-c: 点击 body / gallery / .col 空白均退出搜索；交互元素不触发
   document.addEventListener('click', e => {
     if (state.view !== 'search') return;
     if (e.target.closest('.topbar, .search-filter-bar, .pill-menu, .lightbox, .card, .load-more-wrap, .status, #sentinel, .toast, button, a, input, select')) return;
@@ -2623,7 +2580,6 @@
     closePill();
   });
 
-  // 药丸菜单按钮分发（data-view 顺序不影响逻辑）
   pillMenu.querySelectorAll('[data-view]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -2650,7 +2606,6 @@
   document.addEventListener('keydown', e => {
     if (lightbox.classList.contains('open')) {
       if (e.key === 'Escape') { e.preventDefault(); closeLightbox(); return; }
-      // P1-3: 已移除 ←/→ 方向键翻图
       trapFocus(e);
       return;
     }
@@ -2672,9 +2627,6 @@
   window.addEventListener('resize', scheduleRelayout);
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
-
-  // P1-2: 已移除 window scroll 上的 scheduleRebalance —— 改用 IO 管理卡片水化
-
   async function init() {
     loadFavorites();
     await initData();
