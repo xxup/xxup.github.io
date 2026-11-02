@@ -1,23 +1,20 @@
 /* ============================================================
-   AGI 会员瀑布流作品展示 · 逻辑
+   AGI会员瀑布流作品展示 · 主逻辑
    ============================================================ */
 (function () {
   'use strict';
 
   const IMAGE_BASE_URL = 'https://a-g-i.s3.eu-west-3.amazonaws.com';
-  const DATA_URL = './data/data.json';                       // ← 拆分后的数据路径
+  const DATA_URL = './data.json';
   const FAV_KEY = 'gallery_favorites_v1';
   const THEME_KEY = 'gallery_theme_v1';
-  const HOME_ORDER_KEY = 'gallery_home_order_v1';            // 会话内首页顺序种子
-
+  const HOME_ORDER_KEY = 'gallery_home_order_v1';
   const VARIANT_TEMPLATES = {
     small:  '_500xAUTO_crop_center-center_75_none',
     medium: '_1600xAUTO_crop_center-center_75_none',
     large:  '_2000xAUTO_crop_center-center_75_none'
   };
-
   const expandCache = new WeakMap();
-
   function expandImage(img) {
     if (!img) return null;
     if (img.small || img.large) return img;
@@ -29,13 +26,11 @@
       expandCache.set(img, empty);
       return empty;
     }
-
     if (/^(data|blob):/i.test(base)) {
       const pass = Object.assign({}, img, { url: base, small: base, medium: base, large: base });
       expandCache.set(img, pass);
       return pass;
     }
-
     let host = '';
     let path = base;
     const m = base.match(/^((?:https?:)?\/\/[^/]+)(\/.*)$/i);
@@ -46,18 +41,14 @@
       expandCache.set(img, pass);
       return pass;
     }
-
     const dir = path.replace(/^\//, '');
     const slash = dir.lastIndexOf('/');
     const folder = slash >= 0 ? dir.slice(0, slash + 1) : '';
     const file = slash >= 0 ? dir.slice(slash + 1) : dir;
-
     const qIdx = file.indexOf('?');
     const cleanFile = qIdx >= 0 ? file.slice(0, qIdx) : file;
     const query = qIdx >= 0 ? file.slice(qIdx) : '';
-
     const prefix = host ? host + '/' : '';
-
     const result = Object.assign({}, img, {
       url: base,
       small:  prefix + folder + VARIANT_TEMPLATES.small  + '/' + cleanFile + query,
@@ -67,7 +58,6 @@
     expandCache.set(img, result);
     return result;
   }
-
   function resolveUrl(url) {
     if (!url) return '';
     const s = String(url).trim();
@@ -76,7 +66,6 @@
     if (/^(data|blob):/i.test(s)) return s;
     return IMAGE_BASE_URL + (s.charAt(0) === '/' ? '' : '/') + s;
   }
-
   function shuffleArray(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -85,7 +74,6 @@
     }
     return a;
   }
-
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
@@ -93,8 +81,6 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-  // 单次正则替换，杜绝多词依次替换破坏已插入的 <mark> 标签
   function highlightHtml(text, terms) {
     const safe = escapeHtml(text || '');
     if (!terms || !terms.length) return safe;
@@ -104,8 +90,6 @@
     const pattern = uniq.map(escapeRegExp).join('|');
     return safe.replace(new RegExp('(' + pattern + ')', 'gi'), '<mark>$1</mark>');
   }
-
-  // 保序过滤（原 intersectSorted 更名）
   function filterBySet(base, other) {
     if (!base || !base.length || !other || !other.length) return [];
     const set = new Set(other);
@@ -116,14 +100,12 @@
   const PHONE_PORTRAIT_MAX = 640, PHONE_LANDSCAPE_MAX = 900;
   const HEADER_EST = 70, CHUNK_SIZE = 15;
   const SEARCH_PAGE = 60;
-
   const FILTER_LABELS = {
     designer: '设计师',
     country:  '国家',
     type:     '类型',
     sector:   '领域'
   };
-
   const gallery = document.getElementById('gallery');
   const sentinel = document.getElementById('sentinel');
   const statusEl = document.getElementById('status');
@@ -149,7 +131,6 @@
   const loadMoreBtn = document.getElementById('loadMoreBtn');
   const toastEl = document.getElementById('toast');
   const themeToggle = document.getElementById('themeToggle');
-
   const state = {
     allProjects: [],
     loadQueue: [],
@@ -197,8 +178,6 @@
     homeFilterValue: '',
     aboutStats: ''
   };
-
-  /* ---------- 收藏 ---------- */
   function loadFavorites() {
     try {
       const raw = localStorage.getItem(FAV_KEY);
@@ -224,8 +203,6 @@
       lbFav.setAttribute('aria-pressed', active ? 'true' : 'false');
     }
   }
-
-  /* ---------- Toast ---------- */
   let toastTimer;
   function showToast(msg) {
     toastEl.textContent = msg;
@@ -233,11 +210,9 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
   }
-
   function updateSearchClear() {
     searchBox.classList.toggle('has-value', searchInput.value.length > 0);
   }
-
   function exitPageViews() {
     document.body.classList.remove('view-discover', 'view-about');
     const dv = document.getElementById('discoverView');
@@ -245,7 +220,6 @@
     if (dv) dv.hidden = true;
     if (av) av.hidden = true;
   }
-
   function updateDesignerChip() {
     const chip = document.getElementById('designerChip');
     const nameEl = document.getElementById('designerChipName');
@@ -257,8 +231,6 @@
       chip.hidden = true;
     }
   }
-
-  /* ---------- 图片 / 数据工具 ---------- */
   function hasUsableImage(img) {
     if (!img) return false;
     const s = img.small, l = img.large, u = img.url;
@@ -266,7 +238,6 @@
               (s && String(s).trim()) ||
               (l && String(l).trim()));
   }
-
   function findCoverImage(record) {
     const imgs = Array.isArray(record.images) ? record.images : [];
     for (let i = 0; i < imgs.length; i++) {
@@ -276,7 +247,6 @@
     }
     return null;
   }
-
   function buildProjectQueue(records) {
     const items = [];
     records.forEach(rec => {
@@ -286,8 +256,6 @@
     });
     return items;
   }
-
-  /* ---------- 首页顺序种子（sessionStorage） ---------- */
   function getHomeOrderSeed() {
     try {
       const raw = sessionStorage.getItem(HOME_ORDER_KEY);
@@ -317,8 +285,6 @@
     saveHomeOrderSeed(shuffled);
     return shuffled;
   }
-
-  /* ---------- 首页筛选 ---------- */
   function matchHomeFilter(rec) {
     const t = state.homeFilterType;
     const v = state.homeFilterValue;
@@ -348,7 +314,6 @@
     state.liveCount = 0;
     state.dehydrated.clear();
   }
-
   function showFilterInHome(type, value) {
     const v = String(value || '').trim();
     if (!type || !v) return;
@@ -370,28 +335,23 @@
     state.searchTotal = 0;
     state.savedCards = [];
     state.allCards = [];
-
     state.view = 'all';
     state.homeFilterType = type;
     state.homeFilterValue = v;
     rebuildHomeQueue();
     clearGalleryForSearch();
     syncUrl();
-
     if (!state.loadQueue.length) {
       statusEl.textContent = `没有找到「${FILTER_LABELS[type] || ''} · ${v}」对应的作品`;
       updateLoadMore();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-
     updateStatus('正在加载…');
     setupObserver();
     requestAnimationFrame(() => loadNextBatch());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-  /* ---------- 数据加载 ---------- */
   async function initData() {
     try {
       statusEl.textContent = '正在下载数据…';
@@ -401,7 +361,6 @@
       const text = await res.text();
       statusEl.textContent = '正在解析数据…';
       await new Promise(r => setTimeout(r, 30));
-
       const json = JSON.parse(text);
       if (Array.isArray(json)) {
         state.allProjects = json;
@@ -412,28 +371,23 @@
       } else {
         state.allProjects = [];
       }
-
       state.recordById = new Map();
       state.allProjects.forEach(rec => {
         if (rec && rec.id != null) state.recordById.set(String(rec.id), rec);
       });
-
       state.loadQueue = buildSeededHomeQueue();
       state.currentIndex = 0;
       state.totalLoaded = 0;
       state.finished = false;
       state.liveCount = 0;
       state.dehydrated.clear();
-
       await buildSearchIndexChunked();
       computeAboutStats();
       rebuildFilters();
-
       if (!state.loadQueue.length) {
         statusEl.textContent = '数据中没有可用的图片';
         return;
       }
-
       statusEl.textContent = `成功加载 ${state.allProjects.length} 个项目，可用 ${state.loadQueue.length} 个项目，开始渲染…`;
       requestAnimationFrame(() => loadNextBatch());
     } catch (err) {
@@ -452,8 +406,6 @@
       statusEl.appendChild(btn);
     }
   }
-
-  /* ---------- 搜索索引 ---------- */
   const TOKEN_SPLIT_RE = /[\s,，。;；、|\/\\\-_·:：()（）\[\]【】"'“”‘’!！?？]+/;
   async function buildSearchIndexChunked() {
     const total = state.allProjects.length;
@@ -473,7 +425,6 @@
           rec.nationalGroup || '', details, sectors, types, tags
         ].join(' ').toLowerCase();
         state.searchIndex[j] = { id: rec.id, haystack, record: rec };
-
         const seen = new Set();
         const tokens = haystack.split(TOKEN_SPLIT_RE);
         for (let k = 0; k < tokens.length; k++) {
@@ -489,7 +440,6 @@
       await new Promise(r => setTimeout(r, 0));
     }
   }
-
   function rebuildFilters() {
     const prevYear = filterYear.value;
     const prevType = filterType.value;
@@ -497,7 +447,6 @@
     filterYear.innerHTML = '<option value="">全部年份</option>';
     filterType.innerHTML = '<option value="">全部类型</option>';
     filterCountry.innerHTML = '<option value="">全部国家</option>';
-
     const years = new Set(), types = new Set(), countries = new Set();
     state.allProjects.forEach(rec => {
       if (rec.year) years.add(String(rec.year).trim());
@@ -521,8 +470,6 @@
     if (prevType && types.has(prevType)) filterType.value = prevType;
     if (prevCountry && countries.has(prevCountry)) filterCountry.value = prevCountry;
   }
-
-  /* ---------- URL 同步 ---------- */
   function syncUrl() {
     const params = new URLSearchParams();
     if (state.view === 'search') {
@@ -546,7 +493,6 @@
     try {
       history.replaceState(null, '', url);
     } catch (e) {
-      // file:// 等环境可能抛出 SecurityError，忽略
     }
   }
   function restoreFromUrl() {
@@ -556,11 +502,9 @@
     const country = params.get('country');
     const designer = params.get('designer');
     const hf = params.get('hf');
-
     if (view === 'favorites') { enterFavorites(); return; }
     if (view === 'discover') { enterDiscover(); return; }
     if (view === 'about') { enterAbout(); return; }
-
     if (hf && !view) {
       const idx = hf.indexOf(':');
       if (idx > 0) {
@@ -575,10 +519,8 @@
         }
       }
     }
-
     if (q || year || type || country || designer) {
       enterSearch({ focus: false });  
-
       if (year) filterYear.value = year;
       if (type) filterType.value = type;
       if (country) filterCountry.value = country;
@@ -588,8 +530,6 @@
       doSearch(q || '');
     }
   }
-
-  /* ---------- 布局 ---------- */
   function computeColumnCount(innerWidth, gap) {
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -599,35 +539,29 @@
     if (!isPortrait && vw <= PHONE_LANDSCAPE_MAX) n = Math.max(3, n);
     return n;
   }
-
   function computeLoadConfig(cols, isPhonePortrait) {
     if (cols <= 3) return { chunksPerBatch: 1, rootMargin: isPhonePortrait ? 600 : 800, maxCards: 200 };
     return { chunksPerBatch: 2, rootMargin: 1000, maxCards: 400 };
   }
-
   function layoutCards(cards) {
     gallery.classList.add('js-ready');
     if (state.cardIO) state.cardIO.disconnect();
     gallery.innerHTML = '';
     state.columns = [];
     state.columnHeights = [];
-
     const style = getComputedStyle(gallery);
     const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     const gap = parseFloat(style.columnGap) || parseFloat(style.gap) || 16;
     let innerWidth = gallery.clientWidth - paddingX;
     if (!innerWidth || innerWidth <= 0) innerWidth = window.innerWidth - paddingX;
     if (!innerWidth || innerWidth <= 0) return false;
-
     const vw = window.innerWidth;
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
     const isPhonePortrait = isPortrait && vw <= PHONE_PORTRAIT_MAX;
-
     const count = computeColumnCount(innerWidth, gap);
     state.currentColCount = count;
     state.gap = gap;
     state.colWidth = (innerWidth - gap * (count - 1)) / count;
-
     for (let i = 0; i < count; i++) {
       const col = document.createElement('div');
       col.className = 'col';
@@ -635,35 +569,27 @@
       state.columns.push(col);
       state.columnHeights.push(0);
     }
-
     cards.forEach(card => appendCardToColumn(card));
-
     const config = computeLoadConfig(count, isPhonePortrait);
     state.chunksPerBatch = config.chunksPerBatch;
     state.maxCards = config.maxCards || state.maxCards;
     state.rootMargin = config.rootMargin;
-
     if (state.view === 'all') setupObserver();
-
-    // 用真实列高校正估算值
     requestAnimationFrame(() => {
       for (let i = 0; i < state.columns.length; i++) {
         const h = state.columns[i].offsetHeight;
         if (h > 0) state.columnHeights[i] = h + state.gap;
       }
     });
-
     updateLoadMore();
     return true;
   }
-
   function setCards(cards) {
     state.cardQueue = cards.slice();
     state.dehydrated.clear();
     state.liveCount = state.cardQueue.reduce((n, c) => n + (c && c._img ? 1 : 0), 0);
     layoutCards(cards);
   }
-
   function appendCardToColumn(card) {
     if (!state.columns.length) {
       if (!layoutCards([]) || !state.columns.length) return;
@@ -676,11 +602,9 @@
     state.columns[minIdx].appendChild(card);
     card.dataset.colIndex = String(minIdx);
     state.columnHeights[minIdx] += state.colWidth * ratio + HEADER_EST + state.gap;
-
     if (!state.cardIO) setupCardObserver();
     state.cardIO.observe(card);
   }
-
   function removeCard(card) {
     if (!card || !card.isConnected) return;
     if (state.cardIO) state.cardIO.unobserve(card);
@@ -688,7 +612,6 @@
     if (idx >= 0) state.cardQueue.splice(idx, 1);
     state.dehydrated.delete(card);
     if (card._img) { card._img = null; state.liveCount = Math.max(0, state.liveCount - 1); }
-
     const colIdx = parseInt(card.dataset.colIndex, 10);
     if (!Number.isNaN(colIdx) && state.columnHeights[colIdx] != null) {
       const realH = card.offsetHeight;
@@ -704,8 +627,6 @@
     }
     card.remove();
   }
-
-  /* ---------- 卡片 ---------- */
   function createCard(item) {
     const record = item && item.record;
     if (!record) return null;
@@ -713,14 +634,12 @@
     const image = cover.image || {};
     const coverIndex = cover.index || 0;
     if (!hasUsableImage(image)) return null;
-
     const article = document.createElement('article');
     article.className = 'card';
     article.dataset.id = record.id;
     article.setAttribute('tabindex', '0');
     article.setAttribute('role', 'button');
     article.setAttribute('aria-label', (record.title || '查看图片') + '，按回车打开详情');
-
     const w = parseInt(image.width, 10) || 2000;
     const h = parseInt(image.height, 10) || 1500;
     article.dataset.ratio = (h / w).toFixed(4);
@@ -728,15 +647,12 @@
     article._coverIndex = coverIndex;
     article._img = null;
     article._imgFailed = false;
-
     const imgWrap = document.createElement('div');
     imgWrap.className = 'card-img-wrap';
     imgWrap.style.setProperty('--ratio', (h / w) * 100 + '%');
     article._imgWrap = imgWrap;
-
     const body = document.createElement('div');
     body.className = 'card-body';
-
     const h2 = document.createElement('h2');
     if (state.currentTerms && state.currentTerms.length) {
       h2.innerHTML = highlightHtml(record.title || '无标题', state.currentTerms);
@@ -744,7 +660,6 @@
       h2.textContent = record.title || '无标题';
     }
     body.appendChild(h2);
-
     const meta = document.createElement('div');
     meta.className = 'card-meta';
     const sp1 = document.createElement('span');
@@ -755,14 +670,10 @@
     meta.appendChild(sp1);
     meta.appendChild(sp2);
     body.appendChild(meta);
-
     article.appendChild(imgWrap);
     article.appendChild(body);
-
     materializeCard(article);
-
     if (article._imgFailed) return null;
-
     article.addEventListener('click', () => openLightbox(record, coverIndex));
     article.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -772,7 +683,6 @@
     });
     return article;
   }
-
   function materializeCard(card) {
     if (!card || card._img || card._imgFailed) return;
     const item = card._item;
@@ -782,41 +692,33 @@
     const urlLarge = resolveUrl(image.large);
     const urlOrig  = resolveUrl(image.url);
     const primaryUrl = urlSmall || urlLarge || urlOrig;
-
     if (!primaryUrl) {
       card._imgFailed = true;
       removeCard(card);
       return;
     }
-
     const img = document.createElement('img');
     img.alt = item.record.title || '图片';
     img.loading = 'lazy';
     img.decoding = 'async';
     img.onload = () => img.classList.add('loaded');
-
     img.onerror = () => {
-      // 防误删：若该卡已被重新水化（_img 换成了新对象），忽略旧图的失败回调
       if (card._img && card._img !== img) return;
       card._imgFailed = true;
       img.remove();
       if (card._img === img) card._img = null;
       state.liveCount = Math.max(0, state.liveCount - 1);
-      removeCard(card);   // 失败即删
+      removeCard(card);
     };
-
     img.src = primaryUrl;
     if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
-
     card._imgWrap.appendChild(img);
     card._img = img;
     state.liveCount++;
     state.dehydrated.delete(card);
   }
-
   function dematerializeCard(card) {
     if (!card || !card._img) return;
-    // 防误删：脱水前解绑旧 img 回调，避免旧图加载失败误删已重新水化的卡片
     card._img.onload = null;
     card._img.onerror = null;
     card._img.remove();
@@ -824,7 +726,6 @@
     state.liveCount = Math.max(0, state.liveCount - 1);
     state.dehydrated.add(card);
   }
-
   function setupCardObserver() {
     if (state.cardIO) return;
     state.cardIO = new IntersectionObserver(entries => {
@@ -850,7 +751,6 @@
           appendCardToColumn(card);
           success++;
         }
-        // 每帧末用真实高度校准列高
         for (let c = 0; c < state.columns.length; c++) {
           const h = state.columns[c].offsetHeight;
           if (h > 0) state.columnHeights[c] = h + state.gap;
@@ -861,8 +761,6 @@
       requestAnimationFrame(step);
     });
   }
-
-  /* ---------- 批量加载 ---------- */
   async function loadNextBatch() {
     if (state.view !== 'all' || state.loading || state.finished) return;
 
@@ -882,7 +780,6 @@
         return;
       }
     }
-
     const batchSize = state.chunksPerBatch * CHUNK_SIZE;
 
     let nextItems;
@@ -899,16 +796,10 @@
     const added = await renderItemsChunked(nextItems);
     state.totalLoaded += added;
     state.loading = false;
-
-    // 下拉后把当前 loadQueue 顺序写回 sessionStorage：
-    // 刷新后从种子恢复，即保留下拉后的顺序。
-    // 仅在「首页、无筛选」时写回，避免筛选子集污染全量种子。
     if (!state.homeFilterType && !state.homeFilterValue) {
       saveHomeOrderSeed(state.loadQueue);
     }
-
     updateStatus();
-
     if (!state.finished) requestAnimationFrame(checkSentinel);
   }
 
@@ -916,7 +807,6 @@
     const rect = sentinel.getBoundingClientRect();
     if (rect.top < window.innerHeight + state.rootMargin) loadNextBatch();
   }
-
   function updateStatus(text) {
     if (text) { statusEl.textContent = text; updateLoadMore(); return; }
     if (state.view === 'search') {
@@ -932,7 +822,6 @@
     else statusEl.textContent = `已渲染 ${state.totalLoaded} 个项目 · 剩余约 ${remain} 个 · 滚动加载更多`;
     updateLoadMore();
   }
-
   function updateLoadMore() {
     let show = false, label = '加载更多';
     if (state.view === 'all') {
@@ -945,7 +834,6 @@
     loadMoreBtn.disabled = state.loading;
     loadMoreBtn.textContent = state.loading ? '加载中…' : label;
   }
-
   function setupObserver() {
     if (state.io && state.ioRootMargin === state.rootMargin) return;
     if (state.io) state.io.disconnect();
@@ -955,7 +843,6 @@
     }, { rootMargin: state.rootMargin + 'px 0px' });
     state.io.observe(sentinel);
   }
-
   function clearGalleryForSearch() {
     if (state.cardIO) state.cardIO.disconnect();
     gallery.innerHTML = '';
@@ -966,8 +853,6 @@
     state.dehydrated.clear();
     state.liveCount = 0;
   }
-
-  /* ---------- 发现页 ---------- */
   function enterDiscover() {
     if (state.view === 'discover') return;
     exitPageViews();
@@ -1006,7 +891,6 @@
     const countryMap = new Map();
     const typeMap = new Map();
     const sectorMap = new Map();
-
     state.allProjects.forEach(rec => {
       if (rec.designer) {
         const n = String(rec.designer).trim();
@@ -1014,27 +898,23 @@
       }
       const c = String(rec.nationalGroup || '').trim();
       if (c) countryMap.set(c, (countryMap.get(c) || 0) + 1);
-
       const types = Array.isArray(rec.type) ? rec.type : (rec.type ? [rec.type] : []);
       types.forEach(x => {
         const v = String(x || '').trim();
         if (v) typeMap.set(v, (typeMap.get(v) || 0) + 1);
       });
-
       const sectors = Array.isArray(rec.sector) ? rec.sector : (rec.sector ? [rec.sector] : []);
       sectors.forEach(x => {
         const v = String(x || '').trim();
         if (v) sectorMap.set(v, (sectorMap.get(v) || 0) + 1);
       });
     });
-
     document.getElementById('discoverStats').textContent =
       `${total} 个项目 · ${designerMap.size} 位设计师 · ${countryMap.size} 个国家 · ${typeMap.size} 种类型 · ${sectorMap.size} 个领域`;
 
     renderChips('discoverCountryChips', countryMap, 'country', (a, b) => a.localeCompare(b, 'en'));
     renderChips('discoverTypeChips', typeMap, 'type', (a, b) => a.localeCompare(b, 'zh'));
     renderChips('discoverSectorChips', sectorMap, 'sector', (a, b) => a.localeCompare(b, 'zh'));
-
     const groups = new Map();
     [...designerMap.entries()].forEach(([name, count]) => {
       const first = name.charAt(0).toUpperCase();
@@ -1089,7 +969,6 @@
       az.appendChild(sec);
     });
   }
-
   function renderChips(containerId, map, filterType, sorter) {
     const wrap = document.getElementById(containerId);
     if (!wrap) return;
@@ -1113,8 +992,6 @@
       wrap.appendChild(btn);
     });
   }
-
-  /* ---------- 关于页 ---------- */
   function enterAbout() {
     if (state.view === 'about') return;
     exitPageViews();
@@ -1143,7 +1020,6 @@
     renderAbout();
     syncUrl();
   }
-
   function computeAboutStats() {
     const total = state.allProjects.length;
     const designers = new Set();
@@ -1162,8 +1038,6 @@
   function renderAbout() {
     document.getElementById('aboutStats').textContent = state.aboutStats || '统计中…';
   }
-
-  /* ---------- 搜索 ---------- */
   function enterSearch(preset) {
     if (state.view === 'search') return;
     exitPageViews();
@@ -1379,8 +1253,6 @@
     }
     updateStatus();
   }
-
-  /* ---------- 收藏页 ---------- */
   function enterFavorites() {
     closePill();
     exitPageViews();
@@ -1433,8 +1305,6 @@
     setCards(cards);
     statusEl.textContent = `收藏夹：${favRecords.length} 个项目`;
   }
-
-  /* ---------- 返回首页 ---------- */
   function goHome() {
     closePill();
     exitPageViews();
@@ -1509,8 +1379,6 @@
     requestAnimationFrame(() => loadNextBatch());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-  /* ---------- 响应式重排 ---------- */
   let resizeTimer;
   function scheduleRelayout() {
     clearTimeout(resizeTimer);
@@ -1547,28 +1415,14 @@
     }, 200);
   }
 
-  /* ---------- 药丸菜单 ---------- 
-  function openPill() {
-    document.body.classList.add('pill-open');
-    pillMenu.setAttribute('aria-hidden', 'false');
-  }
-  function closePill() {
-    document.body.classList.remove('pill-open');
-    pillMenu.setAttribute('aria-hidden', 'true');
-  }
-  function togglePill() {
-    if (document.body.classList.contains('pill-open')) closePill();
-    else openPill();
-  }
-  */
+  /* ---------- 药丸菜单 ---------- */
 
-  const PILL_AUTO_CLOSE_MS = 6000;   // 药丸打开后 50 秒自动关闭（改此值即可调时长）
+  const PILL_AUTO_CLOSE_MS = 6000;
   let pillAutoCloseTimer = null;
 
   function openPill() {
     document.body.classList.add('pill-open');
     pillMenu.setAttribute('aria-hidden', 'false');
-    // 每次打开都重置计时器，避免上一次的定时残留
     clearTimeout(pillAutoCloseTimer);
     pillAutoCloseTimer = setTimeout(() => {
       closePill();
@@ -1577,7 +1431,6 @@
   function closePill() {
     document.body.classList.remove('pill-open');
     pillMenu.setAttribute('aria-hidden', 'true');
-    // 关闭时清掉计时器，避免无意义回调
     clearTimeout(pillAutoCloseTimer);
     pillAutoCloseTimer = null;
   }
@@ -1586,7 +1439,6 @@
     else openPill();
   }
 
-  /* ---------- 灯箱 ---------- */
   function setBackgroundInert(on) {
     const els = [
       document.querySelector('.topbar'),
@@ -1883,7 +1735,6 @@
     }
   }
 
-  /* ---------- 事件绑定 ---------- */
   lbFav.addEventListener('click', e => {
     e.stopPropagation();
     if (!state.currentLightboxId) return;
@@ -2003,7 +1854,6 @@
   const orientationMQ = window.matchMedia('(orientation: portrait)');
   if (orientationMQ.addEventListener) orientationMQ.addEventListener('change', scheduleRelayout);
 
-  /* ---------- 启动 ---------- */
   async function init() {
     loadFavorites();
     await initData();
